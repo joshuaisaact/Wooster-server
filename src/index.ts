@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
-import routes from './routes/routes.js';
+import cors from 'cors';
+import routes from './routes/routes';
 import 'dotenv/config';
 
 const app = express();
@@ -11,7 +12,7 @@ if (!PORT) {
 }
 
 app.use(express.json());
-
+app.use(cors());
 app.use(routes);
 
 app.get('/', (_req: Request, res: Response) => {
