@@ -11,6 +11,7 @@ export interface DayItinerary {
 }
 
 export interface Trip {
+  id: number;
   destination: string;
   num_days: number;
   itinerary: DayItinerary[];

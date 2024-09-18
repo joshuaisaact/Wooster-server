@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import trip from '../models/trip';
+import trips from '../models/trip';
 
 const getTrip = (_req: Request, res: Response) => {
   try {
-    res.json(trip);
+    res.json(trips);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Something went wrong' });

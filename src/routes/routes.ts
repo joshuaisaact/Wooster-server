@@ -3,6 +3,6 @@ import getTrip from '../controllers/getTrip';
 
 const router = express.Router();
 
-router.get('/trip', getTrip);
+router.get('/trips', getTrip);
 
 export default router;
