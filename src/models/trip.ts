@@ -2,9 +2,10 @@ import { Trip } from '../types/tripTypes';
 
 const trips: Trip[] = [
   {
-    id: 1,
+    id: '1',
     destination: 'Tokyo',
     num_days: 2,
+    date: '5th November',
     itinerary: [
       {
         day: 1,
@@ -60,9 +61,10 @@ const trips: Trip[] = [
     ],
   },
   {
-    id: 2,
+    id: '2',
     destination: 'Kyoto',
     num_days: 3,
+    date: '5th November',
     itinerary: [
       {
         day: 1,
@@ -122,9 +124,10 @@ const trips: Trip[] = [
     ],
   },
   {
-    id: 3,
+    id: '3',
     destination: 'New York City',
     num_days: 3,
+    date: '5th November',
     itinerary: [
       {
         day: 1,

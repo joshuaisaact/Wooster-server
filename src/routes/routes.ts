@@ -1,8 +1,10 @@
 import express from 'express';
-import getTrip from '../controllers/getTrip';
+import getTrips from '../controllers/getTrips';
+import newTrip from '../controllers/newTrip';
 
 const router = express.Router();
 
-router.get('/trips', getTrip);
+router.get('/trips', getTrips);
+router.post('/newtrip', newTrip);
 
 export default router;

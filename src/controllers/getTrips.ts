@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import trips from '../models/trip';
 
-const getTrip = (_req: Request, res: Response) => {
+const getTrips = (_req: Request, res: Response) => {
   try {
     res.json(trips);
   } catch (error) {
@@ -10,4 +10,4 @@ const getTrip = (_req: Request, res: Response) => {
   }
 };
 
-export default getTrip;
+export default getTrips;
