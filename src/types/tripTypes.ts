@@ -3,6 +3,7 @@ export interface Activity {
   description: string;
   location: string;
   price: string;
+  image: string;
 }
 
 export interface DayItinerary {
