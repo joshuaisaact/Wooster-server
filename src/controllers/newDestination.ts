@@ -42,10 +42,16 @@ const newDestination = async (
 
     const result = await model.generateContent(prompt);
 
-    const generatedDestination = result.response.text(); // Get the raw response
+    let generatedDestination = result.response.text(); // Get the raw response
+
+    console.log('generated destination', generatedDestination);
+
+    generatedDestination = generatedDestination
+      .replace(/^```json|```$/g, '')
+      .trim();
 
     const destinationData = JSON.parse(generatedDestination);
-
+    console.log('destination data', destinationData);
     const { data: insertedDestination, error: insertError } = await supabase
       .from('destinations')
       .insert([destinationData]) // Insert as an array
