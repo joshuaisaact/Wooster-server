@@ -11,6 +11,8 @@ if (!PORT) {
   throw new Error('Missing environment variable: PORT');
 }
 
+console.log('Supabase URL:', process.env.SUPABASE_URL);
+
 app.use(express.json());
 app.use(cors());
 app.use(routes);
