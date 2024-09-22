@@ -63,8 +63,8 @@ const newTrip = async (
 
     // Create a new trip object with the itinerary
     const newTrip: Trip = {
-      id: uuidv4(),
-      destination: location,
+      trip_id: uuidv4(),
+      destination_name: location,
       num_days: days,
       date,
       itinerary,

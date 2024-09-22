@@ -1,9 +1,10 @@
 export interface Activity {
-  name: string;
+  activity_name: string;
   description: string;
   location: string;
   price: string;
-  image: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface DayItinerary {
@@ -12,9 +13,30 @@ export interface DayItinerary {
 }
 
 export interface Trip {
-  id: string;
-  destination: string;
+  trip_id: string;
+  destination_name: string;
   num_days: number;
   date: string;
   itinerary: DayItinerary[];
+}
+
+export interface DBTrip {
+  trip_id: string;
+  destination_id: string;
+  start_date: string;
+  num_days: number;
+  itinerary_days: ItineraryDay[];
+  destinations: {
+    destination_id: string;
+    destination_name: string;
+    latitude: number;
+    longitude: number;
+    description: string;
+    country: string;
+  };
+}
+
+export interface ItineraryDay {
+  day_number: number;
+  activities: Activity;
 }
