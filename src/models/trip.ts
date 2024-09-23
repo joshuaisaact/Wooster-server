@@ -5,7 +5,7 @@ const trips: Trip[] = [
     trip_id: '1',
     destination_name: 'Tokyo',
     num_days: 2,
-    date: '5th November',
+    date: '12th December',
     itinerary: [
       {
         day: 1,
