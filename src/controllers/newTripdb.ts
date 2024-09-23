@@ -139,6 +139,7 @@ const newTripdb = async (
     return res.status(201).json({
       message: 'Trip created successfully',
       trip: {
+        trip_id: tripId,
         destination_name: location,
         num_days: days,
         start_date,

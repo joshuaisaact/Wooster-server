@@ -6,6 +6,7 @@ import getDestinations from '../controllers/getDestinastions';
 import getDestinationDetails from '../controllers/getDestinationDetails';
 import newDestination from '../controllers/newDestination';
 import newTripdb from '../controllers/newTripdb';
+import deleteDestination from '../controllers/deleteDestination';
 
 const router = express.Router();
 
@@ -17,5 +18,7 @@ router.get('/tripsdb', getTripsDB);
 router.post('/newdestination', newDestination);
 router.post('/newtrip', newTrip);
 router.post('/newtripdb', newTripdb);
+
+router.delete('/destinations/:destinationId', deleteDestination);
 
 export default router;
