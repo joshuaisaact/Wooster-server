@@ -5,6 +5,7 @@ import getTripsDB from '../controllers/getTripsDB';
 import getDestinations from '../controllers/getDestinastions';
 import getDestinationDetails from '../controllers/getDestinationDetails';
 import newDestination from '../controllers/newDestination';
+import newTripdb from '../controllers/newTripdb';
 
 const router = express.Router();
 
@@ -15,5 +16,6 @@ router.get('/tripsdb', getTripsDB);
 
 router.post('/newdestination', newDestination);
 router.post('/newtrip', newTrip);
+router.post('/newtripdb', newTripdb);
 
 export default router;

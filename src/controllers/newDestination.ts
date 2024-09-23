@@ -8,7 +8,7 @@ interface CreateDestinationRequestBody {
 }
 
 const newDestination = async (
-  req: Request<{}, {}, CreateDestinationRequestBody>,
+  req: Request<object, object, CreateDestinationRequestBody>,
   res: Response,
 ) => {
   try {

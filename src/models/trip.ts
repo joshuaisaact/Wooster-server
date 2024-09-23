@@ -5,7 +5,7 @@ const trips: Trip[] = [
     trip_id: '1',
     destination_name: 'Tokyo',
     num_days: 2,
-    date: '12th December',
+    start_date: '12th December',
     itinerary: [
       {
         day: 1,
@@ -68,7 +68,7 @@ const trips: Trip[] = [
     trip_id: '2',
     destination_name: 'Kyoto',
     num_days: 3,
-    date: '5th November',
+    start_date: '5th November',
     itinerary: [
       {
         day: 1,
@@ -136,7 +136,7 @@ const trips: Trip[] = [
     trip_id: '3',
     destination_name: 'New York City',
     num_days: 3,
-    date: '5th November',
+    start_date: '5th November',
     itinerary: [
       {
         day: 1,

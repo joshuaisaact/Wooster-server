@@ -7,19 +7,19 @@ import { DayItinerary, Trip } from '../types/tripTypes';
 interface CreateTripRequestBody {
   days: number;
   location: string;
-  date: string;
+  start_date: string;
 }
 
 const newTrip = async (
-  req: Request<{}, {}, CreateTripRequestBody>,
+  req: Request<object, object, CreateTripRequestBody>,
   res: Response,
 ) => {
   try {
-    const { days, location, date } = req.body;
+    const { days, location, start_date } = req.body;
     console.log(location);
 
     // Validate input
-    if (!days || !location || !date) {
+    if (!days || !location || !start_date) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -30,8 +30,9 @@ const newTrip = async (
     const prompt = promptTemplate
       .replace(/{days}/g, days.toString())
       .replace(/{location}/g, location)
-      .replace(/{date}/g, date);
+      .replace(/{start_date}/g, start_date);
 
+    console.log(promptTemplate);
     // Ensure the API key is set
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -66,7 +67,7 @@ const newTrip = async (
       trip_id: uuidv4(),
       destination_name: location,
       num_days: days,
-      date,
+      start_date: start_date,
       itinerary,
     };
 
