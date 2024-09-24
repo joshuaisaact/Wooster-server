@@ -5,7 +5,7 @@ const deleteDestination = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  console.log(req.params);
+  // console.log(req.params);
   const { destinationId } = req.params;
 
   try {
