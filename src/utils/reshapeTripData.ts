@@ -31,6 +31,7 @@ function convertActivities(data: any) {
 
     if (dayEntry) {
       dayEntry.activities.push({
+        activity_id: activities.activity_id,
         activity_name: activities.activity_name,
         description: activities.description,
         location: activities.location,
@@ -43,6 +44,7 @@ function convertActivities(data: any) {
         day: day_number,
         activities: [
           {
+            activity_id: activities.activity_id,
             activity_name: activities.activity_name,
             description: activities.description,
             location: activities.location,

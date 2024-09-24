@@ -15,7 +15,7 @@ const deleteDestination = async (
       .match({ destination_id: destinationId })
       .select(); // Add .select() to return the deleted row
 
-    console.log('Supabase Response:', { data, error });
+    // console.log('Supabase Response:', { data, error });
 
     if (error) {
       throw error;

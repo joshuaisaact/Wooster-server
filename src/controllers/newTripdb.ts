@@ -87,6 +87,7 @@ const newTripdb = async (
     const activityIds = await Promise.all(
       itinerary.map(async (day) => {
         const activities = day.activities.map((activity) => ({
+          location_id: destinationId,
           activity_name: activity.activity_name,
           latitude: activity.latitude,
           longitude: activity.longitude,
