@@ -77,9 +77,7 @@ Here are the available API routes in the application:
 
 ### Trip Routes
 
-- **`GET /trips`**: Fetch trips from the AI-powered planner.
 - **`GET /tripsdb`**: Fetch trips from the Supabase database, including associated itinerary days and activities.
-- **`POST /newtrip`**: Create a new trip using AI-generated suggestions.
 - **`POST /newtripdb`**: Save a new trip to the Supabase database.
 - **`DELETE /trips/:tripId`**: Delete a trip from the Supabase database by its ID.
 
