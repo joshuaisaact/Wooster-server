@@ -35,6 +35,7 @@ PORT=your_port_number
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_KEY=your_supabase_api_key
 GOOGLE_GEMINI_API_KEY=your_google_gemini_api_key
+
 PROMPT_TEMPLATE = `Generate **ONLY** a JSON itinerary for a {days}-day trip to **{location}**, starting on {start_date}. If you include any additional text outside the JSON it will break. Have no more than three activities per day. Exclude arrival, departure, check-in, and check-out. Include **only** the following fields for each activity: activity_name, description, location, price, latitude, longitude.
 
 [
