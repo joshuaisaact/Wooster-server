@@ -28,41 +28,46 @@ To get the backend server up and running, follow these steps:
 
 You will need to create a `.env` file at the root of the project with the following environment variables:
 
-\`\`\`bash
+```bash
+
 # .env
 PORT=your_port_number
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_KEY=your_supabase_api_key
 GOOGLE_GEMINI_API_KEY=your_google_gemini_api_key
-\`\`\`
+```
 
-Replace \`your_port_number\`, \`your_supabase_project_url\`, \`your_supabase_api_key\`, and \`your_google_gemini_api_key\` with your actual credentials.
+Replace `your_port_number`, `your_supabase_project_url`, `your_supabase_api_key`, and `your_google_gemini_api_key` with your actual credentials.
 
 ### Installation
 
 1. Clone the repository:
 
-   \`\`\`bash
+   ```bash
+
    git clone https://github.com/your-username/wooster-server.git
-   \`\`\`
+   ```
 
 2. Navigate to the project directory:
 
-   \`\`\`bash
+   ```bash
+
    cd wooster-server
-   \`\`\`
+   ```
 
 3. Install dependencies:
 
-   \`\`\`bash
+   ```bash
+
    npm install
-   \`\`\`
+   ```
 
 4. Start the server:
 
-   \`\`\`bash
+   ```bash
+
    npm start
-   \`\`\`
+   ```
 
 The server will start on the port specified in your `.env` file.
 
@@ -72,24 +77,25 @@ Here are the available API routes in the application:
 
 ### Trip Routes
 
-- **\`GET /trips\`**: Fetch trips from the AI-powered planner.
-- **\`GET /tripsdb\`**: Fetch trips from the Supabase database, including associated itinerary days and activities.
-- **\`POST /newtrip\`**: Create a new trip using AI-generated suggestions.
-- **\`POST /newtripdb\`**: Save a new trip to the Supabase database.
-- **\`DELETE /trips/:tripId\`**: Delete a trip from the Supabase database by its ID.
+- **`GET /trips`**: Fetch trips from the AI-powered planner.
+- **`GET /tripsdb`**: Fetch trips from the Supabase database, including associated itinerary days and activities.
+- **`POST /newtrip`**: Create a new trip using AI-generated suggestions.
+- **`POST /newtripdb`**: Save a new trip to the Supabase database.
+- **`DELETE /trips/:tripId`**: Delete a trip from the Supabase database by its ID.
 
 ### Destination Routes
 
-- **\`GET /destinations\`**: Fetch a list of all destinations.
-- **\`GET /destinations/:destinationId\`**: Fetch detailed information about a specific destination by ID.
-- **\`POST /newdestination\`**: Add a new destination to the Supabase database.
-- **\`DELETE /destinations/:destinationId\`**: Remove a destination from the Supabase database by its ID.
+- **`GET /destinations`**: Fetch a list of all destinations.
+- **`GET /destinations/:destinationId`**: Fetch detailed information about a specific destination by ID.
+- **`POST /newdestination`**: Add a new destination to the Supabase database.
+- **`DELETE /destinations/:destinationId`**: Remove a destination from the Supabase database by its ID.
 
 ## Utilities
 
-The server includes a utility function to reshape the trip data fetched from Supabase into a format suitable for front-end consumption. The function \`reshapeTripData\` converts the raw database data into a format where trips are nested with their associated activities and days:
+The server includes a utility function to reshape the trip data fetched from Supabase into a format suitable for front-end consumption. The function `reshapeTripData` converts the raw database data into a format where trips are nested with their associated activities and days:
 
-\`\`\`typescript
+```typescript
+
 function reshapeTripData(dbData: any) {
   return dbData.map((trip: any) => ({
     trip_id: trip.trip_id.toString(),
@@ -99,11 +105,12 @@ function reshapeTripData(dbData: any) {
     itinerary: convertActivities(trip.itinerary_days),
   }));
 }
-\`\`\`
+```
 
-The helper function \`convertActivities\` structures the activities by day:
+The helper function `convertActivities` structures the activities by day:
 
-\`\`\`typescript
+```typescript
+
 function convertActivities(data: any) {
   const result: any[] = [];
 
@@ -141,7 +148,7 @@ function convertActivities(data: any) {
 
   return result;
 }
-\`\`\`
+```
 
 ## License
 
