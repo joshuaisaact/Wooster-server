@@ -6,8 +6,14 @@ import newDestination from '../controllers/newDestination';
 import newTripdb from '../controllers/newTripdb';
 import deleteDestination from '../controllers/deleteDestination';
 import deleteTrip from '../controllers/deleteTrip';
+import register from '../controllers/auth/register';
+import login from '../controllers/auth/login';
 
 const router = express.Router();
+
+// Auth routes
+router.post('/auth/register', register);
+router.post('/auth/login', login);
 
 router.get('/destinations/:destinationId', getDestinationDetails);
 router.delete('/destinations/:destinationId', deleteDestination);

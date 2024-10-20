@@ -29,7 +29,6 @@ export const authenticate = async (
       return;
     }
 
-    // Optionally fetch additional user data if needed
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
