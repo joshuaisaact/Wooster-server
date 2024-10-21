@@ -47,6 +47,7 @@ SUPABASE_KEY=your_supabase_api_key
 GOOGLE_GEMINI_API_KEY=your_google_gemini_api_key
 
 Replace `your_port_number`, `your_supabase_project_url`, `your_supabase_api_key`, and `your_google_gemini_api_key` with your actual credentials.
+  ```
 
 ### Installation
 
