@@ -46,54 +46,6 @@ SUPABASE_URL=your_supabase_project_url
 SUPABASE_KEY=your_supabase_api_key
 GOOGLE_GEMINI_API_KEY=your_google_gemini_api_key
 
-PROMPT_TEMPLATE = `Generate **ONLY** a JSON itinerary for a {days}-day trip to **{location}**, starting on {start_date}. If you include any additional text outside the JSON it will break. Have no more than three activities per day. Exclude arrival, departure, check-in, and check-out. Include **only** the following fields for each activity: activity_name, description, location, price, latitude, longitude.
-
-[
-  {
-     [
-      {
-        "day": 1,
-        "activities": [
-          {
-            "activity_name": "{activity1_name}",
-            "description": "{activity1_description}",
-            "location": "{activity1_location}",
-            "price": "{activity1_price}",
-            "latitude": "{activity1_latitude}",
-            "longitude": "{activity1_longitude}",
-          },
-          { /* ... other activities */ }
-        ]
-      },
-      { /* ... other days */ }
-    ]
-  }
-]`;
-
-DESTINATION_PROMPT_TEMPLATE = `Generate **ONLY** a valid JSON object for {destination}. That means **NO ARRAYS**. **DO NOT** include a user_ratings field. Temperature will be stored as a **NUMBER**. If you include any additional text outside the JSON it will break. **DO NOT** include the destination_id field in your output. Include **only** the following fields for each destination: destination_name, latitude, longitude, description, country, created_at, best_time_to_visit, average_temperature_low, average_temperature_high, popular_activities, travel_tips, nearby_attractions, transportation_options, accessibility_info, official_language, currency, local_cuisine, user_ratings, cost_level, safety_rating, and cultural_significance. Make sure all keys are in double quotes and use double quotes for string values. Format lists as comma-separated strings without brackets. Here is an example:
-
-{
-    "destination_name": "New York City",
-    "latitude": 40.712776,
-    "longitude": -74.005974,
-    "description": "The largest city in the United States, known for its iconic landmarks and cultural diversity.",
-    "country": "USA",
-    "created_at": "2024-09-20T20:57:39.74403+00:00",
-    "best_time_to_visit": "April to June",
-    "average_temperature_low": 40.0,
-    "average_temperature_high": 75.0,
-    "accessibility_info": "Mostly accessible.",
-    "official_language": "English",
-    "currency": "USD",
-    "local_cuisine": "Pizza, bagels",
-    "cost_level": "Moderate",
-    "safety_rating": 4.0,
-    "cultural_significance": "A melting pot of cultures."
-}
-
-return only valid JSON`;
-```
-
 Replace `your_port_number`, `your_supabase_project_url`, `your_supabase_api_key`, and `your_google_gemini_api_key` with your actual credentials.
 
 ### Installation
