@@ -4,6 +4,8 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![Node.js CI](https://github.com/joshuaisaact/Wooster-server/actions/workflows/run-tests.yml/badge.svg)](https://github.com/joshuaisaact/Wooster-server/actions/workflows/run-tests.yml)
 
+<img src="./docs/wooster.png" alt="Wooster Logo" style="width:300px;"/>
+
 ## Backend for AI-Powered Trip Planning App
 
 Wooster Server is the backend service for the Wooster AI-powered trip planning application. It is built using **Express** and **TypeScript**, and integrates with **Google's Gemini API** for AI services and **Supabase** for database storage. The backend manages trip and destination data, providing API routes for creating, managing, and retrieving trip itineraries and destination details.
@@ -15,6 +17,7 @@ Wooster Server is the backend service for the Wooster AI-powered trip planning a
 ![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)
 ![Supertest](https://img.shields.io/badge/supertest-ff69b4?style=for-the-badge)
+
 </div>
 
 ## Table of Contents
@@ -24,6 +27,7 @@ Wooster Server is the backend service for the Wooster AI-powered trip planning a
 - [Environment Variables](#environment-variables)
 - [Installation](#installation)
 - [API Routes](#api-routes)
+- [Testing](#testing)
 - [Utilities](#utilities)
 - [License](#license)
 
@@ -49,7 +53,7 @@ SUPABASE_KEY=your_supabase_api_key
 GOOGLE_GEMINI_API_KEY=your_google_gemini_api_key
 
 Replace `your_port_number`, `your_supabase_project_url`, `your_supabase_api_key`, and `your_google_gemini_api_key` with your actual credentials.
-  ```
+```
 
 ### Installation
 
@@ -105,6 +109,14 @@ Here are the available API routes in the application:
 - **`GET /destinations/:destinationId`**: Fetch detailed information about a specific destination by ID.
 - **`POST /destination`**: Add a new destination to the Supabase database.
 - **`DELETE /destinations/:destinationId`**: Remove a destination by its ID from the Supabase database.
+
+## Testing
+
+This project includes unit and integration tests using **Jest** and **Supertest**. To run the tests, use the following command:
+
+```bash
+npm test
+```
 
 ## Utilities
 
