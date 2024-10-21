@@ -14,6 +14,7 @@ Wooster Server is the backend service for the Wooster AI-powered trip planning a
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 
 </div>
+
 ## Table of Contents
 
 - [Getting Started](#getting-started)
