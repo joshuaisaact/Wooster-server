@@ -2,7 +2,7 @@
 <h2> Wooster Server </h2>
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Node.js CI](https://github.com/joshuaisaact/wooster-server/actions/workflows/node.js.yml/badge.svg)
+[![Node.js Run-Tests](https://github.com/joshuaisaact/Wooster-server/actions/workflows/run-tests.yml/badge.svg)](https://github.com/joshuaisaact/Wooster-server/actions/workflows/run-tests.yml)
 
 ## Backend for AI-Powered Trip Planning App
 
