@@ -1,10 +1,19 @@
+<div align="center">
+<h2> Wooster Server </h2>
 
-# Wooster Server (Backend for AI-Powered Trip Planning App)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-## Overview
+## Backend for AI-Powered Trip Planning App
 
-Wooster Server is the backend for an AI-powered trip planning application. It is built using **Express** and **TypeScript**, and it integrates with **Google's Gemini API** for AI services and **Supabase** for database storage. This repository manages trip and destination data and provides API routes for trip planning, storing itinerary details, and managing trip-related data.
+Wooster Server is the backend service for the Wooster AI-powered trip planning application. It is built using **Express** and **TypeScript**, and integrates with **Google's Gemini API** for AI services and **Supabase** for database storage. The backend manages trip and destination data, providing API routes for creating, managing, and retrieving trip itineraries and destination details.
 
+![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+![Supabase](https://img.shields.io/badge/supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+
+</div>
 ## Table of Contents
 
 - [Getting Started](#getting-started)
@@ -122,25 +131,30 @@ The server will start on the port specified in your `.env` file.
 
 Here are the available API routes in the application:
 
+### Auth Routes
+
+- **`POST /auth/register`**: Register a new user.
+- **`POST /auth/login`**: Login an existing user.
+- **`POST /auth/logout`**: Logout the current user (requires authentication).
+
 ### Trip Routes
 
-- **`GET /tripsdb`**: Fetch trips from the Supabase database, including associated itinerary days and activities.
-- **`POST /newtripdb`**: Save a new trip to the Supabase database.
-- **`DELETE /trips/:tripId`**: Delete a trip from the Supabase database by its ID.
+- **`GET /trips`**: Fetch all trips from the Supabase database.
+- **`POST /trip`**: Save a new trip to the Supabase database.
+- **`DELETE /trips/:tripId`**: Delete a trip by its ID from the Supabase database.
 
 ### Destination Routes
 
 - **`GET /destinations`**: Fetch a list of all destinations.
 - **`GET /destinations/:destinationId`**: Fetch detailed information about a specific destination by ID.
-- **`POST /newdestination`**: Add a new destination to the Supabase database.
-- **`DELETE /destinations/:destinationId`**: Remove a destination from the Supabase database by its ID.
+- **`POST /destination`**: Add a new destination to the Supabase database.
+- **`DELETE /destinations/:destinationId`**: Remove a destination by its ID from the Supabase database.
 
 ## Utilities
 
 The server includes a utility function to reshape the trip data fetched from Supabase into a format suitable for front-end consumption. The function `reshapeTripData` converts the raw database data into a format where trips are nested with their associated activities and days:
 
 ```typescript
-
 function reshapeTripData(dbData: any) {
   return dbData.map((trip: any) => ({
     trip_id: trip.trip_id.toString(),
@@ -155,7 +169,6 @@ function reshapeTripData(dbData: any) {
 The helper function `convertActivities` structures the activities by day:
 
 ```typescript
-
 function convertActivities(data: any) {
   const result: any[] = [];
 

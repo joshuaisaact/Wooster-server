@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import supabase from '../../models/supabaseClient';
 
-const logout = async (req: Request, res: Response) => {
+const logout = async (res: Response) => {
   try {
     const { error } = await supabase.auth.signOut();
 
