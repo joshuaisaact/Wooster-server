@@ -22,4 +22,8 @@ app.use(
 
 app.use(routes);
 
+app.use((_, res) => {
+  res.status(404).json({ error: 'Not Found' });
+});
+
 export default app;

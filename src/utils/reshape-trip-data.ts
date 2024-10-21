@@ -1,14 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { DBTrip, ItineraryDay } from '../types/tripTypes';
-
-// interface Tript {
-//   trip_id: number;
-//   destination_id: number;
-//   start_date: string; // Use Date if you're parsing it later
-//   num_days: number | null;
-//   destination_name: string; // Added here
-//   itinerary_days: ItineraryDay[]; // Define ItineraryDay as needed
-// }
 
 // TODO REFACTOR TO TYPES
 
