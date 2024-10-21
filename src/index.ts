@@ -17,11 +17,13 @@ console.log('Allowed CORS Origin:', CLIENT_URL);
 
 app.use(express.json());
 
-cors({
-  origin: CLIENT_URL,
-  methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'],
-  credentials: true,
-});
+app.use(
+  cors({
+    origin: CLIENT_URL,
+    methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'],
+    credentials: true,
+  }),
+);
 
 app.use(routes);
 
