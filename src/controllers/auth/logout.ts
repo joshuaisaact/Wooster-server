@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import supabase from '../../models/supabaseClient';
+import supabase from '../../models/supabase-client';
 
 const logout = async (res: Response) => {
   try {

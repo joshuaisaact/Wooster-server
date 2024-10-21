@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import supabase from '../../models/supabaseClient';
+import supabase from '../../models/supabase-client';
 
 const register = async (req: Request, res: Response): Promise<void> => {
   try {
