@@ -1,19 +1,12 @@
 import { Request, Response } from 'express';
-import supabase from '../models/supabaseClient';
+import { getDestinationsFromDb } from '../services/destination-service';
 
 const getDestinations = async (_req: Request, res: Response) => {
   try {
-    const { data: destinations, error } = await supabase
-      .from('destinations')
-      .select('*');
-
-    if (error) {
-      throw error;
-    }
-
+    const destinations = await getDestinationsFromDb();
     res.json(destinations);
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching destinations:', error);
     res.status(500).json({ error: 'Something went wrong' });
   }
 };

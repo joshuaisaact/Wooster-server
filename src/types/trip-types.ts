@@ -13,14 +13,6 @@ export interface DayItinerary {
 }
 
 export interface Trip {
-  trip_id: string;
-  destination_name: string;
-  num_days: number;
-  start_date: string;
-  itinerary: DayItinerary[];
-}
-
-export interface DBTrip {
   trip_id: number;
   destination_id: number;
   start_date: string;
