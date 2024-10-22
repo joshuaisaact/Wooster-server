@@ -20,6 +20,14 @@ Wooster Server is the backend service for the Wooster AI-powered trip planning a
 
 </div>
 
+## Database Schema
+
+Here’s an overview of the database schema that powers the Wooster trip-planning engine, managing user trips, itineraries, activities, and destinations:
+
+<div align="center">
+  <img src="./docs/database.png" alt="Database Schema" style="width:800px;"/>
+</div>
+
 ## Table of Contents
 
 - [Getting Started](#getting-started)
