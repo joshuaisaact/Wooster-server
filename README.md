@@ -4,7 +4,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![Node.js CI](https://github.com/joshuaisaact/Wooster-server/actions/workflows/run-tests.yml/badge.svg)](https://github.com/joshuaisaact/Wooster-server/actions/workflows/run-tests.yml)
 
-<img src="./docs/wooster.png" alt="Wooster Logo" style="width:300px;"/>
+<img src="./docs/wooster.png" alt="Wooster Server Logo" title="Wooster Server" style="width:350px;"/>
 
 ## Backend for AI-Powered Trip Planning App
 
