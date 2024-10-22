@@ -8,7 +8,7 @@
 
 ## Backend for AI-Powered Trip Planning App
 
-Wooster Server is the backend service for the Wooster AI-powered trip planning application. It is built using **Express** and **TypeScript**, it uses **Drizzle** as an ORM, and integrates with **Google's Gemini API** for AI services and **Supabase** for database storage. The backend manages trip and destination data, providing API routes for creating, managing, and retrieving trip itineraries and destination details.
+Wooster Server is the backend service for the Wooster AI-powered trip planning application. It is built using **Express** and **TypeScript**, it uses **Drizzle** as an ORM, and integrates with **Google's Gemini API** for AI services and **Supabase** for cloud database storage. The backend manages trip and destination data, providing API routes for creating, managing, and retrieving trip itineraries and destination details.
 
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
