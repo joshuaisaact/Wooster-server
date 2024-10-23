@@ -161,60 +161,27 @@ npm test
 
 ## Utilities
 
-The server includes a utility function to reshape the trip data fetched from Supabase into a format suitable for front-end consumption. The function `reshapeTripData` converts the raw database data into a format where trips are nested with their associated activities and days:
+### Clean LLM JSON Response
+
+The cleanLLMJsonResponse utility function cleans the response from a language model by removing markdown code blocks and comments, ensuring the result is a clean string for further parsing.
 
 ```typescript
-function reshapeTripData(dbData: any) {
-  return dbData.map((trip: any) => ({
-    trip_id: trip.trip_id.toString(),
-    start_date: trip.start_date,
-    num_days: trip.num_days,
-    destination_name: trip.destinations.destination_name,
-    itinerary: convertActivities(trip.itinerary_days),
-  }));
-}
-```
+const cleanLLMJsonResponse = (text: string): string => {
+  // Remove markdown code blocks with any language specification
+  const withoutCodeBlocks = text.replace(
+    /```(?:json)?\s*([\s\S]*?)\s*```/g,
+    '$1'
+  );
 
-The helper function `convertActivities` structures the activities by day:
+  // Remove any potential comments
+  const withoutComments = withoutCodeBlocks.replace(
+    /\/\*[\s\S]*?\*\/|\/\/.*/g,
+    ''
+  );
 
-```typescript
-function convertActivities(data: any) {
-  const result: any[] = [];
-
-  data.forEach((item: any) => {
-    const { day_number, activities } = item;
-    const dayEntry = result.find((entry) => entry.day === day_number);
-
-    if (dayEntry) {
-      dayEntry.activities.push({
-        activity_id: activities.activity_id,
-        activity_name: activities.activity_name,
-        description: activities.description,
-        location: activities.location,
-        price: activities.price,
-        latitude: activities.latitude,
-        longitude: activities.longitude,
-      });
-    } else {
-      result.push({
-        day: day_number,
-        activities: [
-          {
-            activity_id: activities.activity_id,
-            activity_name: activities.activity_name,
-            description: activities.description,
-            location: activities.location,
-            price: activities.price,
-            latitude: activities.latitude,
-            longitude: activities.longitude,
-          },
-        ],
-      });
-    }
-  });
-
-  return result;
-}
+  // Remove any leading/trailing whitespace
+  return withoutComments.trim();
+};
 ```
 
 ## License
