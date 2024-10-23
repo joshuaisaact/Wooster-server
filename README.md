@@ -84,7 +84,7 @@ npm install
 
 2. **Run Migrations**: Drizzle will automatically create and apply the necessary database tables and schema defined in the project. To ensure the database is fully initialized or updated, run:
 ```
-npm run drizzle
+npm run drizzle:migrate
 ```
 
 This will apply any pending migrations and ensure the database schema matches the project’s schema.
