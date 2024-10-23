@@ -63,9 +63,10 @@ You will need to create a `.env` file at the root of the project with the follow
 PORT=your_port_number
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_KEY=your_supabase_api_key
+DATABASE_URL=postgresql://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 GOOGLE_GEMINI_API_KEY=your_google_gemini_api_key
 
-Replace `your_port_number`, `your_supabase_project_url`, `your_supabase_api_key`, and `your_google_gemini_api_key` with your actual credentials.
+Replace `your_port_number`, `your_supabase_project_url`, `your_supabase_api_key`, and `your_google_gemini_api_key` with your actual credentials. In the DATABASE_URL, Supabase gives you all the details in your database settings bar the password, which you will need to replace yourself when creating the .env file.
 ```
 
 ### Installation
