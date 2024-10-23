@@ -70,6 +70,34 @@ GOOGLE_GEMINI_API_KEY=your_google_gemini_api_key
 - Replace your_port_number, your_supabase_project_url, your_supabase_api_key, and your_google_gemini_api_key with your actual credentials.
 - In the DATABASE_URL, Supabase provides all the details in your database settings except the password. You will need to replace the password manually when creating the .env file.
 
+
+### Database Initialization with Drizzle
+
+This project uses Drizzle ORM to manage the database schema. When setting up the project, Drizzle will handle creating and applying the schema to the database.
+
+## Steps to Initialize the Database
+
+Install Dependencies: Ensure that all dependencies are installed by running:
+
+```
+npm install
+```
+
+Run Migrations: Drizzle will automatically create and apply the necessary database tables and schema defined in the project. To ensure the database is fully initialized or updated, run:
+
+```
+npm run drizzle
+```
+
+This will apply any pending migrations and ensure the database schema matches the project’s schema.
+
+**Notes:**
+
+- The schema will be created from scratch if no existing schema is found in the database.
+- Drizzle will ensure that the database is kept up-to-date with the latest migrations whenever they are added to the project.
+  
+Make sure the .env file is properly configured (as detailed above) before running the migration command.
+
 ### Installation
 
 1. Clone the repository:
