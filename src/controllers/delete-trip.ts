@@ -1,17 +1,20 @@
 import { Request, Response } from 'express';
-import {
-  deleteItineraryDaysByTripId,
-  deleteTripById,
-} from '../services/trip-service';
+import { deleteTripById } from '../services/trip-service';
+import { deleteItineraryDaysByTripId } from '../services/itinerary-service';
 
 const deleteTrip = async (req: Request, res: Response): Promise<Response> => {
-  const { tripId } = req.params;
+  const tripId = Number(req.params.tripId);
+
+  if (isNaN(tripId)) {
+    return res.status(400).json({ error: 'Invalid trip ID' });
+  }
 
   try {
     await deleteItineraryDaysByTripId(tripId);
-    const deletedTrip = await deleteTripById(tripId);
 
-    if (deletedTrip && deletedTrip.length === 0) {
+    const rowsDeleted = await deleteTripById(tripId);
+
+    if (rowsDeleted === 0) {
       return res.status(404).json({ error: 'Trip not found' });
     }
 

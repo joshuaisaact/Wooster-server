@@ -1,10 +1,8 @@
 import { eq } from 'drizzle-orm';
-import { promptTemplate } from '../config/trip-prompt-template';
 import { db, trips } from '../db';
 import { activities } from '../db/tables/activities';
 import { destinations } from '../db/tables/destinations';
 import { itineraryDays } from '../db/tables/itinerary_days';
-import supabase from '../models/supabase-client';
 
 export const fetchTripsFromDB = async () => {
   try {
@@ -77,57 +75,24 @@ export const addTrip = async (
   }
 };
 
-export const insertTrip = async (
-  destinationId: number,
-  startDate: string,
-  numDays: number,
-) => {
-  const { data, error } = await supabase
-    .from('trips')
-    .insert([
-      {
-        destination_id: destinationId,
-        start_date: startDate,
-        num_days: numDays,
-      },
-    ])
-    .select('trip_id')
-    .single();
+export const deleteTripById = async (tripId: number) => {
+  try {
+    const deletedTrips = await db
+      .delete(trips)
+      .where(eq(trips.tripId, tripId))
+      .returning();
 
-  if (error) {
-    throw new Error(`Failed to insert trip: ${error.message}`);
-  }
+    // Check if any rows were deleted
+    if (deletedTrips.length === 0) {
+      throw new Error(`No trip found with ID ${tripId}`);
+    }
 
-  return data.trip_id;
-};
-
-export const deleteItineraryDaysByTripId = async (tripId: string) => {
-  const { error: itineraryError } = await supabase
-    .from('itinerary_days')
-    .delete()
-    .match({ trip_id: tripId });
-
-  if (itineraryError) {
+    return deletedTrips.length;
+  } catch (error) {
     throw new Error(
-      `Error deleting itinerary days for trip ${tripId}: ${itineraryError.message}`,
+      `Error deleting trip with ID ${tripId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
   }
-};
-
-export const deleteTripById = async (tripId: string) => {
-  const { data, error: tripError } = await supabase
-    .from('trips')
-    .delete()
-    .match({ trip_id: tripId })
-    .select();
-
-  if (tripError) {
-    throw new Error(
-      `Error deleting trip with ID ${tripId}: ${tripError.message}`,
-    );
-  }
-
-  return data;
 };
 
 export const validateTripInput = (
@@ -136,15 +101,4 @@ export const validateTripInput = (
   start_date: string,
 ): boolean => {
   return days > 0 && !!location && !!start_date;
-};
-
-export const createPrompt = (
-  days: number,
-  location: string,
-  startDate: string,
-): string => {
-  return promptTemplate
-    .replace(/{days}/g, days.toString())
-    .replace(/{location}/g, location)
-    .replace(/{start_date}/g, startDate);
 };

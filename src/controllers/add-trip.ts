@@ -1,14 +1,11 @@
 import { Request, Response } from 'express';
 import { DayItinerary } from '../types/trip-types';
-import {
-  createPrompt,
-  addTrip,
-  validateTripInput,
-} from '../services/trip-service';
+import { addTrip, validateTripInput } from '../services/trip-service';
 import { generateTripItinerary } from '../services/google-ai-service';
 import { fetchDestinationIdByName } from '../services/destination-service';
 import { addItineraryDays } from '../services/itinerary-service';
 import { addActivities } from '../services/activity-service';
+import { createPrompt } from '../config/trip-prompt-template';
 
 interface CreateTripRequestBody {
   userId: string;
