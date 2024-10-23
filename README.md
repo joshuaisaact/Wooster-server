@@ -75,7 +75,7 @@ GOOGLE_GEMINI_API_KEY=your_google_gemini_api_key
 
 This project uses Drizzle ORM to manage the database schema. When setting up the project, Drizzle will handle creating and applying the schema to the database.
 
-## Steps to Initialize the Database
+**Steps to Initialize the Database**
 
 Install Dependencies: Ensure that all dependencies are installed by running:
 
