@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import { db, itineraryDays } from '../db';
 import { DayItinerary } from '../types/trip-types';
 
@@ -32,25 +33,12 @@ export const addItineraryDays = async (
   }
 };
 
-// export const insertItineraryDays = async (
-//   tripId: number,
-//   itinerary: DayItinerary[],
-//   activityIds: number[][],
-// ) => {
-//   for (let i = 0; i < itinerary.length; i++) {
-//     const dayNumber = i + 1;
-//     for (const activityId of activityIds[i]) {
-//       const { error } = await supabase
-//         .from('itinerary_days')
-//         .insert([
-//           { trip_id: tripId, day_number: dayNumber, activity_id: activityId },
-//         ]);
-
-//       if (error) {
-//         throw new Error(
-//           `Error inserting itinerary day ${dayNumber}: ${error.message}`,
-//         );
-//       }
-//     }
-//   }
-// };
+export const deleteItineraryDaysByTripId = async (tripId: number) => {
+  try {
+    await db.delete(itineraryDays).where(eq(itineraryDays.tripId, tripId));
+  } catch (error) {
+    throw new Error(
+      `Error deleting itinerary days for trip ${tripId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
+};
