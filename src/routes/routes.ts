@@ -5,11 +5,11 @@ import register from '../controllers/auth/register';
 import login from '../controllers/auth/login';
 import logout from '../controllers/auth/logout';
 import { authenticate } from '../middleware/auth-middleware';
-import postTrip from '../controllers/post-trip';
 import handleGetDestinations from '../controllers/get-all-destinations';
 import handleAddDestination from '../controllers/add-destination';
 import handleDeleteDestination from '../controllers/delete-destination';
 import handleGetTrips from '../controllers/get-all-trips';
+import handleAddTrip from '../controllers/add-trip';
 
 const router = express.Router();
 
@@ -28,6 +28,6 @@ router.delete('/trips/:tripId', deleteTrip);
 router.get('/trips', handleGetTrips);
 
 router.post('/destination', handleAddDestination);
-router.post('/trip', postTrip);
+router.post('/trip', handleAddTrip);
 
 export default router;

@@ -5,7 +5,6 @@ import { activities } from '../db/tables/activities';
 import { destinations } from '../db/tables/destinations';
 import { itineraryDays } from '../db/tables/itinerary_days';
 import supabase from '../models/supabase-client';
-import { DayItinerary } from '../types/trip-types';
 
 export const fetchTripsFromDB = async () => {
   try {
@@ -51,39 +50,31 @@ export const fetchTripsFromDB = async () => {
   }
 };
 
-export const getTripsFromDb = async () => {
-  const { data: trips, error } = await supabase.from('trips').select(`
-    trip_id,
-    destination_id,
-    start_date,
-    num_days,
-    itinerary_days!inner (
-      day_number,
-      activities (
-        activity_id,
-        activity_name,
-        latitude,
-        longitude,
-        price,
-        location,
-        description
-      )
-    ),
-    destinations!inner (
-      destination_id,
-      destination_name,
-      latitude,
-      longitude,
-      description,
-      country
-    )
-  `);
+export const addTrip = async (
+  userId: string,
+  destinationId: number,
+  startDate: string,
+  numDays: number,
+) => {
+  try {
+    const startDateAsDate = new Date(startDate);
 
-  if (error) {
-    throw new Error(`Error fetching trips: ${error.message}`);
+    const [insertedTrip] = await db
+      .insert(trips)
+      .values({
+        userId,
+        destinationId,
+        startDate: startDateAsDate,
+        numDays,
+      })
+      .returning({ tripId: trips.tripId });
+
+    return insertedTrip.tripId;
+  } catch (error) {
+    throw new Error(
+      `Failed to insert trip: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
   }
-
-  return trips;
 };
 
 export const insertTrip = async (
@@ -156,35 +147,4 @@ export const createPrompt = (
     .replace(/{days}/g, days.toString())
     .replace(/{location}/g, location)
     .replace(/{start_date}/g, startDate);
-};
-
-export const insertActivities = async (
-  itinerary: DayItinerary[],
-  destinationId: number,
-) => {
-  return Promise.all(
-    itinerary.map(async (day) => {
-      const activities = day.activities.map((activity) => ({
-        location_id: destinationId,
-        activity_name: activity.activity_name,
-        latitude: activity.latitude,
-        longitude: activity.longitude,
-        price: activity.price,
-        location: activity.location,
-        description: activity.description,
-      }));
-
-      const { data: activityData, error: activityError } = await supabase
-        .from('activities')
-        .insert(activities)
-        .select('activity_id');
-
-      if (activityError) {
-        console.error('Error inserting activities:', activityError);
-        throw new Error('Failed to insert activities into database');
-      }
-
-      return activityData.map((activity) => activity.activity_id);
-    }),
-  );
 };

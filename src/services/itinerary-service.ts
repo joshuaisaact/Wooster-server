@@ -2,9 +2,9 @@ import supabase from '../models/supabase-client';
 import { DayItinerary } from '../types/trip-types';
 
 export const insertItineraryDays = async (
-  tripId: string,
+  tripId: number,
   itinerary: DayItinerary[],
-  activityIds: string[][],
+  activityIds: number[][],
 ) => {
   for (let i = 0; i < itinerary.length; i++) {
     const dayNumber = i + 1;

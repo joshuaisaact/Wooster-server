@@ -2,28 +2,29 @@ import { Request, Response } from 'express';
 import { DayItinerary } from '../types/trip-types';
 import {
   createPrompt,
-  insertActivities,
-  insertTrip,
+  addTrip,
   validateTripInput,
 } from '../services/trip-service';
 import { generateTripItinerary } from '../services/google-ai-service';
 import { fetchDestinationIdByName } from '../services/destination-service';
 import { insertItineraryDays } from '../services/itinerary-service';
+import { addActivities } from '../services/activity-service';
 
 interface CreateTripRequestBody {
+  userId: string;
   days: number;
   location: string;
-  start_date: string;
+  startDate: string;
 }
 
-const postTrip = async (
+const handleAddTrip = async (
   req: Request<object, object, CreateTripRequestBody>,
   res: Response,
 ) => {
   try {
-    const { days, location, start_date } = req.body;
+    const { userId, days, location, startDate } = req.body;
 
-    if (!validateTripInput(days, location, start_date)) {
+    if (!validateTripInput(days, location, startDate)) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -44,7 +45,7 @@ const postTrip = async (
       }
     }
 
-    const prompt = createPrompt(days, location, start_date);
+    const prompt = createPrompt(days, location, startDate);
 
     // Generate itinerary from Google Generative AI
     let itineraryText: string;
@@ -70,9 +71,9 @@ const postTrip = async (
     }
 
     // Insert the new trip into the database
-    let tripId: string;
+    let tripId: number;
     try {
-      tripId = await insertTrip(destinationId, start_date, days);
+      tripId = await addTrip(userId, destinationId, startDate, days);
     } catch (tripError) {
       console.error('Error inserting trip:', tripError);
       return res
@@ -81,9 +82,9 @@ const postTrip = async (
     }
 
     // Insert activities
-    let activityIds: string[][];
+    let activityIds: number[][];
     try {
-      activityIds = await insertActivities(itinerary, destinationId);
+      activityIds = await addActivities(itinerary, destinationId);
     } catch (activityError) {
       console.error('Error inserting activities:', activityError);
       return res.status(500).json({ error: 'Failed to insert activities' });
@@ -104,7 +105,7 @@ const postTrip = async (
       trip_id: tripId,
       destination_name: location,
       num_days: days,
-      start_date,
+      startDate,
       itinerary,
     });
 
@@ -114,7 +115,7 @@ const postTrip = async (
         trip_id: tripId,
         destination_name: location,
         num_days: days,
-        start_date,
+        startDate,
         itinerary,
       },
     });
@@ -124,4 +125,4 @@ const postTrip = async (
   }
 };
 
-export default postTrip;
+export default handleAddTrip;

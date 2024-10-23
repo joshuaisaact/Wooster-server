@@ -3,8 +3,8 @@ export interface Activity {
   description: string;
   location: string;
   price: string;
-  latitude: number;
-  longitude: number;
+  latitude: string;
+  longitude: string;
 }
 
 export interface DayItinerary {
@@ -21,8 +21,8 @@ export interface Trip {
   destinations: {
     destination_id: string;
     destination_name: string;
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
     description: string;
     country: string;
   };
