@@ -1,5 +1,5 @@
 import {
-  bigint,
+  serial,
   text,
   numeric,
   varchar,
@@ -8,10 +8,8 @@ import {
 } from 'drizzle-orm/pg-core';
 
 export const destinations = pgTable('destinations', {
-  destinationId: bigint('destination_id', { mode: 'number' })
-    .notNull()
-    .primaryKey(),
-  destinationName: text('destination_name'),
+  destinationId: serial('destination_id').primaryKey(),
+  destinationName: text('destination_name').notNull(),
   latitude: numeric('latitude'),
   longitude: numeric('longitude'),
   description: text('description'),

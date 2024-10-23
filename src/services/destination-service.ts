@@ -1,80 +1,101 @@
-import supabase from '../models/supabase-client';
+import { eq } from 'drizzle-orm';
+import { db } from '../db';
+import { destinations } from '../db/tables/destinations';
+import { NewDestination } from '../types/destination-type';
 
-// Fetch all destinations
-export const getDestinationsFromDb = async () => {
-  const { data: destinations, error } = await supabase
-    .from('destinations')
-    .select('*');
-
-  if (error) {
-    throw new Error(`Error fetching destinations: ${error.message}`);
+export const fetchDestinationsFromDB = async () => {
+  try {
+    const destinationsData = await db.select().from(destinations);
+    return destinationsData;
+  } catch (error) {
+    throw new Error(
+      `Error fetching destinations: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
+    );
   }
-
-  return destinations;
 };
 
 // Fetch a single destination by name
-export const getDestinationDetailsByName = async (destinationName: string) => {
-  const { data: destination, error } = await supabase
-    .from('destinations')
-    .select('*')
-    .eq('destination_name', destinationName)
-    .single();
+export const fetchDestinationDetailsByName = async (
+  destinationName: string,
+) => {
+  try {
+    const [destination] = await db
+      .select()
+      .from(destinations)
+      .where(eq(destinations.destinationName, destinationName));
 
-  if (error) {
+    if (!destination) {
+      throw new Error(`Destination with name ${destinationName} not found`);
+    }
+
+    return destination;
+  } catch (error) {
     throw new Error(
-      `Error fetching destination with name ${destinationName}: ${error.message}`,
+      `Error fetching destination with name ${destinationName}: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
     );
   }
-
-  return destination;
 };
 
-// Fetch a destination ID by name (this is already implemented in your service)
-export const getDestinationIdByName = async (location: string) => {
-  const { data, error } = await supabase
-    .from('destinations')
-    .select('destination_id')
-    .eq('destination_name', location)
-    .single();
+export const fetchDestinationIdByName = async (location: string) => {
+  try {
+    const [destination] = await db
+      .select({ destinationId: destinations.destinationId })
+      .from(destinations)
+      .where(eq(destinations.destinationName, location));
 
-  if (error) {
+    if (!destination) {
+      throw new Error(`Destination with name ${location} not found`);
+    }
+
+    return destination.destinationId;
+  } catch (error) {
     throw new Error(
-      `Error fetching destination with name ${location}: ${error.message}`,
+      `Error fetching destination with name ${location}: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
     );
   }
-
-  return data?.destination_id;
 };
 
-// Insert a new destination
-export const insertDestination = async (destinationData: object) => {
-  const { data, error } = await supabase
-    .from('destinations')
-    .insert([destinationData])
-    .select('*')
-    .single();
+export const addDestination = async (destinationData: NewDestination) => {
+  try {
+    const [insertedDestination] = await db
+      .insert(destinations)
+      .values(destinationData)
+      .returning();
 
-  if (error) {
-    throw new Error(`Failed to insert destination: ${error.message}`);
+    return insertedDestination;
+  } catch (error) {
+    throw new Error(
+      `Failed to insert destination: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
+    );
   }
-
-  return data;
 };
 
 // Delete a destination by ID
-export const deleteDestinationById = async (destinationId: string) => {
-  const { data, error } = await supabase
-    .from('destinations')
-    .delete()
-    .match({ destination_id: destinationId })
-    .select();
+export const deleteDestinationById = async (destinationId: number) => {
+  try {
+    const deletedDestination = await db
+      .delete(destinations)
+      .where(eq(destinations.destinationId, destinationId))
+      .returning();
 
-  if (error) {
+    if (!deletedDestination || deletedDestination.length === 0) {
+      throw new Error(`No destination found with ID ${destinationId}`);
+    }
+
+    return deletedDestination;
+  } catch (error) {
     throw new Error(
-      `Error deleting destination with ID ${destinationId}: ${error.message}`,
+      `Error deleting destination with ID ${destinationId}: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
     );
   }
-
-  return data;
 };

@@ -1,6 +1,55 @@
+import { eq } from 'drizzle-orm';
 import { promptTemplate } from '../config/trip-prompt-template';
+import { db, trips } from '../db';
+import { activities } from '../db/tables/activities';
+import { destinations } from '../db/tables/destinations';
+import { itineraryDays } from '../db/tables/itinerary_days';
 import supabase from '../models/supabase-client';
 import { DayItinerary } from '../types/trip-types';
+
+export const fetchTripsFromDB = async () => {
+  try {
+    const tripData = await db
+      .select({
+        tripId: trips.tripId,
+        destinationId: trips.destinationId,
+        startDate: trips.startDate,
+        numDays: trips.numDays,
+        itineraryDays: itineraryDays.dayNumber,
+        activities: {
+          activityId: activities.activityId,
+          activityName: activities.activityName,
+          latitude: activities.latitude,
+          longitude: activities.longitude,
+          price: activities.price,
+          location: activities.location,
+          description: activities.description,
+        },
+        destination: {
+          destinationId: destinations.destinationId,
+          destinationName: destinations.destinationName,
+          latitude: destinations.latitude,
+          longitude: destinations.longitude,
+          description: destinations.description,
+          country: destinations.country,
+        },
+      })
+      .from(trips)
+      .leftJoin(
+        destinations,
+        eq(destinations.destinationId, trips.destinationId),
+      )
+      .leftJoin(itineraryDays, eq(itineraryDays.tripId, trips.tripId))
+      .leftJoin(activities, eq(activities.activityId, itineraryDays.dayNumber));
+    return tripData;
+  } catch (error) {
+    throw new Error(
+      `Error fetching trips: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
+    );
+  }
+};
 
 export const getTripsFromDb = async () => {
   const { data: trips, error } = await supabase.from('trips').select(`
@@ -38,7 +87,7 @@ export const getTripsFromDb = async () => {
 };
 
 export const insertTrip = async (
-  destinationId: string,
+  destinationId: number,
   startDate: string,
   numDays: number,
 ) => {
@@ -111,7 +160,7 @@ export const createPrompt = (
 
 export const insertActivities = async (
   itinerary: DayItinerary[],
-  destinationId: string,
+  destinationId: number,
 ) => {
   return Promise.all(
     itinerary.map(async (day) => {
