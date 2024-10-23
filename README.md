@@ -77,14 +77,12 @@ This project uses Drizzle ORM to manage the database schema. When setting up the
 
 **Steps to Initialize the Database**
 
-Install Dependencies: Ensure that all dependencies are installed by running:
-
+1. **Install Dependencies**: Ensure that all dependencies are installed by running:
 ```
 npm install
 ```
 
-Run Migrations: Drizzle will automatically create and apply the necessary database tables and schema defined in the project. To ensure the database is fully initialized or updated, run:
-
+2. **Run Migrations**: Drizzle will automatically create and apply the necessary database tables and schema defined in the project. To ensure the database is fully initialized or updated, run:
 ```
 npm run drizzle
 ```
