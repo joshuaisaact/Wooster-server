@@ -7,7 +7,7 @@ import {
 } from '../services/trip-service';
 import { generateTripItinerary } from '../services/google-ai-service';
 import { fetchDestinationIdByName } from '../services/destination-service';
-import { insertItineraryDays } from '../services/itinerary-service';
+import { addItineraryDays } from '../services/itinerary-service';
 import { addActivities } from '../services/activity-service';
 
 interface CreateTripRequestBody {
@@ -92,7 +92,7 @@ const handleAddTrip = async (
 
     // Insert itinerary days
     try {
-      await insertItineraryDays(tripId, itinerary, activityIds);
+      await addItineraryDays(tripId, itinerary, activityIds);
     } catch (itineraryError) {
       console.error('Error inserting itinerary days:', itineraryError);
       return res
