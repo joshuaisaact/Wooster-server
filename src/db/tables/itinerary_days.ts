@@ -1,7 +1,7 @@
-import { pgTable, bigint, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, bigint, timestamp, serial } from 'drizzle-orm/pg-core';
 
 export const itineraryDays = pgTable('itinerary_days', {
-  dayId: bigint('day_id', { mode: 'number' }).notNull().primaryKey(),
+  dayId: serial('day_id').primaryKey(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
