@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { destinationPromptTemplate } from '../config/destination-prompt-template';
 import { generateDestinationData } from '../services/google-ai-service';
-import { insertDestination } from '../services/destination-service';
+import { addDestination } from '../services/destination-service';
 
 interface CreateDestinationRequestBody {
   destination: string;
 }
 
-const postDestination = async (
+const handleAddDestination = async (
   req: Request<object, object, CreateDestinationRequestBody>,
   res: Response,
 ) => {
@@ -17,11 +17,11 @@ const postDestination = async (
     if (!destination) {
       return res.status(400).json({ error: 'Destination is required' });
     }
+    console.log('Destination:', destination);
 
-    const prompt = destinationPromptTemplate.replace(
-      /{destination}/g,
-      destination,
-    );
+    const prompt = destinationPromptTemplate(destination);
+
+    console.log('Prompt:', prompt);
 
     let generatedDestination: string;
     try {
@@ -36,6 +36,8 @@ const postDestination = async (
         .json({ error: 'Failed to generate destination data' });
     }
 
+    console.log('generated destination:', generatedDestination);
+
     let destinationData;
     try {
       destinationData = JSON.parse(generatedDestination);
@@ -48,7 +50,7 @@ const postDestination = async (
 
     let insertedDestination;
     try {
-      insertedDestination = await insertDestination(destinationData);
+      insertedDestination = await addDestination(destinationData);
     } catch (dbError) {
       if (dbError instanceof Error) {
         console.error('Database Error:', dbError.message);
@@ -71,4 +73,4 @@ const postDestination = async (
   }
 };
 
-export default postDestination;
+export default handleAddDestination;

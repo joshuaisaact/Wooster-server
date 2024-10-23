@@ -1,13 +1,16 @@
-export interface Destination {
-  destination_id: number;
-  destination_name: string;
-  latitude: number;
-  longitude: number;
+export interface NewDestination {
+  destinationName: string;
+  latitude: string;
+  longitude: string;
   description: string;
   country?: string;
-  created_at: string;
-  popular_activities: string[]; // Array of strings
-  travel_tips: string[]; // Array of strings
-  nearby_attractions: string[]; // Array of strings
-  transportation_options: string[]; // Array of strings
+  popularActivities: string;
+  travelTips: string;
+  nearbyAttractions: string;
+  transportationOptions: string;
+}
+
+export interface Destination extends NewDestination {
+  destinationId: number;
+  createdAt: Date;
 }

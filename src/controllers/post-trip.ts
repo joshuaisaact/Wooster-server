@@ -7,7 +7,7 @@ import {
   validateTripInput,
 } from '../services/trip-service';
 import { generateTripItinerary } from '../services/google-ai-service';
-import { getDestinationIdByName } from '../services/destination-service';
+import { fetchDestinationIdByName } from '../services/destination-service';
 import { insertItineraryDays } from '../services/itinerary-service';
 
 interface CreateTripRequestBody {
@@ -28,9 +28,9 @@ const postTrip = async (
     }
 
     // Fetch destination ID by location name
-    let destinationId: string;
+    let destinationId: number;
     try {
-      destinationId = await getDestinationIdByName(location);
+      destinationId = await fetchDestinationIdByName(location);
       if (!destinationId) {
         return res.status(404).json({ error: 'Destination not found' });
       }

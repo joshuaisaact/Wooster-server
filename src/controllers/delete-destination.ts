@@ -1,14 +1,20 @@
 import { Request, Response } from 'express';
 import { deleteDestinationById } from '../services/destination-service';
 
-const deleteDestination = async (
+const handleDeleteDestination = async (
   req: Request,
   res: Response,
 ): Promise<Response> => {
   const { destinationId } = req.params;
 
+  const destinationIdNumber = Number(destinationId);
+
+  if (isNaN(destinationIdNumber)) {
+    return res.status(400).json({ error: 'Invalid destination ID' });
+  }
+
   try {
-    const deletedDestination = await deleteDestinationById(destinationId);
+    const deletedDestination = await deleteDestinationById(destinationIdNumber);
 
     if (!deletedDestination || deletedDestination.length === 0) {
       return res.status(404).json({ error: 'Destination not found' });
@@ -24,4 +30,4 @@ const deleteDestination = async (
   }
 };
 
-export default deleteDestination;
+export default handleDeleteDestination;

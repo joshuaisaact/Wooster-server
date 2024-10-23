@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { getDestinationDetailsByName } from '../services/destination-service';
+import { fetchDestinationDetailsByName } from '../services/destination-service';
 
-const getDestinationDetails = async (req: Request, res: Response) => {
-  const { destinationId } = req.params;
-  const decodedDestinationName = decodeURIComponent(destinationId);
+const handleGetDestinationByName = async (req: Request, res: Response) => {
+  const { destinationName } = req.params;
+  const decodedDestinationName = decodeURIComponent(destinationName);
 
   try {
-    const destination = await getDestinationDetailsByName(
+    const destination = await fetchDestinationDetailsByName(
       decodedDestinationName,
     );
 
@@ -21,4 +21,4 @@ const getDestinationDetails = async (req: Request, res: Response) => {
   }
 };
 
-export default getDestinationDetails;
+export default handleGetDestinationByName;

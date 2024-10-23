@@ -1,15 +1,15 @@
 import express from 'express';
-import getTrips from '../controllers/get-trips';
-import getDestinations from '../controllers/get-destinations';
-import getDestinationDetails from '../controllers/get-destination-details';
-import postDestination from '../controllers/post-destination';
-import deleteDestination from '../controllers/delete-destination';
+import handleGetDestinationByName from '../controllers/get-destination-by-name';
 import deleteTrip from '../controllers/delete-trip';
 import register from '../controllers/auth/register';
 import login from '../controllers/auth/login';
 import logout from '../controllers/auth/logout';
 import { authenticate } from '../middleware/auth-middleware';
 import postTrip from '../controllers/post-trip';
+import handleGetDestinations from '../controllers/get-all-destinations';
+import handleAddDestination from '../controllers/add-destination';
+import handleDeleteDestination from '../controllers/delete-destination';
+import handleGetTrips from '../controllers/get-all-trips';
 
 const router = express.Router();
 
@@ -18,16 +18,16 @@ router.post('/auth/register', register);
 router.post('/auth/login', login);
 router.post('/auth/logout', authenticate, logout);
 
-router.get('/destinations/:destinationId', getDestinationDetails);
-router.delete('/destinations/:destinationId', deleteDestination);
+router.get('/destinations/:destinationName', handleGetDestinationByName);
+router.delete('/destinations/:destinationId', handleDeleteDestination);
 
-router.get('/destinations', getDestinations);
+router.get('/destinations', handleGetDestinations);
 
 router.delete('/trips/:tripId', deleteTrip);
 
-router.get('/trips', getTrips);
+router.get('/trips', handleGetTrips);
 
-router.post('/destination', postDestination);
+router.post('/destination', handleAddDestination);
 router.post('/trip', postTrip);
 
 export default router;
