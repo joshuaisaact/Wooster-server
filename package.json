@@ -6,6 +6,7 @@
     "dev": "nodemon --exec ts-node src/server.ts",
     "start": "ts-node src/server.ts",
     "drizzle:migrate": "drizzle-kit generate:migration && drizzle-kit migrate",
+    "drizzle:migrate:test": "drizzle-kit generate:migration --config ./drizzle.config.ts && drizzle-kit migrate --url postgres://test_user:test_password@localhost:5433/test_db",
     "build": "tsc",
     "serve": "node dist/index.js",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
