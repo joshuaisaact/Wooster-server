@@ -18,10 +18,10 @@ describe('Trips API', () => {
       expect(res.body).toBeInstanceOf(Array);
 
       if (res.body.length > 0) {
-        expect(res.body[0]).toHaveProperty('trip_id');
-        expect(res.body[0]).toHaveProperty('destination_name');
+        expect(res.body[0]).toHaveProperty('tripId');
+        expect(res.body[0]).toHaveProperty('destinationName');
         expect(res.body[0]).toHaveProperty('itinerary');
-        expect(res.body[0]).toHaveProperty('num_days');
+        expect(res.body[0]).toHaveProperty('numDays');
       }
     });
   });
