@@ -1,5 +1,5 @@
 export interface Activity {
-  activity_name: string;
+  activityName: string;
   description: string;
   location: string;
   price: string;
@@ -13,14 +13,14 @@ export interface DayItinerary {
 }
 
 export interface Trip {
-  trip_id: number;
-  destination_id: number;
-  start_date: string;
-  num_days: number;
-  itinerary_days: ItineraryDay[];
+  tripId: number;
+  destinationId: number;
+  startDate: string;
+  numDays: number;
+  itineraryDays: ItineraryDay[];
   destinations: {
-    destination_id: string;
-    destination_name: string;
+    destinationId: string;
+    destinationName: string;
     latitude: string;
     longitude: string;
     description: string;
