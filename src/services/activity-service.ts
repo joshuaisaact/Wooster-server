@@ -10,7 +10,7 @@ export const addActivities = async (
     itinerary.map(async (day) => {
       const activityData = day.activities.map((activity) => ({
         locationId: destinationId,
-        activityName: activity.activity_name,
+        activityName: activity.activityName,
         latitude: activity.latitude,
         longitude: activity.longitude,
         price: activity.price,
