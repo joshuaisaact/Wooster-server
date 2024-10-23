@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { cleanLLMJsonResponse, validateJSON } from '../utils/llm-utils';
 
 export const generateDestinationData = async (
   prompt: string,
@@ -11,13 +12,22 @@ export const generateDestinationData = async (
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-  const result = await model.generateContent(prompt);
+  try {
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
 
-  // Clean the response (remove ```json blocks if needed)
-  return result.response
-    .text()
-    .replace(/^```json|```$/g, '')
-    .trim();
+    if (!responseText) {
+      throw new Error('Empty response from LLM');
+    }
+
+    const response = cleanLLMJsonResponse(responseText);
+    validateJSON(response);
+    return response;
+  } catch (error) {
+    throw new Error(
+      `Failed to generate destination data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
 };
 
 export const generateTripItinerary = async (
@@ -31,10 +41,21 @@ export const generateTripItinerary = async (
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-  const result = await model.generateContent(prompt);
 
-  return result.response
-    .text()
-    .replace(/^```json|```$/g, '')
-    .trim();
+  try {
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+
+    if (!responseText) {
+      throw new Error('Empty response from LLM');
+    }
+
+    const response = cleanLLMJsonResponse(responseText);
+    validateJSON(response);
+    return response;
+  } catch (error) {
+    throw new Error(
+      `Failed to generate trip itinerary: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
 };

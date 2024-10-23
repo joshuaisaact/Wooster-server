@@ -17,11 +17,8 @@ const handleAddDestination = async (
     if (!destination) {
       return res.status(400).json({ error: 'Destination is required' });
     }
-    console.log('Destination:', destination);
 
     const prompt = destinationPromptTemplate(destination);
-
-    console.log('Prompt:', prompt);
 
     let generatedDestination: string;
     try {
@@ -36,7 +33,7 @@ const handleAddDestination = async (
         .json({ error: 'Failed to generate destination data' });
     }
 
-    console.log('generated destination:', generatedDestination);
+    console.log('Generated destination:', generatedDestination);
 
     let destinationData;
     try {
