@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
     "start": "ts-node src/server.ts",
+    "drizzle:migrate": "drizzle-kit generate:migration && drizzle-kit migrate",
     "build": "tsc",
     "serve": "node dist/index.js",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
