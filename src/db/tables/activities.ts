@@ -1,14 +1,14 @@
 import {
   pgTable,
-  bigint,
   text,
   numeric,
   timestamp,
   integer,
+  serial,
 } from 'drizzle-orm/pg-core';
 
 export const activities = pgTable('activities', {
-  activityId: bigint('activity_id', { mode: 'number' }).notNull().primaryKey(),
+  activityId: serial('activity_id').primaryKey(),
   activityName: text('activity_name'),
   description: text('description'),
   location: text('location'),
