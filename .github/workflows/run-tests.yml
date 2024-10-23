@@ -23,6 +23,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
+      # Install dependencies using npm ci
       - run: npm ci
 
       # Ensure environment variables are properly loaded
@@ -30,5 +31,7 @@ jobs:
         run: |
           echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> $GITHUB_ENV
           echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> $GITHUB_ENV
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV  # Add the DATABASE_URL secret
 
+      # Run tests
       - run: npm test
