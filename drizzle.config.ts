@@ -13,7 +13,7 @@ const TEST_DB_URL = 'postgres://test_user:test_password@localhost:5433/test_db';
 
 export default defineConfig({
   out: './drizzle',
-  schema: './src/db/schema.ts',
+  schema: './src/db/tables/**/*.ts',
   dialect: 'postgresql',
   dbCredentials: {
     url: isTestEnv ? TEST_DB_URL : process.env.SUPABASE_URL!,
