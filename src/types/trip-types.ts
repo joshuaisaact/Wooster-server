@@ -1,10 +1,11 @@
 export interface Activity {
-  activityName: string;
-  description: string;
-  location: string;
-  price: string;
-  latitude: string;
-  longitude: string;
+  activityId: number;
+  activityName: string | null;
+  description: string | null;
+  location: string | null;
+  price: string | null;
+  latitude: string | null;
+  longitude: string | null;
 }
 
 export interface DayItinerary {
@@ -13,22 +14,14 @@ export interface DayItinerary {
 }
 
 export interface Trip {
-  tripId: number;
-  destinationId: number;
+  tripId: string;
   startDate: string;
   numDays: number;
-  itineraryDays: ItineraryDay[];
-  destinations: {
-    destinationId: string;
-    destinationName: string;
-    latitude: string;
-    longitude: string;
-    description: string;
-    country: string;
-  };
+  destinationName: string;
+  itinerary: ItineraryDay[];
 }
 
 export interface ItineraryDay {
   day_number: number;
-  activities: Activity;
+  activities: Activity[];
 }

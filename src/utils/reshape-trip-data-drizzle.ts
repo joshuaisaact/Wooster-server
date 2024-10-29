@@ -15,8 +15,6 @@ function reshapeTripData(dbData: TripDBRow[]) {
           row.destination?.destinationName || 'Unknown Destination',
         itinerary: [],
       };
-    } else {
-      console.log(`Trip with tripId ${row.tripId} already exists.`);
     }
 
     // Handle itinerary day grouping
