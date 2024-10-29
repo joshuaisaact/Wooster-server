@@ -18,7 +18,7 @@ router.post('/auth/register', register);
 router.post('/auth/login', login);
 router.post('/auth/logout', authenticate, logout);
 
-router.get('/destinations/:destinationName', handleGetDestinationByName);
+router.get('/destination/:destinationName', handleGetDestinationByName);
 router.delete('/destinations/:destinationId', handleDeleteDestination);
 
 router.get('/destinations', handleGetDestinations);

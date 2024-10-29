@@ -13,59 +13,89 @@ const handleAddDestination = async (
 ) => {
   try {
     const { destination } = req.body;
+    console.log('Received destination:', destination);
 
-    if (!destination) {
+    if (!destination || destination.trim() === '') {
       return res.status(400).json({ error: 'Destination is required' });
     }
 
     const prompt = destinationPromptTemplate(destination);
+    console.log('Generated prompt:', prompt);
 
-    let generatedDestination: string;
+    let generatedDestination: string | null | undefined;
     try {
       generatedDestination = await generateDestinationData(prompt);
+      console.log('AI Response:', generatedDestination);
+
+      if (generatedDestination === undefined) {
+        return res
+          .status(500)
+          .json({ error: 'Failed to generate destination data' });
+      }
     } catch (aiError) {
-      console.error(
-        'AI Error:',
-        aiError instanceof Error ? aiError.message : 'Unknown error',
-      );
+      console.error('AI Service Error:', aiError);
       return res
         .status(500)
         .json({ error: 'Failed to generate destination data' });
     }
 
-    console.log('Generated destination:', generatedDestination);
-
-    let destinationData;
-    try {
-      destinationData = JSON.parse(generatedDestination);
-    } catch (parseError) {
-      console.error('Failed to parse destination data:', parseError);
+    if (generatedDestination === null) {
       return res
         .status(500)
         .json({ error: 'Failed to parse destination data' });
     }
 
-    let insertedDestination;
+    let destinationData;
     try {
-      insertedDestination = await addDestination(destinationData);
-    } catch (dbError) {
-      if (dbError instanceof Error) {
-        console.error('Database Error:', dbError.message);
-        return res.status(500).json({ error: dbError.message });
-      } else {
-        console.error('Unknown Database Error:', dbError);
-        return res.status(500).json({ error: 'An unknown error occurred' });
+      destinationData = JSON.parse(generatedDestination);
+      console.log('Parsed destination data:', destinationData);
+
+      // Validate required fields
+      if (!destinationData || !destinationData.destinationName) {
+        console.error('Invalid destination data format:', destinationData);
+        return res
+          .status(500)
+          .json({ error: 'Invalid destination data format' });
       }
+    } catch (parseError) {
+      console.error('JSON Parse Error:', parseError);
+      return res
+        .status(500)
+        .json({ error: 'Failed to parse destination data' });
     }
 
-    console.log('Inserted Destination:', insertedDestination);
+    try {
+      console.log('Attempting to insert destination:', destinationData);
+      const insertedDestination = await addDestination(destinationData);
+      console.log('Inserted destination:', insertedDestination);
 
-    return res.status(201).json({
-      message: 'Destination created successfully',
-      destination: insertedDestination,
-    });
+      // Return success even if insertedDestination is undefined/null
+      // since we know the insert succeeded if no error was thrown
+      return res.status(201).json({
+        message: 'Destination created successfully',
+        destination: insertedDestination || destinationData,
+      });
+    } catch (dbError) {
+      console.error('Database Error:', dbError);
+
+      // Handle known database error types
+      if (typeof dbError === 'object' && dbError !== null) {
+        // Check for constraint violation
+        if ('code' in dbError && dbError.code === '23505') {
+          return res.status(409).json({ error: 'Destination already exists' });
+        }
+
+        // Check for message property
+        if ('message' in dbError && typeof dbError.message === 'string') {
+          return res.status(500).json({ error: dbError.message });
+        }
+      }
+
+      // Handle any other type of error
+      return res.status(500).json({ error: 'An unknown error occurred' });
+    }
   } catch (error) {
-    console.error('Error creating new destination:', error);
+    console.error('Unhandled Error:', error);
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };
