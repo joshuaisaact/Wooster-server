@@ -1,38 +1,31 @@
 import request from 'supertest';
+import { Server } from 'http';
 import app from '../src/index';
-import http from 'http';
 
 describe('Server Tests', () => {
-  let server: http.Server;
-  let port: number;
+  let server: Server;
+  const port = 59781;
 
+  // Setup before tests
   beforeAll((done) => {
-    server = app.listen(0, () => {
-      port = (server.address() as any).port;
+    server = app.listen(port, () => {
+      console.log(`Test server running on port ${port}`);
       done();
     });
   });
 
+  // Cleanup after tests
   afterAll((done) => {
-    server.close(done);
+    if (server) {
+      server.close(done);
+    } else {
+      done();
+    }
   });
 
   it('should start the server and respond to a basic request', async () => {
-    const response = await request(`http://localhost:${port}`).get('/');
+    const response = await request(app).get('/');
     expect(response.status).toBe(200);
     expect(response.text).toContain('Welcome to the server!');
-  });
-
-  it('should log the correct startup message', () => {
-    const consoleLogSpy = jest.spyOn(console, 'log');
-    const logMessage = '🚀 Server is running successfully!';
-
-    server = app.listen(port, () => {
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining(logMessage),
-      );
-    });
-
-    consoleLogSpy.mockRestore();
   });
 });

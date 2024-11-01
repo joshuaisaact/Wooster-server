@@ -10,6 +10,7 @@ import handleAddDestination from '../controllers/add-destination';
 import handleDeleteDestination from '../controllers/delete-destination';
 import handleGetTrips from '../controllers/get-all-trips';
 import handleAddTrip from '../controllers/add-trip';
+import { llmLimiter } from '../middleware/rate-limits';
 
 const router = express.Router();
 
@@ -28,11 +29,11 @@ router.delete(
   requireAuth,
   handleDeleteDestination,
 );
-router.post('/destination', requireAuth, handleAddDestination);
+router.post('/destination', llmLimiter, requireAuth, handleAddDestination);
 
 // Protected trip routes
 router.get('/trips', requireAuth, handleGetTrips);
-router.post('/trip', requireAuth, handleAddTrip);
+router.post('/trip', llmLimiter, requireAuth, handleAddTrip);
 router.delete('/trips/:tripId', requireAuth, deleteTrip);
 
 export default router;

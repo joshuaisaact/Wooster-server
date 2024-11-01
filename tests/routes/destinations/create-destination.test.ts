@@ -4,6 +4,28 @@ import supabase from '../../../src/models/supabase-client';
 import { generateDestinationData } from '../../../src/services/google-ai-service';
 import * as destinationService from '../../../src/services/destination-service';
 import { CreateMockDestination } from '../../../src/types/test-types';
+import { User } from '@supabase/supabase-js';
+import { NextFunction } from 'express';
+import { mockAuthHeader } from '../../helpers/auth-mocks';
+
+// Mock the auth middleware
+jest.mock('../../../src/middleware/auth-middleware', () => ({
+  requireAuth: (
+    req: Request & { user?: User },
+    _res: Response,
+    next: NextFunction,
+  ) => {
+    req.user = {
+      id: 'test-user-id',
+      app_metadata: {},
+      aud: 'authenticated',
+      created_at: '',
+      role: '',
+      user_metadata: {},
+    } as User;
+    next();
+  },
+}));
 
 // Mock both services
 jest.mock('../../../src/services/google-ai-service');
@@ -52,6 +74,7 @@ describe('Destination Routes', () => {
 
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(201);
 
@@ -68,6 +91,7 @@ describe('Destination Routes', () => {
       it('should return 400 when destination is missing', async () => {
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({})
           .expect(400);
         expect(res.body).toHaveProperty('error', 'Destination is required');
@@ -76,6 +100,7 @@ describe('Destination Routes', () => {
       it('should handle empty string destination', async () => {
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({ destination: '' })
           .expect(400);
 
@@ -91,6 +116,7 @@ describe('Destination Routes', () => {
 
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
 
@@ -105,6 +131,7 @@ describe('Destination Routes', () => {
 
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
 
@@ -121,6 +148,7 @@ describe('Destination Routes', () => {
 
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
 
@@ -137,6 +165,7 @@ describe('Destination Routes', () => {
 
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
 
@@ -161,6 +190,7 @@ describe('Destination Routes', () => {
 
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
 
@@ -179,6 +209,7 @@ describe('Destination Routes', () => {
 
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
 
@@ -198,6 +229,7 @@ describe('Destination Routes', () => {
 
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(409);
 
@@ -216,6 +248,7 @@ describe('Destination Routes', () => {
 
         const res = await request(app)
           .post('/destination')
+          .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
 
@@ -223,10 +256,4 @@ describe('Destination Routes', () => {
       });
     });
   });
-
-  // You can add more route tests here
-  // describe('GET /destinations', () => {});
-  // describe('GET /destination/:id', () => {});
-  // describe('PUT /destination/:id', () => {});
-  // describe('DELETE /destination/:id', () => {});
 });
