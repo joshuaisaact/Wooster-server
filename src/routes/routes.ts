@@ -14,6 +14,11 @@ import { llmLimiter } from '../middleware/rate-limits';
 
 const router = express.Router();
 
+router.use((req, _, next) => {
+  console.log(`[DEBUG] Incoming request: ${req.method} ${req.path}`);
+  next();
+});
+
 // Auth routes
 router.post('/auth/register', register);
 router.post('/auth/login', login);
@@ -35,5 +40,10 @@ router.post('/destination', llmLimiter, requireAuth, handleAddDestination);
 router.get('/trips', requireAuth, handleGetTrips);
 router.post('/trip', llmLimiter, requireAuth, handleAddTrip);
 router.delete('/trips/:tripId', requireAuth, deleteTrip);
+
+router.get('/test-route', (_, res) => {
+  console.log('[DEBUG] Test route hit!');
+  res.json({ message: 'Test route working!' });
+});
 
 export default router;

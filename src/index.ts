@@ -16,9 +16,16 @@ app.use(generalLimiter);
 
 app.use(express.json({ limit: '1mb' }));
 
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const allowedOrigins = isDevelopment
+  ? ['http://localhost:5173']
+  : ['http://46.101.72.66'];
+
+console.log('Allowed CORS Origins:', allowedOrigins); // Debug log
+
 app.use(
   cors({
-    origin: CLIENT_URL,
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'],
     credentials: true,
   }),
