@@ -7,19 +7,19 @@ import {
   addDestination,
   deleteDestinationById,
 } from '../../src/services/destination-service';
-import { db } from '../../src/db'; // Import your database connection
-import { mockDestination } from '../helpers/destination-mocks'; // Import your destination mock
+import { db } from '../../src/db';
+import { mockDestination } from '../helpers/destination-mocks';
 
-jest.mock('../../src/db'); // Mock the db module
+jest.mock('../../src/db');
 
 describe('Destination Service', () => {
   afterEach(() => {
-    jest.clearAllMocks(); // Clear mocks after each test
+    jest.clearAllMocks();
   });
 
   describe('fetchDestinationsFromDB', () => {
     it('should fetch all destinations successfully', async () => {
-      const mockDestinations = [mockDestination]; // Use the complete mock
+      const mockDestinations = [mockDestination];
 
       (db.select as jest.Mock).mockReturnValueOnce({
         from: jest.fn().mockResolvedValue(mockDestinations),
@@ -43,7 +43,7 @@ describe('Destination Service', () => {
 
   describe('fetchDestinationDetailsByName', () => {
     it('should fetch destination details by name', async () => {
-      const mockDestinationWithName = { ...mockDestination }; // Spread to preserve the structure
+      const mockDestinationWithName = { ...mockDestination };
       (db.select as jest.Mock).mockReturnValueOnce({
         from: jest.fn().mockReturnValue({
           where: jest.fn().mockResolvedValue([mockDestinationWithName]),

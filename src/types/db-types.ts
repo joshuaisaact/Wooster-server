@@ -1,3 +1,5 @@
+import { BestTime, Category, Difficulty } from './trip-types';
+
 // The shape of each row returned by the Drizzle query
 export interface DBActivity {
   activityId: number;
@@ -5,8 +7,12 @@ export interface DBActivity {
   description: string | null; // Allow null
   location: string | null; // Allow null
   price: string | null; // Allow null
-  latitude: string | null; // Allow null
-  longitude: string | null; // Allow null
+  latitude: number | null;
+  longitude: number | null;
+  duration: string | null;
+  difficulty: Difficulty;
+  category: Category;
+  bestTime: BestTime;
 }
 
 export interface DBDestination {
@@ -32,6 +38,10 @@ export interface TripDBRow {
     price: string | null;
     latitude: string | null;
     longitude: string | null;
+    duration: string | null;
+    difficulty: Difficulty;
+    category: Category;
+    bestTime: BestTime;
   } | null;
   destination: {
     destinationId: number | null;

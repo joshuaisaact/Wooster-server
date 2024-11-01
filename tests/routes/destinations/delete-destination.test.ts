@@ -3,6 +3,28 @@ import app from '../../../src/index';
 import supabase from '../../../src/models/supabase-client';
 import * as destinationService from '../../../src/services/destination-service';
 import { mockDestination } from '../../helpers/destination-mocks';
+import { mockAuthHeader } from '../../helpers/auth-mocks';
+import { User } from '@supabase/supabase-js';
+import { NextFunction } from 'express';
+
+// Mock the auth middleware
+jest.mock('../../../src/middleware/auth-middleware', () => ({
+  requireAuth: (
+    req: Request & { user?: User },
+    _res: Response,
+    next: NextFunction,
+  ) => {
+    req.user = {
+      id: 'test-user-id',
+      app_metadata: {},
+      aud: 'authenticated',
+      created_at: '',
+      role: '',
+      user_metadata: {},
+    } as User;
+    next();
+  },
+}));
 
 // Mock the service
 jest.mock('../../../src/services/destination-service');
@@ -28,6 +50,7 @@ describe('DELETE /destinations/:destinationId', () => {
 
       const res = await request(app)
         .delete(`/destinations/${destinationId}`)
+        .set('Authorization', mockAuthHeader) // Add auth header
         .expect(200);
 
       expect(res.body).toHaveProperty(
@@ -38,12 +61,14 @@ describe('DELETE /destinations/:destinationId', () => {
     });
   });
 
+  // Update other test cases similarly
   describe('input validation', () => {
     it('should return 400 for an invalid destination ID', async () => {
       const invalidId = 'invalid-id';
 
       const res = await request(app)
         .delete(`/destinations/${invalidId}`)
+        .set('Authorization', mockAuthHeader) // Add auth header
         .expect(400);
 
       expect(res.body).toHaveProperty('error', 'Invalid destination ID');
@@ -54,10 +79,11 @@ describe('DELETE /destinations/:destinationId', () => {
   describe('not found handling', () => {
     it('should return 404 if the destination is not found', async () => {
       const nonexistentId = 999;
-      mockedDeleteDestination.mockResolvedValue([]); // Simulate destination not found
+      mockedDeleteDestination.mockResolvedValue([]);
 
       const res = await request(app)
         .delete(`/destinations/${nonexistentId}`)
+        .set('Authorization', mockAuthHeader) // Add auth header
         .expect(404);
 
       expect(res.body).toHaveProperty('error', 'Destination not found');
@@ -71,6 +97,7 @@ describe('DELETE /destinations/:destinationId', () => {
 
       const res = await request(app)
         .delete(`/destinations/${destinationId}`)
+        .set('Authorization', mockAuthHeader) // Add auth header
         .expect(500);
 
       expect(res.body).toHaveProperty('error', 'Something went wrong');
@@ -83,6 +110,7 @@ describe('DELETE /destinations/:destinationId', () => {
 
       const res = await request(app)
         .delete(`/destinations/${destinationId}`)
+        .set('Authorization', mockAuthHeader) // Add auth header
         .expect(500);
 
       expect(res.body).toHaveProperty('error', 'Something went wrong');

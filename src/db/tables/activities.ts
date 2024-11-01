@@ -19,4 +19,8 @@ export const activities = pgTable('activities', {
     .notNull(),
   price: text('price'),
   locationId: integer('location_id'),
+  duration: text('duration'),
+  difficulty: text('difficulty'),
+  category: text('category'),
+  bestTime: text('best_time'),
 });

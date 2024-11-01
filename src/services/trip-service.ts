@@ -4,7 +4,7 @@ import { activities } from '../db/tables/activities';
 import { destinations } from '../db/tables/destinations';
 import { itineraryDays } from '../db/tables/itinerary_days';
 
-export const fetchTripsFromDB = async () => {
+export const fetchTripsFromDB = async (userId: string) => {
   try {
     const tripData = await db
       .select({
@@ -21,6 +21,10 @@ export const fetchTripsFromDB = async () => {
           price: activities.price,
           location: activities.location,
           description: activities.description,
+          duration: activities.duration,
+          difficulty: activities.difficulty,
+          category: activities.category,
+          bestTime: activities.bestTime,
         },
         destination: {
           destinationId: destinations.destinationId,
@@ -32,12 +36,17 @@ export const fetchTripsFromDB = async () => {
         },
       })
       .from(trips)
+      .where(eq(trips.userId, userId))
       .leftJoin(
         destinations,
         eq(destinations.destinationId, trips.destinationId),
       )
       .leftJoin(itineraryDays, eq(itineraryDays.tripId, trips.tripId))
-      .leftJoin(activities, eq(activities.activityId, itineraryDays.dayNumber));
+      .leftJoin(
+        activities,
+        eq(activities.activityId, itineraryDays.activityId),
+      );
+    console.log('Raw trip data:', tripData[0]?.activities);
     return tripData;
   } catch (error) {
     throw new Error(

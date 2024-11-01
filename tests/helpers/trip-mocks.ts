@@ -19,9 +19,13 @@ export const dbTripMock: TripDBRow[] = [
       price: '$0',
       latitude: '40.785091',
       longitude: '-73.968285',
+      duration: '2 hours',
+      difficulty: 'Challenging',
+      category: 'Adventure',
+      bestTime: 'Afternoon',
     },
     destination: {
-      destinationId: '1',
+      destinationId: 1,
       destinationName: 'New York',
       latitude: '40.712776',
       longitude: '-74.005974',
@@ -33,11 +37,10 @@ export const dbTripMock: TripDBRow[] = [
 
 // Reshaped data expected by the application
 export const reshapedTripMock: Trip = {
-  tripId: 1,
-  destinationId: 1,
+  tripId: '1',
   startDate: '2024-01-01',
   numDays: 7,
-  itineraryDays: [
+  itinerary: [
     {
       day: 1,
       activities: [
@@ -49,6 +52,10 @@ export const reshapedTripMock: Trip = {
           price: '$0',
           latitude: '40.785091',
           longitude: '-73.968285',
+          duration: '2 hours',
+          difficulty: 'Challenging',
+          category: 'Adventure',
+          bestTime: 'Afternoon',
         },
       ],
     },
