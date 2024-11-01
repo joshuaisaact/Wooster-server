@@ -8,7 +8,7 @@ const jestConfig: JestConfigWithTsJest = {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  // silent: true,
+  silent: true,
 };
 
 export default jestConfig;

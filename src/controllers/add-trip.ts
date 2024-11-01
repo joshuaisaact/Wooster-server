@@ -8,7 +8,6 @@ import { addActivities } from '../services/activity-service';
 import { createPrompt } from '../config/trip-prompt-template';
 
 interface CreateTripRequestBody {
-  userId: string;
   days: number;
   location: string;
   startDate: string;
@@ -19,8 +18,9 @@ const handleAddTrip = async (
   res: Response,
 ) => {
   try {
-    const { userId, days, location, startDate } = req.body;
-
+    const { days, location, startDate } = req.body;
+    const userId = req.user!.id; // Get userId from auth middleware
+    console.log('Received trip request body:', req.body);
     if (!validateTripInput(days, location, startDate)) {
       return res.status(400).json({ error: 'Missing required fields' });
     }

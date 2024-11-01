@@ -1,23 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
-import supabase from '../models/supabase-client';
-import { User } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
-interface AuthenticatedRequest extends Request {
-  user?: User;
-}
-
-export const authenticate = async (
-  req: AuthenticatedRequest,
+export const requireAuth = async (
+  req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Promise<void | Response> => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const authHeader = req.headers.authorization;
 
-    if (!token) {
-      res.status(401).json({ error: 'Authorization token required' });
-      return;
+    if (!authHeader) {
+      return res.status(401).json({ error: 'No authorization header' });
     }
+
+    const token = authHeader.replace('Bearer ', '');
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!,
+    );
 
     const {
       data: { user },
@@ -25,26 +25,15 @@ export const authenticate = async (
     } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      res.status(401).json({ error: 'Invalid or expired token' });
-      return;
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (userError) {
-      console.error('Error fetching user data:', userError);
-      res.status(500).json({ error: 'Error fetching user data' });
-      return;
-    }
-
-    req.user = userData;
+    req.user = user;
     next();
   } catch (error) {
-    console.error('Authentication error:', error);
-    res.status(500).json({ error: 'An unknown error occurred' });
+    if (error instanceof Error) {
+      return res.status(401).json({ error: error.message });
+    }
+    return res.status(401).json({ error: 'Authentication failed' });
   }
 };

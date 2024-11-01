@@ -32,8 +32,16 @@ function reshapeTripData(dbData: TripDBRow[]) {
             description: row.activities.description,
             location: row.activities.location,
             price: row.activities.price,
-            latitude: row.activities.latitude,
-            longitude: row.activities.longitude,
+            duration: row.activities.duration,
+            latitude: row.activities.latitude
+              ? parseFloat(row.activities.latitude)
+              : null,
+            longitude: row.activities.longitude
+              ? parseFloat(row.activities.longitude)
+              : null,
+            difficulty: row.activities.difficulty,
+            category: row.activities.category,
+            bestTime: row.activities.bestTime,
           }
         : null;
 
@@ -53,6 +61,7 @@ function reshapeTripData(dbData: TripDBRow[]) {
   const result = Object.values(tripsMap);
 
   // Return the object values as an array of trips
+
   return result;
 }
 

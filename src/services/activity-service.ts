@@ -16,15 +16,17 @@ export const addActivities = async (
         price: activity.price,
         location: activity.location,
         description: activity.description,
+        duration: activity.duration,
+        difficulty: activity.difficulty,
+        category: activity.category,
+        bestTime: activity.bestTime,
       }));
 
-      // Insert activities using Drizzle ORM and return the activity IDs
       const insertedActivities = await db
         .insert(activities)
         .values(activityData)
         .returning({ activityId: activities.activityId });
 
-      // Returning the array of inserted activity IDs
       return insertedActivities.map((activity) => activity.activityId);
     }),
   );

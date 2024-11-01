@@ -20,6 +20,10 @@ app.use(
   }),
 );
 
+app.get('/', (_, res) => {
+  res.send('Welcome to the server!'); // Adjust message if needed
+});
+
 app.use(routes);
 
 app.use((_, res) => {

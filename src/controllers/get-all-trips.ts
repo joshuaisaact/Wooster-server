@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import { fetchTripsFromDB } from '../services/trip-service';
 import reshapeTripData from '../utils/reshape-trip-data-drizzle';
 
-const handleGetTrips = async (_req: Request, res: Response) => {
+const handleGetTrips = async (req: Request, res: Response) => {
   try {
-    const trips = await fetchTripsFromDB();
+    const trips = await fetchTripsFromDB(req.user!.id);
     const reshapedTrips = reshapeTripData(trips);
     res.json(reshapedTrips);
   } catch (error) {
