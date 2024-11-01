@@ -35,7 +35,7 @@ app.get('/', (_: Request, res: Response) => {
   res.status(200).send('Welcome to the server!');
 });
 
-app.use(routes);
+app.use('/api', routes);
 
 app.use((_, res) => {
   res.status(404).json({ error: 'Not Found' });
