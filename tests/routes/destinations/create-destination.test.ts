@@ -73,7 +73,7 @@ describe('Destination Routes', () => {
         );
 
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(201);
@@ -90,7 +90,7 @@ describe('Destination Routes', () => {
     describe('validation errors', () => {
       it('should return 400 when destination is missing', async () => {
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({})
           .expect(400);
@@ -99,7 +99,7 @@ describe('Destination Routes', () => {
 
       it('should handle empty string destination', async () => {
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({ destination: '' })
           .expect(400);
@@ -115,7 +115,7 @@ describe('Destination Routes', () => {
         );
 
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -130,7 +130,7 @@ describe('Destination Routes', () => {
         mockedGenerateDestinationData.mockResolvedValue('invalid json');
 
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -147,7 +147,7 @@ describe('Destination Routes', () => {
         );
 
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -164,7 +164,7 @@ describe('Destination Routes', () => {
         );
 
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -189,7 +189,7 @@ describe('Destination Routes', () => {
         );
 
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -208,7 +208,7 @@ describe('Destination Routes', () => {
         mockedAddDestination.mockRejectedValue(new Error('Database error'));
 
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -228,7 +228,7 @@ describe('Destination Routes', () => {
         mockedAddDestination.mockRejectedValue(uniqueViolationError);
 
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(409);
@@ -247,7 +247,7 @@ describe('Destination Routes', () => {
         mockedAddDestination.mockRejectedValue(unknownError);
 
         const res = await request(app)
-          .post('/destination')
+          .post('/api/destination')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
