@@ -19,7 +19,11 @@ app.use(express.json({ limit: '1mb' }));
 const isDevelopment = process.env.NODE_ENV !== 'production';
 const allowedOrigins = isDevelopment
   ? ['http://localhost:5173']
-  : ['http://46.101.72.66'];
+  : [
+      'http://46.101.72.66',
+      'https://trywooster.live',
+      'https://www.trywooster.live',
+    ];
 
 console.log('Allowed CORS Origins:', allowedOrigins); // Debug log
 

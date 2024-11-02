@@ -49,7 +49,7 @@ describe('DELETE /destinations/:destinationId', () => {
       mockedDeleteDestination.mockResolvedValue([mockDestination]);
 
       const res = await request(app)
-        .delete(`/destinations/${destinationId}`)
+        .delete(`/api/destinations/${destinationId}`)
         .set('Authorization', mockAuthHeader) // Add auth header
         .expect(200);
 
@@ -67,7 +67,7 @@ describe('DELETE /destinations/:destinationId', () => {
       const invalidId = 'invalid-id';
 
       const res = await request(app)
-        .delete(`/destinations/${invalidId}`)
+        .delete(`/api/destinations/${invalidId}`)
         .set('Authorization', mockAuthHeader) // Add auth header
         .expect(400);
 
@@ -82,7 +82,7 @@ describe('DELETE /destinations/:destinationId', () => {
       mockedDeleteDestination.mockResolvedValue([]);
 
       const res = await request(app)
-        .delete(`/destinations/${nonexistentId}`)
+        .delete(`/api/destinations/${nonexistentId}`)
         .set('Authorization', mockAuthHeader) // Add auth header
         .expect(404);
 
@@ -96,7 +96,7 @@ describe('DELETE /destinations/:destinationId', () => {
       mockedDeleteDestination.mockRejectedValue(new Error('Database error'));
 
       const res = await request(app)
-        .delete(`/destinations/${destinationId}`)
+        .delete(`/api/destinations/${destinationId}`)
         .set('Authorization', mockAuthHeader) // Add auth header
         .expect(500);
 
@@ -109,7 +109,7 @@ describe('DELETE /destinations/:destinationId', () => {
       mockedDeleteDestination.mockRejectedValue({ unexpected: 'error' });
 
       const res = await request(app)
-        .delete(`/destinations/${destinationId}`)
+        .delete(`/api/destinations/${destinationId}`)
         .set('Authorization', mockAuthHeader) // Add auth header
         .expect(500);
 

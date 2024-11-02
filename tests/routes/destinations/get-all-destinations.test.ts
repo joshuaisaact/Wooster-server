@@ -78,7 +78,7 @@ describe('GET /destinations', () => {
     it('should return all destinations successfully', async () => {
       mockedFetchDestinations.mockResolvedValue(mockDestinations);
 
-      const res = await request(app).get('/destinations').expect(200);
+      const res = await request(app).get('/api/destinations').expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body).toHaveLength(2);
@@ -89,7 +89,7 @@ describe('GET /destinations', () => {
     it('should return an empty array when no destinations exist', async () => {
       mockedFetchDestinations.mockResolvedValue([]);
 
-      const res = await request(app).get('/destinations').expect(200);
+      const res = await request(app).get('/api/destinations').expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body).toHaveLength(0);
@@ -102,7 +102,7 @@ describe('GET /destinations', () => {
         new Error('Database connection error'),
       );
 
-      const res = await request(app).get('/destinations').expect(500);
+      const res = await request(app).get('/api/destinations').expect(500);
 
       expect(res.body).toHaveProperty('error', 'Something went wrong');
     });
@@ -112,7 +112,7 @@ describe('GET /destinations', () => {
         notAnError: 'unexpected error type',
       });
 
-      const res = await request(app).get('/destinations').expect(500);
+      const res = await request(app).get('/api/destinations').expect(500);
 
       expect(res.body).toHaveProperty('error', 'Something went wrong');
     });
@@ -129,7 +129,7 @@ describe('GET /destinations', () => {
 
       mockedFetchDestinations.mockResolvedValue(largeDestinationSet);
 
-      const res = await request(app).get('/destinations').expect(200);
+      const res = await request(app).get('/api/destinations').expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body).toHaveLength(100);
@@ -166,7 +166,7 @@ describe('GET /destinations', () => {
 
       mockedFetchDestinations.mockResolvedValue([fullDestination]);
 
-      const res = await request(app).get('/destinations').expect(200);
+      const res = await request(app).get('/api/destinations').expect(200);
 
       expect(res.body[0]).toMatchObject(
         expect.objectContaining({

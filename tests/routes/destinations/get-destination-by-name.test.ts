@@ -54,7 +54,7 @@ describe('GET /destination/:destinationName', () => {
     it('should return destination details when found', async () => {
       mockedFetchDestinationByName.mockResolvedValue(mockDestination);
 
-      const res = await request(app).get('/destination/Paris').expect(200);
+      const res = await request(app).get('/api/destination/Paris').expect(200);
 
       expect(mockedFetchDestinationByName).toHaveBeenCalledWith('Paris');
       expect(res.body).toHaveProperty('destinationName', 'Paris');
@@ -70,7 +70,7 @@ describe('GET /destination/:destinationName', () => {
       mockedFetchDestinationByName.mockResolvedValue(encodedDestination);
 
       const res = await request(app)
-        .get('/destination/New%20York%20City')
+        .get('/api/destination/New%20York%20City')
         .expect(200);
 
       expect(res.body).toHaveProperty('destinationName', 'New York City');
@@ -87,7 +87,7 @@ describe('GET /destination/:destinationName', () => {
       mockedFetchDestinationByName.mockResolvedValue(specialCharDestination);
 
       const res = await request(app)
-        .get('/destination/S%C3%A3o%20Paulo')
+        .get('/api/destination/S%C3%A3o%20Paulo')
         .expect(200);
 
       expect(res.body).toHaveProperty('destinationName', 'São Paulo');
@@ -102,7 +102,7 @@ describe('GET /destination/:destinationName', () => {
       );
 
       const res = await request(app)
-        .get('/destination/NonExistentCity')
+        .get('/api/destination/NonExistentCity')
         .expect(404);
 
       expect(res.body).toHaveProperty('error', 'Destination not found');
@@ -112,7 +112,7 @@ describe('GET /destination/:destinationName', () => {
       const dbError = new Error('Database connection error') as DatabaseError;
       mockedFetchDestinationByName.mockRejectedValue(dbError);
 
-      const res = await request(app).get('/destination/Paris').expect(500);
+      const res = await request(app).get('/api/destination/Paris').expect(500);
 
       expect(res.body).toHaveProperty('error', 'Something went wrong');
     });
@@ -121,7 +121,7 @@ describe('GET /destination/:destinationName', () => {
       const notFoundError = new Error('Destination with name Paris not found');
       mockedFetchDestinationByName.mockRejectedValue(notFoundError);
 
-      const res = await request(app).get('/destination/Paris').expect(404);
+      const res = await request(app).get('/api/destination/Paris').expect(404);
 
       expect(res.body).toHaveProperty('error', 'Destination not found');
     });
@@ -131,7 +131,7 @@ describe('GET /destination/:destinationName', () => {
     it('should return destinations with all required properties', async () => {
       mockedFetchDestinationByName.mockResolvedValue(mockDestination);
 
-      const res = await request(app).get('/destination/Paris').expect(200);
+      const res = await request(app).get('/api/destination/Paris').expect(200);
 
       expect(res.body).toMatchObject({
         destinationId: expect.any(Number),
@@ -152,7 +152,7 @@ describe('GET /destination/:destinationName', () => {
       };
       mockedFetchDestinationByName.mockResolvedValue(partialDestination);
 
-      const res = await request(app).get('/destination/Paris').expect(200);
+      const res = await request(app).get('/api/destination/Paris').expect(200);
 
       expect(res.body.popularActivities).toBeNull();
       expect(res.body.travelTips).toBeNull();
@@ -162,7 +162,7 @@ describe('GET /destination/:destinationName', () => {
     it('should maintain correct data types for all fields', async () => {
       mockedFetchDestinationByName.mockResolvedValue(mockDestination);
 
-      const res = await request(app).get('/destination/Paris').expect(200);
+      const res = await request(app).get('/api/destination/Paris').expect(200);
 
       expect(typeof res.body.destinationId).toBe('number');
       expect(typeof res.body.destinationName).toBe('string');
@@ -176,7 +176,7 @@ describe('GET /destination/:destinationName', () => {
 
   describe('edge cases', () => {
     it('should handle empty string destination name', async () => {
-      const res = await request(app).get('/destination/%20').expect(400);
+      const res = await request(app).get('/api/destination/%20').expect(400);
 
       expect(res.body).toHaveProperty('error', 'Destination name is required');
     });
@@ -186,7 +186,7 @@ describe('GET /destination/:destinationName', () => {
       mockedFetchDestinationByName.mockResolvedValue(null);
 
       const res = await request(app)
-        .get(`/destination/${longName}`)
+        .get(`/api/destination/${longName}`)
         .expect(404);
 
       expect(res.body).toHaveProperty('error', 'Destination not found');
