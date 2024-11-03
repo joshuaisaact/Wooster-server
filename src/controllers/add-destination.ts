@@ -69,8 +69,6 @@ const handleAddDestination = async (
       const insertedDestination = await addDestination(destinationData);
       console.log('Inserted destination:', insertedDestination);
 
-      // Return success even if insertedDestination is undefined/null
-      // since we know the insert succeeded if no error was thrown
       return res.status(201).json({
         message: 'Destination created successfully',
         destination: insertedDestination || destinationData,

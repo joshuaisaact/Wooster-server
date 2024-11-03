@@ -19,7 +19,6 @@ const handleGetDestinationByName = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Destination not found' });
     }
 
-    // Ensure all string fields remain strings in the response
     return res.json({
       ...destination,
       destinationId: Number(destination.destinationId),

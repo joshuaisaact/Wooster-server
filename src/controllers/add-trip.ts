@@ -19,7 +19,7 @@ const handleAddTrip = async (
 ) => {
   try {
     const { days, location, startDate } = req.body;
-    const userId = req.user!.id; // Get userId from auth middleware
+    const userId = req.user!.id;
     console.log('Received trip request body:', req.body);
     if (!validateTripInput(days, location, startDate)) {
       return res.status(400).json({ error: 'Missing required fields' });
