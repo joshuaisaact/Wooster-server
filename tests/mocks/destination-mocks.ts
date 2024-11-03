@@ -1,4 +1,3 @@
-// tests/helpers/destination-mocks.ts
 import { FullMockDestination } from '../../src/types/test-types';
 
 export const mockDestination: FullMockDestination = {

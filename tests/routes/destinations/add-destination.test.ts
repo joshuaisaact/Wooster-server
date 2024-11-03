@@ -1,35 +1,16 @@
+import { mockAuthMiddleware } from '../../mocks/auth-middleware-mock';
+
+jest.mock('../../../src/middleware/auth-middleware', () => mockAuthMiddleware);
+jest.mock('../../../src/services/google-ai-service');
+jest.mock('../../../src/services/destination-service');
+
 import request from 'supertest';
 import app from '../../../src/index';
 import supabase from '../../../src/models/supabase-client';
 import { generateDestinationData } from '../../../src/services/google-ai-service';
 import * as destinationService from '../../../src/services/destination-service';
 import { CreateMockDestination } from '../../../src/types/test-types';
-import { User } from '@supabase/supabase-js';
-import { NextFunction } from 'express';
-import { mockAuthHeader } from '../../helpers/auth-mocks';
-
-// Mock the auth middleware
-jest.mock('../../../src/middleware/auth-middleware', () => ({
-  requireAuth: (
-    req: Request & { user?: User },
-    _res: Response,
-    next: NextFunction,
-  ) => {
-    req.user = {
-      id: 'test-user-id',
-      app_metadata: {},
-      aud: 'authenticated',
-      created_at: '',
-      role: '',
-      user_metadata: {},
-    } as User;
-    next();
-  },
-}));
-
-// Mock both services
-jest.mock('../../../src/services/google-ai-service');
-jest.mock('../../../src/services/destination-service');
+import { mockAuthHeader } from '../../mocks/auth-mocks';
 
 // Type the mocked functions
 const mockedGenerateDestinationData =
@@ -73,7 +54,7 @@ describe('Destination Routes', () => {
         );
 
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(201);
@@ -90,7 +71,7 @@ describe('Destination Routes', () => {
     describe('validation errors', () => {
       it('should return 400 when destination is missing', async () => {
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({})
           .expect(400);
@@ -99,7 +80,7 @@ describe('Destination Routes', () => {
 
       it('should handle empty string destination', async () => {
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({ destination: '' })
           .expect(400);
@@ -115,7 +96,7 @@ describe('Destination Routes', () => {
         );
 
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -130,7 +111,7 @@ describe('Destination Routes', () => {
         mockedGenerateDestinationData.mockResolvedValue('invalid json');
 
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -147,7 +128,7 @@ describe('Destination Routes', () => {
         );
 
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -164,7 +145,7 @@ describe('Destination Routes', () => {
         );
 
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -189,7 +170,7 @@ describe('Destination Routes', () => {
         );
 
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -208,7 +189,7 @@ describe('Destination Routes', () => {
         mockedAddDestination.mockRejectedValue(new Error('Database error'));
 
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);
@@ -228,7 +209,7 @@ describe('Destination Routes', () => {
         mockedAddDestination.mockRejectedValue(uniqueViolationError);
 
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(409);
@@ -247,7 +228,7 @@ describe('Destination Routes', () => {
         mockedAddDestination.mockRejectedValue(unknownError);
 
         const res = await request(app)
-          .post('/api/destination')
+          .post('/api/destinations')
           .set('Authorization', mockAuthHeader)
           .send({ destination: 'Paris' })
           .expect(500);

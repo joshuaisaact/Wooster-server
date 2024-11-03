@@ -13,7 +13,7 @@ import handleAddTrip from '../controllers/add-trip';
 import { llmLimiter } from '../middleware/rate-limits';
 import { handleGetSavedDestinations } from '../controllers/get-saved-destination';
 import { handleDeleteSavedDestination } from '../controllers/delete-saved-destination';
-import { handleAddSavedDestination } from '../controllers/save-existing-destination';
+import { handleAddSavedDestination } from '../controllers/add-saved-destination';
 
 const router = express.Router();
 
@@ -26,20 +26,26 @@ router.post('/auth/logout', logout);
 router.get('/destination/:destinationName', handleGetDestinationByName);
 router.get('/destinations', handleGetDestinations);
 
-// Destination routes (protected)
-router.post('/destination', llmLimiter, requireAuth, handleAddDestination);
+// Protected destination routes
+router.post('/destinations', llmLimiter, requireAuth, handleAddDestination);
 router.delete(
   '/destinations/:destinationId',
   requireAuth,
   handleDeleteDestination,
 );
+
+// Protected saved destination routes
 router.get('/saved-destinations', requireAuth, handleGetSavedDestinations);
 router.post('/saved-destinations', requireAuth, handleAddSavedDestination);
-router.delete('/saved-destinations', requireAuth, handleDeleteSavedDestination);
+router.delete(
+  '/saved-destinations/:destinationId',
+  requireAuth,
+  handleDeleteSavedDestination,
+);
 
 // Protected trip routes
 router.get('/trips', requireAuth, handleGetTrips);
-router.post('/trip', llmLimiter, requireAuth, handleAddTrip);
+router.post('/trips', llmLimiter, requireAuth, handleAddTrip); // Changed to plural
 router.delete('/trips/:tripId', requireAuth, deleteTrip);
 
 export default router;

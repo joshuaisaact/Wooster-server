@@ -29,7 +29,7 @@ export const handleAddSavedDestination = async (
       });
     }
 
-    const savedDesination = await addSavedDestination(
+    const savedDestination = await addSavedDestination(
       userId,
       destinationId,
       notes,
@@ -38,7 +38,7 @@ export const handleAddSavedDestination = async (
 
     return res.status(201).json({
       message: 'Destination saved successfully',
-      savedDesination,
+      savedDestination,
     });
   } catch (error) {
     console.error('Error saving destination:', error);

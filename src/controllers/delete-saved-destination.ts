@@ -23,6 +23,14 @@ export const handleDeleteSavedDestination = async (
   } catch (error) {
     console.error('Error deleting saved destination:', error);
 
+    // Check for not found error
+    if (
+      error instanceof Error &&
+      error.message.includes('No saved destination found')
+    ) {
+      return res.status(404).json({ error: 'Saved destination not found' });
+    }
+
     return res
       .status(500)
       .json({ error: 'Failed to delete saved destination' });

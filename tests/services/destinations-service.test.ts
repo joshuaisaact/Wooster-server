@@ -8,7 +8,7 @@ import {
   deleteDestinationById,
 } from '../../src/services/destination-service';
 import { db } from '../../src/db';
-import { mockDestination } from '../helpers/destination-mocks';
+import { mockDestination } from '../mocks/destination-mocks';
 
 jest.mock('../../src/db');
 
