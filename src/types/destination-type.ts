@@ -21,3 +21,12 @@ export type SavedDestination = {
   notes?: string;
   isVisited?: boolean;
 };
+
+export interface SavedDestinationData {
+  id: number;
+  userId: string;
+  destinationId: number;
+  notes?: string;
+  isVisited: boolean;
+  createdAt: Date;
+}

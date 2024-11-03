@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { DayItinerary } from '../types/trip-types';
-import { addTrip, validateTripInput } from '../services/trip-service';
-import { generateTripItinerary } from '../services/google-ai-service';
-import { fetchDestinationIdByName } from '../services/destination-service';
-import { addItineraryDays } from '../services/itinerary-service';
-import { addActivities } from '../services/activity-service';
-import { createPrompt } from '../config/trip-prompt-template';
+import { DayItinerary } from '../../types/trip-types';
+import { addTrip, validateTripInput } from '../../services/trip-service';
+import { generateTripItinerary } from '../../services/google-ai-service';
+import { fetchDestinationIdByName } from '../../services/destination-service';
+import { addItineraryDays } from '../../services/itinerary-service';
+import { addActivities } from '../../services/activity-service';
+import { createPrompt } from '../../config/trip-prompt-template';
 
 interface CreateTripRequestBody {
   days: number;
@@ -13,7 +13,7 @@ interface CreateTripRequestBody {
   startDate: string;
 }
 
-const handleAddTrip = async (
+export const handleAddTrip = async (
   req: Request<object, object, CreateTripRequestBody>,
   res: Response,
 ) => {
@@ -121,5 +121,3 @@ const handleAddTrip = async (
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };
-
-export default handleAddTrip;

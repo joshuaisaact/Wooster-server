@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { fetchSavedDestinations } from '../services/destination-service';
+import { fetchSavedDestinations } from '../../services/destination-service';
 
 export const handleGetSavedDestinations = async (
   req: Request,

@@ -3,7 +3,7 @@ import { db, savedDestinations } from '../db';
 import { destinations } from '../db/tables/destinations';
 import { NewDestination } from '../types/destination-type';
 
-export const fetchDestinationsFromDB = async () => {
+export const fetchDestinations = async () => {
   try {
     const destinationsData = await db.select().from(destinations);
     return destinationsData;

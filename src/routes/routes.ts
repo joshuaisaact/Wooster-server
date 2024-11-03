@@ -1,19 +1,26 @@
 import express from 'express';
-import handleGetDestinationByName from '../controllers/get-destination-by-name';
-import deleteTrip from '../controllers/delete-trip';
 import register from '../controllers/auth/register';
 import login from '../controllers/auth/login';
 import logout from '../controllers/auth/logout';
 import { requireAuth } from '../middleware/auth-middleware';
-import handleGetDestinations from '../controllers/get-all-destinations';
-import handleAddDestination from '../controllers/add-destination';
-import handleDeleteDestination from '../controllers/delete-destination';
-import handleGetTrips from '../controllers/get-all-trips';
-import handleAddTrip from '../controllers/add-trip';
+
 import { llmLimiter } from '../middleware/rate-limits';
-import { handleGetSavedDestinations } from '../controllers/get-saved-destination';
-import { handleDeleteSavedDestination } from '../controllers/delete-saved-destination';
-import { handleAddSavedDestination } from '../controllers/add-saved-destination';
+import {
+  handleAddDestination,
+  handleGetDestinationByName,
+  handleGetDestinations,
+  handleDeleteDestination,
+} from '../controllers/destinations';
+import {
+  handleAddSavedDestination,
+  handleGetSavedDestinations,
+  handleDeleteSavedDestination,
+} from '../controllers/saved-destinations';
+import {
+  handleDeleteTrip,
+  handleAddTrip,
+  handleGetTrips,
+} from '../controllers/trips';
 
 const router = express.Router();
 
@@ -46,6 +53,6 @@ router.delete(
 // Protected trip routes
 router.get('/trips', requireAuth, handleGetTrips);
 router.post('/trips', llmLimiter, requireAuth, handleAddTrip); // Changed to plural
-router.delete('/trips/:tripId', requireAuth, deleteTrip);
+router.delete('/trips/:tripId', requireAuth, handleDeleteTrip);
 
 export default router;

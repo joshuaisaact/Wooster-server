@@ -8,7 +8,7 @@ import { FullMockDestination } from '../../../src/types/test-types';
 jest.mock('../../../src/services/destination-service');
 const mockedFetchDestinations = jest.spyOn(
   destinationService,
-  'fetchDestinationsFromDB',
+  'fetchDestinations',
 );
 
 describe('GET /destinations', () => {

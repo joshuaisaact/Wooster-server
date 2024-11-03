@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { deleteDestinationById } from '../services/destination-service';
+import { deleteDestinationById } from '../../services/destination-service';
 
-const handleDeleteDestination = async (
+export const handleDeleteDestination = async (
   req: Request,
   res: Response,
 ): Promise<Response> => {
@@ -29,5 +29,3 @@ const handleDeleteDestination = async (
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };
-
-export default handleDeleteDestination;

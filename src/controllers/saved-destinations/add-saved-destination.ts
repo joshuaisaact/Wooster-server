@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import {
   addSavedDestination,
   findSavedDestinationByUserAndDest,
-} from '../services/destination-service';
+} from '../../services/destination-service';
 
 export const handleAddSavedDestination = async (
   req: Request,
@@ -25,7 +25,7 @@ export const handleAddSavedDestination = async (
     if (existingSaved) {
       return res.status(409).json({
         error: 'Destination already saved!',
-        savedDesination: existingSaved,
+        savedDestination: existingSaved,
       });
     }
 

@@ -1,8 +1,11 @@
 import { Request, Response } from 'express';
-import { deleteTripById } from '../services/trip-service';
-import { deleteItineraryDaysByTripId } from '../services/itinerary-service';
+import { deleteTripById } from '../../services/trip-service';
+import { deleteItineraryDaysByTripId } from '../../services/itinerary-service';
 
-const deleteTrip = async (req: Request, res: Response): Promise<Response> => {
+export const handleDeleteTrip = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
   const tripId = Number(req.params.tripId);
 
   if (isNaN(tripId)) {
@@ -25,5 +28,3 @@ const deleteTrip = async (req: Request, res: Response): Promise<Response> => {
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };
-
-export default deleteTrip;

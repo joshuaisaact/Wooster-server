@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { fetchTripsFromDB } from '../services/trip-service';
-import reshapeTripData from '../utils/reshape-trip-data-drizzle';
+import { fetchTripsFromDB } from '../../services/trip-service';
+import reshapeTripData from '../../utils/reshape-trip-data-drizzle';
 
-const handleGetTrips = async (req: Request, res: Response) => {
+export const handleGetTrips = async (req: Request, res: Response) => {
   try {
     const trips = await fetchTripsFromDB(req.user!.id);
     const reshapedTrips = reshapeTripData(trips);
@@ -12,5 +12,3 @@ const handleGetTrips = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Something went wrong' });
   }
 };
-
-export default handleGetTrips;

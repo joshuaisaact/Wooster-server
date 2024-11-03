@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
-import { destinationPromptTemplate } from '../config/destination-prompt-template';
-import { generateDestinationData } from '../services/google-ai-service';
-import { addDestination } from '../services/destination-service';
+import { destinationPromptTemplate } from '../../config/destination-prompt-template';
+import { generateDestinationData } from '../../services/google-ai-service';
+import { addDestination } from '../../services/destination-service';
 
 interface CreateDestinationRequestBody {
   destination: string;
 }
 
-const handleAddDestination = async (
+export const handleAddDestination = async (
   req: Request<object, object, CreateDestinationRequestBody>,
   res: Response,
 ) => {
@@ -97,5 +97,3 @@ const handleAddDestination = async (
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };
-
-export default handleAddDestination;

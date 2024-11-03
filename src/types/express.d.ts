@@ -10,3 +10,8 @@ declare module 'express' {
     user?: UserInfo;
   }
 }
+
+export interface ServiceResponse<T> {
+  message: string;
+  data?: T;
+}

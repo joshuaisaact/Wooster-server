@@ -1,7 +1,7 @@
 // tests/services/destination-service.test.ts
 
 import {
-  fetchDestinationsFromDB,
+  fetchDestinations,
   fetchDestinationDetailsByName,
   fetchDestinationIdByName,
   addDestination,
@@ -25,7 +25,7 @@ describe('Destination Service', () => {
         from: jest.fn().mockResolvedValue(mockDestinations),
       });
 
-      const result = await fetchDestinationsFromDB();
+      const result = await fetchDestinations();
       expect(result).toEqual(mockDestinations);
       expect(db.select).toHaveBeenCalled();
     });
@@ -35,7 +35,7 @@ describe('Destination Service', () => {
         from: jest.fn().mockRejectedValue(new Error('Database error')),
       });
 
-      await expect(fetchDestinationsFromDB()).rejects.toThrow(
+      await expect(fetchDestinations()).rejects.toThrow(
         'Error fetching destinations: Database error',
       );
     });

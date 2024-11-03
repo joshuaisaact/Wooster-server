@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
-import { fetchDestinationDetailsByName } from '../services/destination-service';
+import { fetchDestinationDetailsByName } from '../../services/destination-service';
 
-const handleGetDestinationByName = async (req: Request, res: Response) => {
+export const handleGetDestinationByName = async (
+  req: Request,
+  res: Response,
+) => {
   const { destinationName } = req.params;
 
   if (!destinationName || destinationName.trim() === '') {
@@ -38,5 +41,3 @@ const handleGetDestinationByName = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };
-
-export default handleGetDestinationByName;

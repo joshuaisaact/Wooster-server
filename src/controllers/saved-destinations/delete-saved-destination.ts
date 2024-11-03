@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { deleteSavedDestination } from '../services/destination-service';
+import { deleteSavedDestination } from '../../services/destination-service';
 
 export const handleDeleteSavedDestination = async (
   req: Request,
