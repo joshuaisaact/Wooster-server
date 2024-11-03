@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import {
   addSavedDestination,
   findSavedDestinationByUserAndDest,
-} from '../../services/destination-service';
+} from '../../services/saved-destination-service';
 
 export const handleAddSavedDestination = async (
   req: Request,

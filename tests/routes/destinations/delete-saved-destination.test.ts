@@ -6,11 +6,11 @@ jest.mock('../../../src/middleware/auth-middleware', () => mockAuthMiddleware);
 import request from 'supertest';
 import app from '../../../src/index';
 import supabase from '../../../src/models/supabase-client';
-import * as destinationService from '../../../src/services/destination-service';
+import * as destinationService from '../../../src/services/saved-destination-service';
 import { mockAuthHeader } from '../../mocks/auth-mocks';
 
 // Mock the service
-jest.mock('../../../src/services/destination-service');
+jest.mock('../../../src/services/saved-destination-service');
 
 // Type the mocked function
 const mockedDeleteSavedDestination = jest.spyOn(

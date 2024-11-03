@@ -6,13 +6,13 @@ jest.mock('../../../src/middleware/auth-middleware', () => mockAuthMiddleware);
 import request from 'supertest';
 import app from '../../../src/index';
 import supabase from '../../../src/models/supabase-client';
-import * as destinationService from '../../../src/services/destination-service';
+import * as destinationService from '../../../src/services/saved-destination-service';
 import { mockAuthHeader } from '../../mocks/auth-mocks';
 import { mockDestination } from '../../mocks/destination-mocks';
 import { FullMockDestination } from '../../../src/types/test-types';
 
 // Mock the service
-jest.mock('../../../src/services/destination-service');
+jest.mock('../../../src/services/saved-destination-service');
 
 type MockSavedDestination = {
   id: number;
@@ -29,6 +29,7 @@ const mockedAddSavedDestination = jest.spyOn(
   destinationService,
   'addSavedDestination',
 );
+
 const mockedFindSavedDestinationByUserAndDest = jest.spyOn(
   destinationService,
   'findSavedDestinationByUserAndDest',
