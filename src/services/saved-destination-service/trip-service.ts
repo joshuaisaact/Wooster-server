@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
-import { db, trips } from '../db';
-import { activities } from '../db/tables/activities';
-import { destinations } from '../db/tables/destinations';
-import { itineraryDays } from '../db/tables/itinerary_days';
+import { db, trips } from '../../db';
+import { activities } from '../../db/tables/activities';
+import { destinations } from '../../db/tables/destinations';
+import { itineraryDays } from '../../db/tables/itinerary_days';
 
 export const fetchTripsFromDB = async (userId: string) => {
   try {

@@ -17,6 +17,21 @@ export const isDatabaseError = (error: unknown): boolean => {
   return typeof error === 'object' && error !== null && 'code' in error;
 };
 
+export interface AIError {
+  operation: 'TRIP_GENERATION' | 'DESTINATION_GENERATION' | 'PARSING';
+  message: string;
+  details?: unknown;
+}
+
+export const isAIError = (error: unknown): error is AIError => {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'operation' in error &&
+    'message' in error
+  );
+};
+
 export const handleControllerError = (error: unknown) => {
   console.error('Error caught:', error);
 
@@ -33,6 +48,30 @@ export const handleControllerError = (error: unknown) => {
       status: 409,
       message: 'Resource already exists',
     };
+  }
+
+  if (isAIError(error)) {
+    switch (error.operation) {
+      case 'TRIP_GENERATION':
+        return {
+          status: 500,
+          message: 'Failed to generate trip itinerary. Please try again.',
+          data: error.details,
+        };
+      case 'DESTINATION_GENERATION':
+        return {
+          status: 500,
+          message:
+            'Failed to generate destination information. Please try again.',
+          data: error.details,
+        };
+      case 'PARSING':
+        return {
+          status: 500,
+          message: 'Failed to process AI response. Please try again.',
+          data: error.details,
+        };
+    }
   }
 
   return {
