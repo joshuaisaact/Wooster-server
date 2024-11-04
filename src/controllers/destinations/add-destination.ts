@@ -15,6 +15,8 @@ interface CreateDestinationRequestBody {
   destination: string;
 }
 
+console.log('findDestinationByName:', findDestinationByName);
+
 export const handleAddDestination = async (
   req: Request<object, object, CreateDestinationRequestBody>,
   res: Response,
