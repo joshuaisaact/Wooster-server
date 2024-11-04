@@ -1,21 +1,20 @@
 import { Request, Response } from 'express';
-import { destinationPromptTemplate } from '../config/destination-prompt-template';
-import { generateDestinationData } from '../services/google-ai-service';
-import { addDestination } from '../services/destination-service';
+import { destinationPromptTemplate } from '../../config/destination-prompt-template';
+import { generateDestinationData } from '../../services/google-ai-service';
+import { addDestination } from '../../services/destination-service';
 
 interface CreateDestinationRequestBody {
   destination: string;
 }
 
-const handleAddDestination = async (
+export const handleAddDestination = async (
   req: Request<object, object, CreateDestinationRequestBody>,
   res: Response,
 ) => {
   try {
     const { destination } = req.body;
-    console.log('Received destination:', destination);
 
-    if (!destination || destination.trim() === '') {
+    if (!destination?.trim()) {
       return res.status(400).json({ error: 'Destination is required' });
     }
 
@@ -69,8 +68,6 @@ const handleAddDestination = async (
       const insertedDestination = await addDestination(destinationData);
       console.log('Inserted destination:', insertedDestination);
 
-      // Return success even if insertedDestination is undefined/null
-      // since we know the insert succeeded if no error was thrown
       return res.status(201).json({
         message: 'Destination created successfully',
         destination: insertedDestination || destinationData,
@@ -99,5 +96,3 @@ const handleAddDestination = async (
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };
-
-export default handleAddDestination;

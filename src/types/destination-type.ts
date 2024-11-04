@@ -14,3 +14,19 @@ export interface Destination extends NewDestination {
   destinationId: number;
   createdAt: Date;
 }
+
+export type SavedDestination = {
+  userId: string;
+  destinationId: number;
+  notes?: string;
+  isVisited?: boolean;
+};
+
+export interface SavedDestinationData {
+  id: number;
+  userId: string;
+  destinationId: number;
+  notes?: string;
+  isVisited: boolean;
+  createdAt: Date;
+}

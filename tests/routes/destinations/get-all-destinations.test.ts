@@ -8,7 +8,7 @@ import { FullMockDestination } from '../../../src/types/test-types';
 jest.mock('../../../src/services/destination-service');
 const mockedFetchDestinations = jest.spyOn(
   destinationService,
-  'fetchDestinationsFromDB',
+  'fetchDestinations',
 );
 
 describe('GET /destinations', () => {
@@ -25,6 +25,7 @@ describe('GET /destinations', () => {
     {
       destinationId: 1,
       destinationName: 'Paris',
+      normalizedName: 'paris',
       latitude: '48.8566',
       longitude: '2.3522',
       description: 'The City of Light, known for its iconic Eiffel Tower',
@@ -50,6 +51,7 @@ describe('GET /destinations', () => {
     {
       destinationId: 2,
       destinationName: 'Tokyo',
+      normalizedName: 'toykyo',
       latitude: '35.6762',
       longitude: '139.6503',
       description: 'A city where tradition meets modernity',
@@ -141,6 +143,7 @@ describe('GET /destinations', () => {
       const fullDestination: FullMockDestination = {
         destinationId: 1,
         destinationName: 'Paris',
+        normalizedName: 'paris',
         latitude: '48.8566',
         longitude: '2.3522',
         description: 'The City of Light',

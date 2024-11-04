@@ -7,6 +7,7 @@ import { trips } from './tables/trips';
 import { itineraryDays } from './tables/itinerary_days';
 import { activities } from './tables/activities';
 import { destinations } from './tables/destinations';
+import { savedDestinations } from './tables/saved_destinations';
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -19,4 +20,11 @@ if (!databaseUrl) {
 const sql = postgres(databaseUrl);
 const db = drizzle(sql);
 
-export { db, trips, itineraryDays, activities, destinations };
+export {
+  db,
+  trips,
+  itineraryDays,
+  activities,
+  destinations,
+  savedDestinations,
+};

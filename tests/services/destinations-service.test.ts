@@ -1,14 +1,14 @@
 // tests/services/destination-service.test.ts
 
 import {
-  fetchDestinationsFromDB,
+  fetchDestinations,
   fetchDestinationDetailsByName,
   fetchDestinationIdByName,
   addDestination,
   deleteDestinationById,
 } from '../../src/services/destination-service';
 import { db } from '../../src/db';
-import { mockDestination } from '../helpers/destination-mocks';
+import { mockDestination } from '../mocks/destination-mocks';
 
 jest.mock('../../src/db');
 
@@ -25,7 +25,7 @@ describe('Destination Service', () => {
         from: jest.fn().mockResolvedValue(mockDestinations),
       });
 
-      const result = await fetchDestinationsFromDB();
+      const result = await fetchDestinations();
       expect(result).toEqual(mockDestinations);
       expect(db.select).toHaveBeenCalled();
     });
@@ -35,7 +35,7 @@ describe('Destination Service', () => {
         from: jest.fn().mockRejectedValue(new Error('Database error')),
       });
 
-      await expect(fetchDestinationsFromDB()).rejects.toThrow(
+      await expect(fetchDestinations()).rejects.toThrow(
         'Error fetching destinations: Database error',
       );
     });

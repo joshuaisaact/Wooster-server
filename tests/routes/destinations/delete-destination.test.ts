@@ -2,8 +2,8 @@ import request from 'supertest';
 import app from '../../../src/index';
 import supabase from '../../../src/models/supabase-client';
 import * as destinationService from '../../../src/services/destination-service';
-import { mockDestination } from '../../helpers/destination-mocks';
-import { mockAuthHeader } from '../../helpers/auth-mocks';
+import { mockDestination } from '../../mocks/destination-mocks';
+import { mockAuthHeader } from '../../mocks/auth-mocks';
 import { User } from '@supabase/supabase-js';
 import { NextFunction } from 'express';
 

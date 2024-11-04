@@ -2,6 +2,7 @@ import { DBActivity, TripDBRow, DBItineraryDay } from '../types/db-types';
 
 // Reshape the data returned by Drizzle ORM
 function reshapeTripData(dbData: TripDBRow[]) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tripsMap: any = {};
 
   dbData.forEach((row: TripDBRow) => {

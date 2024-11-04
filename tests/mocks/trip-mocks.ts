@@ -1,6 +1,6 @@
 // helpers/trip-mocks.ts
 
-import { TripDBRow, DBActivity } from '../../src/types/db-types';
+import { TripDBRow } from '../../src/types/db-types';
 import { Trip } from '../../src/types/trip-types';
 
 // Mock data that simulates what comes from the database
@@ -8,7 +8,7 @@ export const dbTripMock: TripDBRow[] = [
   {
     tripId: 1,
     destinationId: 1,
-    startDate: '2024-01-01',
+    startDate: new Date(),
     numDays: 7,
     itineraryDays: 1,
     activities: {
