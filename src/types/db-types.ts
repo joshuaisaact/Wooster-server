@@ -18,6 +18,7 @@ export interface DBActivity {
 export interface DBDestination {
   destinationId: number;
   destinationName: string;
+  normalizedName: string;
   latitude: string;
   longitude: string;
   description: string;

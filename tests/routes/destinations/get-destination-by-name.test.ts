@@ -27,6 +27,7 @@ describe('GET /destination/:destinationName', () => {
   const mockDestination: FullMockDestination = {
     destinationId: 1,
     destinationName: 'Paris',
+    normalizedName: 'paris',
     latitude: '48.8566',
     longitude: '2.3522',
     description: 'The City of Light',

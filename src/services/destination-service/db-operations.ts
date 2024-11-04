@@ -62,9 +62,16 @@ export const fetchDestinationIdByName = async (location: string) => {
 
 export const addDestination = async (destinationData: NewDestination) => {
   try {
+    const normalizedName = normalizeDestinationName(
+      destinationData.destinationName,
+    );
+
     const [insertedDestination] = await db
       .insert(destinations)
-      .values(destinationData)
+      .values({
+        ...destinationData,
+        normalizedName,
+      })
       .returning();
 
     return insertedDestination;
@@ -93,6 +100,39 @@ export const deleteDestinationById = async (destinationId: number) => {
   } catch (error) {
     throw new Error(
       `Error deleting destination with ID ${destinationId}: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
+    );
+  }
+};
+
+export const normalizeDestinationName = (name: string): string => {
+  return (
+    name
+      .trim()
+      .toLowerCase()
+      // Replace multiple spaces with single space
+      .replace(/\s+/g, ' ')
+      // Remove special characters except spaces and hyphens
+      .replace(/[^a-z0-9\s-]/g, '')
+      // Replace spaces with hyphens
+      .replace(/\s/g, '-')
+  );
+};
+
+export const findDestinationByName = async (destinationName: string) => {
+  try {
+    const normalizedName = normalizeDestinationName(destinationName);
+
+    const [destination] = await db
+      .select()
+      .from(destinations)
+      .where(eq(destinations.normalizedName, normalizedName));
+
+    return destination || null;
+  } catch (error) {
+    throw new Error(
+      `Error finding destination with name ${destinationName}: ${
         error instanceof Error ? error.message : 'Unknown error'
       }`,
     );

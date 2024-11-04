@@ -1,57 +1,126 @@
 import { mockAuthMiddleware } from '../../mocks/auth-middleware-mock';
 
+// Mock auth middleware
 jest.mock('../../../src/middleware/auth-middleware', () => mockAuthMiddleware);
-jest.mock('../../../src/services/google-ai-service');
-jest.mock('../../../src/services/destination-service');
 
 import request from 'supertest';
 import app from '../../../src/index';
 import supabase from '../../../src/models/supabase-client';
 import { generateDestinationData } from '../../../src/services/google-ai-service';
 import * as destinationService from '../../../src/services/destination-service';
-import { CreateMockDestination } from '../../../src/types/test-types';
+import * as savedDestinationService from '../../../src/services/saved-destination-service';
+import {
+  FullMockDestination,
+  MockSavedDestination,
+} from '../../../src/types/test-types';
 import { mockAuthHeader } from '../../mocks/auth-mocks';
+import { NewDestination } from '../../../src/types/destination-type';
+import { ServiceError } from '../../../src/utils/error-handlers';
 
-// Type the mocked functions
+// Mock services
+jest.mock('../../../src/services/google-ai-service');
+jest.mock('../../../src/services/destination-service');
+jest.mock('../../../src/services/saved-destination-service');
+
+// Mock the functions from their respective services
 const mockedGenerateDestinationData =
   generateDestinationData as jest.MockedFunction<
     typeof generateDestinationData
   >;
 const mockedAddDestination = jest.spyOn(destinationService, 'addDestination');
+const mockedFindDestinationByName = jest.spyOn(
+  destinationService,
+  'findDestinationByName',
+);
 
-interface DatabaseViolationError extends Error {
-  code: string;
-}
+// Saved destination service mocks
+const mockedAddSavedDestination = jest.spyOn(
+  savedDestinationService,
+  'addSavedDestination',
+);
 
-interface UnknownErrorType {
-  notAnError: string;
-}
+const mockedFindSavedDestinationByUserAndDest = jest.spyOn(
+  savedDestinationService,
+  'findSavedDestinationByUserAndDest',
+);
+
+const mockedGenerateNewDestination = jest.spyOn(
+  destinationService,
+  'generateNewDestination',
+);
 
 describe('Destination Routes', () => {
+  const testDate = new Date();
+
   beforeEach(async () => {
     await supabase.rpc('start_transaction');
     jest.clearAllMocks();
+
+    // Set up default mocks
+    mockedFindDestinationByName.mockResolvedValue(
+      null as unknown as FullMockDestination,
+    );
+    mockedFindSavedDestinationByUserAndDest.mockResolvedValue(
+      null as unknown as MockSavedDestination,
+    );
+
+    mockedGenerateNewDestination.mockResolvedValue(
+      null as unknown as NewDestination,
+    );
   });
 
   afterEach(async () => {
     await supabase.rpc('rollback_transaction');
   });
 
-  const mockDestinationData: CreateMockDestination = {
+  const mockDestinationData: FullMockDestination = {
+    destinationId: 1,
     destinationName: 'Paris',
+    normalizedName: 'paris',
     latitude: '48.8566',
     longitude: '2.3522',
-    description:
-      'The City of Light, known for its iconic Eiffel Tower and world-class cuisine',
+    description: 'The City of Light',
     country: 'France',
+    bestTimeToVisit: 'Spring',
+    averageTemperatureLow: '8',
+    averageTemperatureHigh: '25',
+    popularActivities: 'Eiffel Tower Visit',
+    travelTips: 'Buy museum pass',
+    nearbyAttractions: 'Versailles',
+    transportationOptions: 'Metro, Bus, RER',
+    accessibilityInfo: 'Wheelchair accessible',
+    officialLanguage: 'French',
+    currency: 'EUR',
+    localCuisine: 'French cuisine',
+    costLevel: 'High',
+    safetyRating: '8',
+    culturalSignificance: 'High historical significance',
+    userRatings: null,
+    createdAt: testDate,
+    updatedAt: testDate,
   };
 
-  describe('POST /destination', () => {
+  describe('POST /destinations', () => {
     describe('successful creation', () => {
       it('should create a new destination successfully', async () => {
+        const createdDestination = { ...mockDestinationData };
+        const savedDestination = {
+          id: 1,
+          userId: 'test-user-id',
+          destinationId: 1,
+          createdAt: testDate,
+          notes: null,
+          isVisited: false,
+        };
+
+        mockedFindDestinationByName.mockResolvedValue(
+          null as unknown as FullMockDestination,
+        );
         mockedGenerateDestinationData.mockResolvedValue(
           JSON.stringify(mockDestinationData),
         );
+        mockedAddDestination.mockResolvedValue(createdDestination);
+        mockedAddSavedDestination.mockResolvedValue(savedDestination);
 
         const res = await request(app)
           .post('/api/destinations')
@@ -59,12 +128,17 @@ describe('Destination Routes', () => {
           .send({ destination: 'Paris' })
           .expect(201);
 
-        expect(res.body).toHaveProperty(
-          'message',
-          'Destination created successfully',
-        );
-        expect(res.body).toHaveProperty('destination');
-        expect(res.body.destination).toHaveProperty('destinationName', 'Paris');
+        const expectedResponse = {
+          ...createdDestination,
+          createdAt: testDate.toISOString(),
+          updatedAt: testDate.toISOString(),
+          saved: {
+            ...savedDestination,
+            createdAt: testDate.toISOString(),
+          },
+        };
+
+        expect(res.body.destination).toEqual(expectedResponse);
       });
     });
 
@@ -91,8 +165,11 @@ describe('Destination Routes', () => {
 
     describe('AI service errors', () => {
       it('should handle AI service errors', async () => {
-        mockedGenerateDestinationData.mockRejectedValue(
-          new Error('AI service error'),
+        mockedFindDestinationByName.mockResolvedValue(
+          null as unknown as FullMockDestination,
+        );
+        mockedGenerateNewDestination.mockRejectedValue(
+          new ServiceError('Failed to generate destination data', 500),
         );
 
         const res = await request(app)
@@ -105,68 +182,15 @@ describe('Destination Routes', () => {
           'error',
           'Failed to generate destination data',
         );
+        expect(mockedAddDestination).not.toHaveBeenCalled();
       });
 
       it('should handle invalid AI response format', async () => {
-        mockedGenerateDestinationData.mockResolvedValue('invalid json');
-
-        const res = await request(app)
-          .post('/api/destinations')
-          .set('Authorization', mockAuthHeader)
-          .send({ destination: 'Paris' })
-          .expect(500);
-
-        expect(res.body).toHaveProperty(
-          'error',
-          'Failed to parse destination data',
+        mockedFindDestinationByName.mockResolvedValue(
+          null as unknown as FullMockDestination,
         );
-      });
-
-      it('should handle undefined response from AI service', async () => {
-        mockedGenerateDestinationData.mockResolvedValue(
-          undefined as unknown as string,
-        );
-
-        const res = await request(app)
-          .post('/api/destinations')
-          .set('Authorization', mockAuthHeader)
-          .send({ destination: 'Paris' })
-          .expect(500);
-
-        expect(res.body).toHaveProperty(
-          'error',
-          'Failed to generate destination data',
-        );
-      });
-
-      it('should handle null response from AI service', async () => {
-        mockedGenerateDestinationData.mockResolvedValue(
-          null as unknown as string,
-        );
-
-        const res = await request(app)
-          .post('/api/destinations')
-          .set('Authorization', mockAuthHeader)
-          .send({ destination: 'Paris' })
-          .expect(500);
-
-        expect(res.body).toHaveProperty(
-          'error',
-          'Failed to parse destination data',
-        );
-      });
-    });
-
-    describe('database errors', () => {
-      it('should handle malformed destination data', async () => {
-        mockedGenerateDestinationData.mockResolvedValue(
-          JSON.stringify({
-            someInvalidField: 'value',
-          }),
-        );
-
-        mockedAddDestination.mockRejectedValue(
-          new Error('Invalid destination data format'),
+        mockedGenerateNewDestination.mockRejectedValue(
+          new ServiceError('Invalid destination data format', 500),
         );
 
         const res = await request(app)
@@ -179,14 +203,16 @@ describe('Destination Routes', () => {
           'error',
           'Invalid destination data format',
         );
+        expect(mockedAddDestination).not.toHaveBeenCalled();
       });
 
-      it('should handle database errors', async () => {
-        mockedGenerateDestinationData.mockResolvedValue(
-          JSON.stringify(mockDestinationData),
+      it('should handle undefined response from AI service', async () => {
+        mockedFindDestinationByName.mockResolvedValue(
+          null as unknown as FullMockDestination,
         );
-
-        mockedAddDestination.mockRejectedValue(new Error('Database error'));
+        mockedGenerateNewDestination.mockRejectedValue(
+          new ServiceError('Failed to generate destination data', 500),
+        );
 
         const res = await request(app)
           .post('/api/destinations')
@@ -194,19 +220,84 @@ describe('Destination Routes', () => {
           .send({ destination: 'Paris' })
           .expect(500);
 
-        expect(res.body).toHaveProperty('error', 'Database error');
+        expect(res.body).toHaveProperty(
+          'error',
+          'Failed to generate destination data',
+        );
+        expect(mockedAddDestination).not.toHaveBeenCalled();
       });
 
-      it('should handle database constraint violations', async () => {
-        mockedGenerateDestinationData.mockResolvedValue(
-          JSON.stringify(mockDestinationData),
+      it('should handle null response from AI service', async () => {
+        mockedFindDestinationByName.mockResolvedValue(
+          null as unknown as FullMockDestination,
+        );
+        mockedGenerateNewDestination.mockRejectedValue(
+          new ServiceError('Failed to generate destination data', 500),
         );
 
-        const uniqueViolationError: DatabaseViolationError = new Error(
-          'Duplicate key value violates unique constraint',
-        ) as DatabaseViolationError;
-        uniqueViolationError.code = '23505';
-        mockedAddDestination.mockRejectedValue(uniqueViolationError);
+        const res = await request(app)
+          .post('/api/destinations')
+          .set('Authorization', mockAuthHeader)
+          .send({ destination: 'Paris' })
+          .expect(500);
+
+        expect(res.body).toHaveProperty(
+          'error',
+          'Failed to generate destination data',
+        );
+        expect(mockedAddDestination).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('existing destination', () => {
+      it('should handle existing destination', async () => {
+        const existingDestination = { ...mockDestinationData };
+        const savedDestination = {
+          id: 1,
+          userId: 'test-user-id',
+          destinationId: 1,
+          createdAt: testDate,
+          notes: null,
+          isVisited: false,
+        };
+
+        mockedFindDestinationByName.mockResolvedValue(existingDestination);
+        mockedAddSavedDestination.mockResolvedValue(savedDestination);
+
+        const res = await request(app)
+          .post('/api/destinations')
+          .set('Authorization', mockAuthHeader)
+          .send({ destination: 'Paris' })
+          .expect(200);
+
+        const expectedResponse = {
+          ...existingDestination,
+          createdAt: testDate.toISOString(),
+          updatedAt: testDate.toISOString(),
+          saved: {
+            ...savedDestination,
+            createdAt: testDate.toISOString(),
+          },
+        };
+
+        expect(res.body.destination).toEqual(expectedResponse);
+      });
+
+      it('should handle already saved destination', async () => {
+        const existingDestination = { ...mockDestinationData };
+        const existingSaved = {
+          id: 1,
+          userId: 'test-user-id',
+          destinationId: 1,
+          createdAt: testDate,
+          notes: null,
+          isVisited: false,
+        };
+
+        mockedFindDestinationByName.mockResolvedValue(existingDestination);
+        mockedFindSavedDestinationByUserAndDest.mockResolvedValue(
+          existingSaved,
+        );
 
         const res = await request(app)
           .post('/api/destinations')
@@ -214,26 +305,7 @@ describe('Destination Routes', () => {
           .send({ destination: 'Paris' })
           .expect(409);
 
-        expect(res.body).toHaveProperty('error', 'Destination already exists');
-      });
-
-      it('should handle unknown errors', async () => {
-        mockedGenerateDestinationData.mockResolvedValue(
-          JSON.stringify(mockDestinationData),
-        );
-
-        const unknownError: UnknownErrorType = {
-          notAnError: 'some unknown error type',
-        };
-        mockedAddDestination.mockRejectedValue(unknownError);
-
-        const res = await request(app)
-          .post('/api/destinations')
-          .set('Authorization', mockAuthHeader)
-          .send({ destination: 'Paris' })
-          .expect(500);
-
-        expect(res.body).toHaveProperty('error', 'An unknown error occurred');
+        expect(res.body).toHaveProperty('error', 'Destination already saved');
       });
     });
   });

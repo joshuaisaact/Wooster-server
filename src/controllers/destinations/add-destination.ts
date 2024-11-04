@@ -1,7 +1,15 @@
 import { Request, Response } from 'express';
-import { destinationPromptTemplate } from '../../config/destination-prompt-template';
-import { generateDestinationData } from '../../services/google-ai-service';
-import { addDestination } from '../../services/destination-service';
+
+import {
+  addDestination,
+  findDestinationByName,
+  generateNewDestination,
+} from '../../services/destination-service';
+import { handleControllerError } from '../../utils/error-handlers';
+import {
+  addSavedDestination,
+  findSavedDestinationByUserAndDest,
+} from '../../services/saved-destination-service';
 
 interface CreateDestinationRequestBody {
   destination: string;
@@ -13,87 +21,67 @@ export const handleAddDestination = async (
 ) => {
   try {
     const { destination } = req.body;
-    console.log('Received destination:', destination);
+    const userId = req.user!.id;
 
-    if (!destination || destination.trim() === '') {
+    if (!destination?.trim()) {
       return res.status(400).json({ error: 'Destination is required' });
     }
 
-    const prompt = destinationPromptTemplate(destination);
-    console.log('Generated prompt:', prompt);
-
-    let generatedDestination: string | null | undefined;
     try {
-      generatedDestination = await generateDestinationData(prompt);
-      console.log('AI Response:', generatedDestination);
+      const existingDestination = await findDestinationByName(destination);
 
-      if (generatedDestination === undefined) {
-        return res
-          .status(500)
-          .json({ error: 'Failed to generate destination data' });
+      if (existingDestination) {
+        // Check if user already saved this destination
+        const existingSaved = await findSavedDestinationByUserAndDest(
+          userId,
+          existingDestination.destinationId,
+        );
+
+        if (existingSaved) {
+          return res.status(409).json({
+            error: 'Destination already saved',
+            destination: existingSaved,
+          });
+        }
+
+        // Save existing destination for user
+        const savedDestination = await addSavedDestination(
+          userId,
+          existingDestination.destinationId,
+        );
+
+        return res.status(200).json({
+          message: 'Existing destination saved successfully',
+          destination: {
+            ...existingDestination,
+            saved: savedDestination,
+          },
+        });
       }
-    } catch (aiError) {
-      console.error('AI Service Error:', aiError);
-      return res
-        .status(500)
-        .json({ error: 'Failed to generate destination data' });
-    }
 
-    if (generatedDestination === null) {
-      return res
-        .status(500)
-        .json({ error: 'Failed to parse destination data' });
-    }
+      // Create new destination if it doesn't exist
+      const destinationData = await generateNewDestination(destination);
+      const newDestination = await addDestination(destinationData);
 
-    let destinationData;
-    try {
-      destinationData = JSON.parse(generatedDestination);
-      console.log('Parsed destination data:', destinationData);
-
-      // Validate required fields
-      if (!destinationData || !destinationData.destinationName) {
-        console.error('Invalid destination data format:', destinationData);
-        return res
-          .status(500)
-          .json({ error: 'Invalid destination data format' });
-      }
-    } catch (parseError) {
-      console.error('JSON Parse Error:', parseError);
-      return res
-        .status(500)
-        .json({ error: 'Failed to parse destination data' });
-    }
-
-    try {
-      console.log('Attempting to insert destination:', destinationData);
-      const insertedDestination = await addDestination(destinationData);
-      console.log('Inserted destination:', insertedDestination);
+      // Save it for the user
+      const savedDestination = await addSavedDestination(
+        userId,
+        newDestination.destinationId,
+      );
 
       return res.status(201).json({
-        message: 'Destination created successfully',
-        destination: insertedDestination || destinationData,
+        message: 'Destination created and saved successfully',
+        destination: {
+          ...newDestination,
+          saved: savedDestination,
+        },
       });
-    } catch (dbError) {
-      console.error('Database Error:', dbError);
-
-      // Handle known database error types
-      if (typeof dbError === 'object' && dbError !== null) {
-        // Check for constraint violation
-        if ('code' in dbError && dbError.code === '23505') {
-          return res.status(409).json({ error: 'Destination already exists' });
-        }
-
-        // Check for message property
-        if ('message' in dbError && typeof dbError.message === 'string') {
-          return res.status(500).json({ error: dbError.message });
-        }
-      }
-
-      // Handle any other type of error
-      return res.status(500).json({ error: 'An unknown error occurred' });
+    } catch (error) {
+      const { status, message } = handleControllerError(error);
+      return res.status(status).json({ error: message });
     }
   } catch (error) {
     console.error('Unhandled Error:', error);
-    return res.status(500).json({ error: 'Something went wrong' });
+    return res.status(500).json({ error: 'An unknown error occurred' });
   }
 };

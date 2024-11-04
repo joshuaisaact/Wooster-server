@@ -10,6 +10,7 @@ import {
 export const destinations = pgTable('destinations', {
   destinationId: serial('destination_id').primaryKey(),
   destinationName: text('destination_name').notNull(),
+  normalizedName: text('normalized_name').notNull().unique(),
   latitude: numeric('latitude'),
   longitude: numeric('longitude'),
   description: text('description'),

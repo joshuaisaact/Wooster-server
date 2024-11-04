@@ -11,6 +11,7 @@ export interface CreateMockDestination {
 export interface FullMockDestination {
   destinationId: number;
   destinationName: string;
+  normalizedName: string;
   latitude: string | null;
   longitude: string | null;
   description: string | null;
@@ -41,3 +42,13 @@ export interface DatabaseError extends Error {
 export interface UnknownErrorType {
   notAnError: string;
 }
+
+export type MockSavedDestination = {
+  id: number;
+  userId: string;
+  destinationId: number;
+  createdAt: Date;
+  notes: string | null;
+  isVisited: boolean | null;
+  destination: FullMockDestination | null;
+};
