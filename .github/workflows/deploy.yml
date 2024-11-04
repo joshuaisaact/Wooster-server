@@ -34,3 +34,6 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           source: './' # or whatever directory contains your backend files
           target: '/home/wooster/backend'
+
+      - name: Restart application
+        run: ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ${{ secrets.USERNAME }}@${{ secrets.HOST }} "pm2 restart backend"
