@@ -1,3 +1,4 @@
+import { Destination } from './destination-type';
 import { BestTime, Category, Difficulty } from './trip-types';
 
 // The shape of each row returned by the Drizzle query
@@ -44,14 +45,7 @@ export interface TripDBRow {
     category: Category;
     bestTime: BestTime;
   } | null;
-  destination: {
-    destinationId: number | null;
-    destinationName: string | null;
-    latitude: string | null;
-    longitude: string | null;
-    description: string | null;
-    country: string | null;
-  } | null;
+  destination: Destination | null;
 }
 
 export interface DBItineraryDay {

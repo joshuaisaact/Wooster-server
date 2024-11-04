@@ -12,8 +12,30 @@ function reshapeTripData(dbData: TripDBRow[]) {
         tripId: row.tripId.toString(),
         startDate: row.startDate,
         numDays: row.numDays,
-        destinationName:
-          row.destination?.destinationName || 'Unknown Destination',
+        destination: {
+          destinationId: row.destination?.destinationId,
+          destinationName:
+            row.destination?.destinationName || 'Unknown Destination',
+          latitude: row.destination?.latitude || '',
+          longitude: row.destination?.longitude || '',
+          description: row.destination?.description || '',
+          country: row.destination?.country || '',
+          bestTimeToVisit: row.destination?.bestTimeToVisit || '',
+          averageTemperatureLow: row.destination?.averageTemperatureLow || '',
+          averageTemperatureHigh: row.destination?.averageTemperatureHigh || '',
+          popularActivities: row.destination?.popularActivities || '',
+          travelTips: row.destination?.travelTips || '',
+          nearbyAttractions: row.destination?.nearbyAttractions || '',
+          transportationOptions: row.destination?.transportationOptions || '',
+          accessibilityInfo: row.destination?.accessibilityInfo || '',
+          officialLanguage: row.destination?.officialLanguage || '',
+          currency: row.destination?.currency || '',
+          localCuisine: row.destination?.localCuisine || '',
+          costLevel: row.destination?.costLevel || '',
+          safetyRating: row.destination?.safetyRating || '',
+          culturalSignificance: row.destination?.culturalSignificance || '',
+          userRatings: row.destination?.userRatings || '',
+        },
         itinerary: [],
       };
     }
