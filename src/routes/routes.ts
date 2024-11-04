@@ -21,6 +21,7 @@ import {
   handleAddTrip,
   handleGetTrips,
 } from '../controllers/trips';
+import { handleGetTrip } from '../controllers/trips/get-trip';
 
 const router = express.Router();
 
@@ -52,7 +53,8 @@ router.delete(
 
 // Protected trip routes
 router.get('/trips', requireAuth, handleGetTrips);
-router.post('/trips', llmLimiter, requireAuth, handleAddTrip); // Changed to plural
+router.get('/trips/:id', requireAuth, handleGetTrip);
+router.post('/trips', llmLimiter, requireAuth, handleAddTrip);
 router.delete('/trips/:tripId', requireAuth, handleDeleteTrip);
 
 export default router;
