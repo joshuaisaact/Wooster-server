@@ -121,16 +121,35 @@ export const normalizeDestinationName = (name: string): string => {
 };
 
 export const findDestinationByName = async (destinationName: string) => {
+  console.log('1. Starting findDestinationByName with:', destinationName);
+
   try {
     const normalizedName = normalizeDestinationName(destinationName);
+    console.log('2. Normalized name:', normalizedName);
 
-    const [destination] = await db
+    const query = db
       .select()
       .from(destinations)
       .where(eq(destinations.normalizedName, normalizedName));
+    console.log('3. Query:', query.toSQL()); // Log the SQL query if possible
 
-    return destination || null;
+    const result = await query;
+    console.log('4. Database query result:', result);
+
+    if (!result || result.length === 0) {
+      console.log('5. No destination found for:', destinationName);
+      return null;
+    }
+
+    console.log('6. Returning found destination:', result[0]);
+    return result[0];
   } catch (error) {
+    console.error('7. Error in findDestinationByName:', {
+      error,
+      destinationName,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : undefined,
+    });
     throw new Error(
       `Error finding destination with name ${destinationName}: ${
         error instanceof Error ? error.message : 'Unknown error'
