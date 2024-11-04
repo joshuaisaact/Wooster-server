@@ -21,7 +21,12 @@ export const fetchSavedDestinations = async (userId: string) => {
       .where(eq(savedDestinations.userId, userId))
       .orderBy(desc(savedDestinations.createdAt));
 
-    return savedDestinationsList;
+    const flattenedList = savedDestinationsList.map((entry) => ({
+      ...entry, // Brings in all savedDestinations fields
+      ...entry.destination, // Flattens all fields in destination into the root object
+    }));
+
+    return flattenedList;
   } catch (error) {
     throw new Error(
       `Error fetching saved destinations: ${
