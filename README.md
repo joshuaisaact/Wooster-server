@@ -2,7 +2,7 @@
 <h2> Wooster Server </h2>
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-[![Node.js CI](https://github.com/joshuaisaact/Wooster-server/actions/workflows/run-tests.yml/badge.svg)](https://github.com/joshuaisaact/Wooster-server/actions/workflows/tests.yml)
+[![Node.js CI](https://github.com/joshuaisaact/Wooster-server/actions/workflows/tests.yml/badge.svg)](https://github.com/joshuaisaact/Wooster-server/actions/workflows/tests.yml)
 
 <img src="./docs/wooster.png" alt="Wooster Server Logo" title="Wooster Server" style="width:350px;"/>
 
