@@ -21,33 +21,21 @@ interface CreateTripRequestBody {
 
 // Helper function to get existing destination or create new one
 async function getOrCreateDestination(location: string): Promise<number> {
-  console.log('A. Starting getOrCreateDestination with location:', location);
-
   try {
+    // First try to find existing destination
     const existingDestination = await findDestinationByName(location);
-    console.log('B. findDestinationByName returned:', existingDestination);
 
     if (existingDestination) {
-      console.log('C. Found existing destination:', existingDestination);
+      console.log('Found existing destination:', location);
       return existingDestination.destinationId;
     }
 
-    console.log('D. No existing destination found, will create new one');
+    // If not found, generate and create new destination
+    console.log('Generating new destination:', location);
     const destinationData = await generateNewDestination(location);
-    console.log('E. Generated destination data:', destinationData);
-
     const newDestination = await addDestination(destinationData);
-    console.log('F. Added new destination:', newDestination);
-
     return newDestination.destinationId;
   } catch (error) {
-    console.error('G. Error in getOrCreateDestination:', {
-      error,
-      location,
-      errorMessage: error instanceof Error ? error.message : 'Unknown error',
-      errorStack: error instanceof Error ? error.stack : undefined,
-    });
-
     throw {
       status: 500,
       message: `Failed to process destination: ${error instanceof Error ? error.message : 'Unknown error'}`,
