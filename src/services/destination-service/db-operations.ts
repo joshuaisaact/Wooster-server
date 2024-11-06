@@ -1,5 +1,5 @@
-import { eq } from 'drizzle-orm';
-import { db, destinations } from '../../db';
+import { desc, eq } from 'drizzle-orm';
+import { activities, db, destinations } from '../../db';
 import { NewDestination } from '../../types/destination-type';
 
 export const fetchDestinations = async () => {
@@ -133,6 +133,29 @@ export const findDestinationByName = async (destinationName: string) => {
   } catch (error) {
     throw new Error(
       `Error finding destination with name ${destinationName}: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
+    );
+  }
+};
+
+export const fetchActivitiesByDestinationName = async (
+  destinationName: string,
+) => {
+  try {
+    const destination = await fetchDestinationDetailsByName(destinationName);
+
+    // Just get all activities for the destination, ordered by creation date
+    const activitiesList = await db
+      .select()
+      .from(activities)
+      .where(eq(activities.locationId, destination.destinationId))
+      .orderBy(desc(activities.createdAt));
+
+    return activitiesList;
+  } catch (error) {
+    throw new Error(
+      `Error fetching activities for destination ${destinationName}: ${
         error instanceof Error ? error.message : 'Unknown error'
       }`,
     );

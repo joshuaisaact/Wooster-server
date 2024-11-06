@@ -1,5 +1,9 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { cleanLLMJsonResponse, validateJSON } from '../utils/llm-utils';
+import {
+  cleanJSON,
+  cleanLLMJsonResponse,
+  validateJSON,
+} from '../utils/llm-utils';
 
 export const generateDestinationData = async (
   prompt: string,
@@ -49,10 +53,14 @@ export const generateTripItinerary = async (
     if (!responseText) {
       throw new Error('Empty response from LLM');
     }
-
-    const response = cleanLLMJsonResponse(responseText);
-    validateJSON(response);
-    return response;
+    console.log(responseText);
+    console.log('Original responseText:', responseText);
+    const withoutMarkdown = cleanLLMJsonResponse(responseText);
+    console.log('After cleanLLMJsonResponse:', withoutMarkdown);
+    const fullyCleaned = cleanJSON(withoutMarkdown);
+    console.log('After cleanJSON:', fullyCleaned);
+    validateJSON(fullyCleaned);
+    return fullyCleaned;
   } catch (error) {
     throw new Error(
       `Failed to generate trip itinerary: ${error instanceof Error ? error.message : 'Unknown error'}`,
