@@ -59,7 +59,7 @@ export const fetchTripsFromDB = async (userId: string) => {
         activities,
         eq(activities.activityId, itineraryDays.activityId),
       );
-    console.log('Raw trip data:', tripData[0]?.activities);
+
     return tripData;
   } catch (error) {
     throw new Error(

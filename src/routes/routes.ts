@@ -22,6 +22,7 @@ import {
   handleGetTrips,
 } from '../controllers/trips';
 import { handleGetTrip } from '../controllers/trips/get-trip';
+import { handleGetDestinationActivities } from '../controllers/destinations/get-destination-activities';
 
 const router = express.Router();
 
@@ -35,6 +36,12 @@ router.get('/destination/:destinationName', handleGetDestinationByName);
 router.get('/destinations', handleGetDestinations);
 
 // Protected destination routes
+router.get(
+  '/destination/:destinationName/activities',
+  requireAuth,
+  handleGetDestinationActivities,
+);
+
 router.post('/destinations', llmLimiter, requireAuth, handleAddDestination);
 router.delete(
   '/destinations/:destinationId',
