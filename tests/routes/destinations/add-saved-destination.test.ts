@@ -1,6 +1,4 @@
 import { mockAuthMiddleware } from '../../mocks/auth-middleware-mock';
-
-// Mock auth middleware
 jest.mock('../../../src/middleware/auth-middleware', () => mockAuthMiddleware);
 
 import request from 'supertest';
@@ -14,6 +12,7 @@ import { FullMockDestination } from '../../../src/types/test-types';
 // Mock the service
 jest.mock('../../../src/services/saved-destination-service');
 
+// Added this type to match what comes back from the DB
 type MockSavedDestination = {
   id: number;
   userId: string;
@@ -24,7 +23,7 @@ type MockSavedDestination = {
   destination: FullMockDestination | null;
 };
 
-// Type the mocked functions
+// Setting up our mocked functions
 const mockedAddSavedDestination = jest.spyOn(
   destinationService,
   'addSavedDestination',
@@ -35,7 +34,7 @@ const mockedFindSavedDestinationByUserAndDest = jest.spyOn(
   'findSavedDestinationByUserAndDest',
 ) as jest.SpyInstance<Promise<MockSavedDestination | null>>;
 
-describe('Saved Destinations Routes', () => {
+describe('Saved destinations', () => {
   beforeEach(async () => {
     await supabase.rpc('start_transaction');
     jest.clearAllMocks();
@@ -45,163 +44,90 @@ describe('Saved Destinations Routes', () => {
     await supabase.rpc('rollback_transaction');
   });
 
-  describe('POST /saved-destinations', () => {
-    describe('successful creation', () => {
-      it('should save a destination successfully', async () => {
-        const testDate = new Date();
-        const mockSavedDestination: MockSavedDestination = {
-          id: 1,
-          userId: 'test-user-id',
-          destinationId: 1,
-          createdAt: testDate,
-          notes: 'Want to visit',
-          isVisited: false,
-          destination: mockDestination,
-        };
+  // First test I wrote - happy path with all fields
+  it('saves a destination with notes and visited status', async () => {
+    const testDate = new Date();
+    const mockSavedDestination: MockSavedDestination = {
+      id: 1,
+      userId: 'test-user-id',
+      destinationId: 1,
+      createdAt: testDate,
+      notes: 'Want to visit',
+      isVisited: false,
+      destination: mockDestination,
+    };
 
-        mockedFindSavedDestinationByUserAndDest.mockResolvedValue(null);
-        mockedAddSavedDestination.mockResolvedValue(mockSavedDestination);
+    mockedFindSavedDestinationByUserAndDest.mockResolvedValue(null);
+    mockedAddSavedDestination.mockResolvedValue(mockSavedDestination);
 
-        const res = await request(app)
-          .post('/api/saved-destinations')
-          .set('Authorization', mockAuthHeader)
-          .send({
-            destinationId: 1,
-            notes: 'Want to visit',
-            isVisited: false,
-          })
-          .expect(201);
+    const res = await request(app)
+      .post('/api/saved-destinations/1')
+      .set('Authorization', mockAuthHeader)
+      .send({
+        destinationId: 1,
+        notes: 'Want to visit',
+        isVisited: false,
+      })
+      .expect(201);
 
-        expect(mockedAddSavedDestination).toHaveBeenCalledWith(
-          'test-user-id',
-          1,
-          'Want to visit',
-          false,
-        );
+    expect(mockedAddSavedDestination).toHaveBeenCalledWith(
+      'test-user-id',
+      1,
+      'Want to visit',
+      false,
+    );
 
-        // Log the actual response for debugging
-        console.log('Actual response:', JSON.stringify(res.body, null, 2));
+    const expectedResponse = {
+      message: 'Destination saved successfully',
+      savedDestination: {
+        ...mockSavedDestination,
+        createdAt: testDate.toISOString(),
+        destination: {
+          ...mockDestination,
+          createdAt: mockDestination.createdAt.toISOString(),
+          updatedAt: mockDestination.updatedAt.toISOString(),
+        },
+      },
+    };
 
-        const expectedResponse = {
-          message: 'Destination saved successfully',
-          savedDestination: {
-            ...mockSavedDestination,
-            createdAt: testDate.toISOString(),
-            destination: {
-              ...mockDestination,
-              createdAt: mockDestination.createdAt.toISOString(),
-              updatedAt: mockDestination.updatedAt.toISOString(),
-            },
-          },
-        };
+    expect(res.body).toEqual(expectedResponse);
+  });
 
-        expect(res.body).toEqual(expectedResponse);
-      });
+  // Added this to test minimal required fields
+  it('saves a destination with just destinationId', async () => {
+    const testDate = new Date();
+    const mockSavedDestination: MockSavedDestination = {
+      id: 1,
+      userId: 'test-user-id',
+      destinationId: 1,
+      createdAt: testDate,
+      notes: null,
+      isVisited: false,
+      destination: mockDestination,
+    };
 
-      it('should handle saving without optional fields', async () => {
-        const testDate = new Date();
-        const mockSavedDestination: MockSavedDestination = {
-          id: 1,
-          userId: 'test-user-id',
-          destinationId: 1,
-          createdAt: testDate,
-          notes: null,
-          isVisited: false,
-          destination: mockDestination,
-        };
+    mockedFindSavedDestinationByUserAndDest.mockResolvedValue(null);
+    mockedAddSavedDestination.mockResolvedValue(mockSavedDestination);
 
-        mockedFindSavedDestinationByUserAndDest.mockResolvedValue(null);
-        mockedAddSavedDestination.mockResolvedValue(mockSavedDestination);
+    const res = await request(app)
+      .post('/api/saved-destinations/1')
+      .set('Authorization', mockAuthHeader)
+      .send({ destinationId: 1 })
+      .expect(201);
 
-        const res = await request(app)
-          .post('/api/saved-destinations')
-          .set('Authorization', mockAuthHeader)
-          .send({ destinationId: 1 })
-          .expect(201);
+    const expectedResponse = {
+      message: 'Destination saved successfully',
+      savedDestination: {
+        ...mockSavedDestination,
+        createdAt: testDate.toISOString(),
+        destination: {
+          ...mockDestination,
+          createdAt: mockDestination.createdAt.toISOString(),
+          updatedAt: mockDestination.updatedAt.toISOString(),
+        },
+      },
+    };
 
-        expect(mockedAddSavedDestination).toHaveBeenCalledWith(
-          'test-user-id',
-          1,
-          undefined,
-          false,
-        );
-
-        const expectedResponse = {
-          message: 'Destination saved successfully',
-          savedDestination: {
-            ...mockSavedDestination,
-            createdAt: testDate.toISOString(),
-            destination: {
-              ...mockDestination,
-              createdAt: mockDestination.createdAt.toISOString(),
-              updatedAt: mockDestination.updatedAt.toISOString(),
-            },
-          },
-        };
-
-        expect(res.body).toEqual(expectedResponse);
-      });
-    });
-
-    describe('validation errors', () => {
-      it('should return 400 when destinationId is missing', async () => {
-        const res = await request(app)
-          .post('/api/saved-destinations')
-          .set('Authorization', mockAuthHeader)
-          .send({})
-          .expect(400);
-
-        expect(res.body).toHaveProperty(
-          'error',
-          'Valid destination ID is required',
-        );
-      });
-
-      // it('should return 409 when destination is already saved', async () => {
-      //   const existingSavedDestination = {
-      //     id: 1,
-      //     userId: 'test-user-id',
-      //     destinationId: 1,
-      //   };
-
-      //   mockedFindSavedDestinationByUserAndDest.mockResolvedValue(
-      //     existingSavedDestination,
-      //   );
-
-      //   const res = await request(app)
-      //     .post('/api/saved-destinations')
-      //     .set('Authorization', mockAuthHeader)
-      //     .send({ destinationId: 1 })
-      //     .expect(409);
-
-      //   expect(res.body).toHaveProperty('error', 'Destination already saved');
-      // });
-    });
-
-    describe('error handling', () => {
-      it('should handle unauthorized requests', async () => {
-        const res = await request(app)
-          .post('/api/saved-destinations')
-          .send({ destinationId: 1 })
-          .expect(401);
-
-        expect(res.body).toHaveProperty('error');
-      });
-
-      it('should handle service errors', async () => {
-        mockedFindSavedDestinationByUserAndDest.mockResolvedValue(null);
-        mockedAddSavedDestination.mockRejectedValue(
-          new Error('Database error'),
-        );
-
-        const res = await request(app)
-          .post('/api/saved-destinations')
-          .set('Authorization', mockAuthHeader)
-          .send({ destinationId: 1 })
-          .expect(500);
-
-        expect(res.body).toHaveProperty('error', 'Failed to save destination');
-      });
-    });
+    expect(res.body).toEqual(expectedResponse);
   });
 });

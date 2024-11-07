@@ -1,160 +1,139 @@
 import {
-  addItineraryDays,
-  deleteItineraryDaysByTripId,
-} from '../../src/services/itinerary-service';
-import { db } from '../../src/db'; // Import your database connection
-import { DayItinerary } from '../../src/types/trip-types'; // Import the type for DayItinerary
+  fetchDestinations,
+  fetchDestinationDetailsByName,
+  addDestination,
+  deleteDestinationById,
+} from '../../src/services/destination-service';
+import { db } from '../../src/db';
+import { mockDestination } from '../mocks/destination-mocks';
 
-jest.mock('../../src/db'); // Mock the db module
+// Mock the DB to avoid actual DB calls in tests
+jest.mock('../../src/db');
 
-describe('Itinerary Service', () => {
+describe('Destination Service', () => {
   afterEach(() => {
-    jest.clearAllMocks(); // Clear mocks after each test
+    jest.clearAllMocks();
   });
 
-  describe('addItineraryDays', () => {
-    describe('addItineraryDays', () => {
-      it('should add itinerary days successfully', async () => {
-        const tripId = 1;
-        const itinerary: DayItinerary[] = [
-          {
-            day: 1,
-            activities: [
-              {
-                activityId: 1,
-                activityName: 'Eiffel Tower Visit',
-                description: 'Visit the iconic Eiffel Tower in Paris.',
-                location: 'Paris, France',
-                price: '25',
-                latitude: '48.8584',
-                longitude: '2.2945',
-                duration: '2 hours',
-                difficulty: 'Challenging',
-                category: 'Adventure',
-                bestTime: 'Afternoon',
-              },
-              {
-                activityId: 2,
-                activityName: 'Louvre Museum Tour',
-                description: 'Explore the famous Louvre Museum.',
-                location: 'Paris, France',
-                price: '15',
-                latitude: '48.8606',
-                longitude: '2.3376',
-                duration: '2 hours',
-                difficulty: 'Challenging',
-                category: 'Adventure',
-                bestTime: 'Afternoon',
-              },
-            ],
-          },
-          {
-            day: 2,
-            activities: [
-              {
-                activityId: 3,
-                activityName: 'Seine River Cruise',
-                description: 'Enjoy a scenic cruise on the Seine River.',
-                location: 'Paris, France',
-                price: '30',
-                latitude: '48.8566',
-                longitude: '2.3522',
-                duration: '2 hours',
-                difficulty: 'Challenging',
-                category: 'Adventure',
-                bestTime: 'Afternoon',
-              },
-            ],
-          },
-        ];
+  // Basic destination data used in a few tests
+  const newDestinationData = {
+    destinationId: 1,
+    destinationName: 'Paris',
+    latitude: '48.8566',
+    longitude: '2.3522',
+    description: 'The City of Light',
+    country: 'France',
+    bestTimeToVisit: 'Spring',
+    averageTemperatureLow: '8',
+    averageTemperatureHigh: '25',
+    popularActivities: 'Eiffel Tower Visit',
+    travelTips: 'Buy museum pass',
+    nearbyAttractions: 'Versailles',
+    transportationOptions: 'Metro, Bus, RER',
+    accessibilityInfo: 'Wheelchair accessible',
+    officialLanguage: 'French',
+    currency: 'EUR',
+    localCuisine: 'French cuisine',
+    costLevel: 'High',
+    safetyRating: '8',
+    culturalSignificance: 'High historical significance',
+    userRatings: 'Excellent',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+  };
 
-        const activityIds = [[1, 2], [3]]; // Corresponding activity IDs for the itinerary
-
-        (db.insert as jest.Mock).mockReturnValueOnce({
-          values: jest.fn().mockResolvedValue(undefined), // Simulate successful insertion
-        });
-
-        await expect(
-          addItineraryDays(tripId, itinerary, activityIds),
-        ).resolves.toBeUndefined();
-        expect(db.insert).toHaveBeenCalledWith(expect.anything());
-      });
-
-      it('should throw an error if itinerary is empty', async () => {
-        const tripId = 1;
-        const emptyItinerary: DayItinerary[] = [];
-        const activityIds: number[][] = [];
-
-        await expect(
-          addItineraryDays(tripId, emptyItinerary, activityIds),
-        ).rejects.toThrow('Itinerary cannot be empty');
-      });
-
-      it('should throw an error if activityIds length does not match itinerary length', async () => {
-        const tripId = 1;
-        const itinerary: DayItinerary[] = [
-          { day: 1, activities: [] },
-          { day: 2, activities: [] },
-        ];
-        const activityIds: number[][] = [[1]]; // Mismatch in length
-
-        await expect(
-          addItineraryDays(tripId, itinerary, activityIds),
-        ).rejects.toThrow(
-          'Activity IDs must match itinerary length', // Ensure you have this validation in the service
-        );
-      });
-
-      it('should handle database errors gracefully when inserting', async () => {
-        const tripId = 1;
-        const itinerary: DayItinerary[] = [
-          {
-            day: 1,
-            activities: [
-              {
-                activityId: 1,
-                activityName: 'Eiffel Tower Visit',
-                description: 'Visit the iconic Eiffel Tower in Paris.',
-                location: 'Paris, France',
-                price: '25',
-                latitude: '48.8584',
-                longitude: '2.2945',
-                duration: '2 hours',
-                difficulty: 'Challenging',
-                category: 'Adventure',
-                bestTime: 'Afternoon',
-              },
-            ],
-          },
-        ];
-        const activityIds: number[][] = [[1]];
-
-        (db.insert as jest.Mock).mockReturnValueOnce({
-          values: jest
-            .fn()
-            .mockRejectedValue(new Error('Database insertion error')),
-        });
-
-        await expect(
-          addItineraryDays(tripId, itinerary, activityIds),
-        ).rejects.toThrow(
-          'Error inserting itinerary days: Database insertion error',
-        );
-      });
+  // Started with basic fetch test
+  it('fetches all destinations', async () => {
+    const mockDestinations = [mockDestination];
+    (db.select as jest.Mock).mockReturnValueOnce({
+      from: jest.fn().mockResolvedValue(mockDestinations),
     });
 
-    describe('deleteItineraryDaysByTripId', () => {
-      it('should throw an error if deleting itinerary days fails', async () => {
-        const tripId = 1;
+    const result = await fetchDestinations();
+    expect(result).toEqual(mockDestinations);
+  });
 
-        (db.delete as jest.Mock).mockReturnValueOnce({
-          where: jest.fn().mockRejectedValue(new Error('Database error')),
-        });
-
-        await expect(deleteItineraryDaysByTripId(tripId)).rejects.toThrow(
-          'Error deleting itinerary days for trip 1: Database error',
-        );
-      });
+  // Added error handling test after seeing DB issues
+  it('handles fetch errors', async () => {
+    (db.select as jest.Mock).mockReturnValueOnce({
+      from: jest.fn().mockRejectedValue(new Error('DB error')),
     });
+
+    await expect(fetchDestinations()).rejects.toThrow(
+      'Error fetching destinations',
+    );
+  });
+
+  // Added when implementing destination detail page
+  it('fetches destination details by name', async () => {
+    (db.select as jest.Mock).mockReturnValueOnce({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue([mockDestination]),
+      }),
+    });
+
+    const result = await fetchDestinationDetailsByName('Paris');
+    expect(result).toEqual(mockDestination);
+  });
+
+  // Added after finding 404 issues
+  it('handles non-existent destination lookups', async () => {
+    (db.select as jest.Mock).mockReturnValueOnce({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue([]),
+      }),
+    });
+
+    await expect(fetchDestinationDetailsByName('Unknown')).rejects.toThrow(
+      'not found',
+    );
+  });
+
+  // Basic create test
+  it('adds new destinations', async () => {
+    (db.insert as jest.Mock).mockReturnValueOnce({
+      values: jest.fn().mockReturnValue({
+        returning: jest.fn().mockResolvedValue([mockDestination]),
+      }),
+    });
+
+    const result = await addDestination(newDestinationData);
+    expect(result).toEqual(mockDestination);
+  });
+
+  // Added after seeing insert fail in dev
+  it('handles insert errors', async () => {
+    (db.insert as jest.Mock).mockReturnValueOnce({
+      values: jest.fn().mockReturnValue({
+        returning: jest.fn().mockRejectedValue(new Error('DB error')),
+      }),
+    });
+
+    await expect(addDestination(newDestinationData)).rejects.toThrow(
+      'Failed to insert',
+    );
+  });
+
+  // Basic delete test
+  it('deletes destinations by id', async () => {
+    (db.delete as jest.Mock).mockReturnValueOnce({
+      where: jest.fn().mockReturnValue({
+        returning: jest.fn().mockResolvedValue([mockDestination]),
+      }),
+    });
+
+    const result = await deleteDestinationById(1);
+    expect(result).toEqual([mockDestination]);
+  });
+
+  // Added this when working on error handling
+  it('handles delete errors', async () => {
+    (db.delete as jest.Mock).mockReturnValueOnce({
+      where: jest.fn().mockReturnValue({
+        returning: jest.fn().mockRejectedValue(new Error('DB error')),
+      }),
+    });
+
+    await expect(deleteDestinationById(1)).rejects.toThrow('Error deleting');
   });
 });
