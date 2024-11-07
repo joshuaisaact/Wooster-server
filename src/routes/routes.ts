@@ -23,6 +23,7 @@ import {
 } from '../controllers/trips';
 import { handleGetTrip } from '../controllers/trips/get-trip';
 import { handleGetDestinationActivities } from '../controllers/destinations/get-destination-activities';
+import { handleSearchDestinations } from '../controllers/destinations/search-destinations';
 
 const router = express.Router();
 
@@ -32,8 +33,9 @@ router.post('/auth/login', login);
 router.post('/auth/logout', logout);
 
 // Public destination routes
+router.get('/destinations/search', handleSearchDestinations);
 router.get('/destination/:destinationName', handleGetDestinationByName);
-router.get('/destinations', handleGetDestinations);
+router.get('/destinations', requireAuth, handleGetDestinations);
 
 // Protected destination routes
 router.get(
@@ -51,7 +53,11 @@ router.delete(
 
 // Protected saved destination routes
 router.get('/saved-destinations', requireAuth, handleGetSavedDestinations);
-router.post('/saved-destinations', requireAuth, handleAddSavedDestination);
+router.post(
+  '/saved-destinations/:destinationId',
+  requireAuth,
+  handleAddSavedDestination,
+);
 router.delete(
   '/saved-destinations/:destinationId',
   requireAuth,

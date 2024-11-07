@@ -39,6 +39,11 @@ app.get('/', (_: Request, res: Response) => {
   res.status(200).send('Welcome to the server!');
 });
 
+app.use((req: Request, _: Response, next) => {
+  console.log(`🔥 ${req.method} ${req.originalUrl}`);
+  next();
+});
+
 app.use('/api', routes);
 
 app.use((_, res) => {

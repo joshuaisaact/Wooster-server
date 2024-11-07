@@ -17,6 +17,7 @@ interface CreateTripRequestBody {
   days: number;
   location: string;
   startDate: string;
+  selectedCategories?: string[];
 }
 
 // Helper function to get existing destination or create new one
@@ -48,8 +49,9 @@ async function generateItinerary(
   days: number,
   location: string,
   startDate: string,
+  selectedCategories?: string[],
 ): Promise<DayItinerary[]> {
-  const prompt = createPrompt(days, location, startDate);
+  const prompt = createPrompt(days, location, startDate, selectedCategories); // Updated this line
   const itineraryText = await generateTripItinerary(prompt);
 
   try {
@@ -82,7 +84,7 @@ export const handleAddTrip = async (
   res: Response,
 ) => {
   try {
-    const { days, location, startDate } = req.body;
+    const { days, location, startDate, selectedCategories } = req.body; // Updated this line
     const userId = req.user!.id;
 
     if (!validateTripInput(days, location, startDate)) {
@@ -103,8 +105,13 @@ export const handleAddTrip = async (
         throw new Error('Failed to fetch destination data');
       }
 
-      // Generate itinerary
-      const itinerary = await generateItinerary(days, location, startDate);
+      // Generate itinerary - updated to include selectedCategories
+      const itinerary = await generateItinerary(
+        days,
+        location,
+        startDate,
+        selectedCategories,
+      );
 
       // Create trip in database
       const tripId = await createTripInDB(

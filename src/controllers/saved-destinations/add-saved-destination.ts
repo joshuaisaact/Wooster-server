@@ -10,9 +10,10 @@ export const handleAddSavedDestination = async (
 ) => {
   try {
     const userId = req.user!.id;
-    const { destinationId, notes = undefined, isVisited = false } = req.body;
+    const destinationId = Number(req.params.destinationId);
+    const { notes = undefined, isVisited = false } = req.body;
 
-    if (!destinationId || isNaN(Number(destinationId))) {
+    if (isNaN(destinationId)) {
       return res
         .status(400)
         .json({ error: 'Valid destination ID is required' });
