@@ -1,8 +1,12 @@
+import { mockAuthMiddleware } from '../../mocks/auth-middleware-mock';
+jest.mock('../../../src/middleware/auth-middleware', () => mockAuthMiddleware);
+
 import request from 'supertest';
 import app from '../../../src/index';
 import supabase from '../../../src/models/supabase-client';
 import * as destinationService from '../../../src/services/destination-service';
 import { FullMockDestination } from '../../../src/types/test-types';
+import { mockAuthHeader } from '../../mocks/auth-mocks';
 
 // Mock destination service
 jest.mock('../../../src/services/destination-service');
@@ -81,7 +85,10 @@ describe('GET /destinations', () => {
   it('returns destinations successfully', async () => {
     mockedFetchDestinations.mockResolvedValue(mockDestinations);
 
-    const res = await request(app).get('/api/destinations').expect(200);
+    const res = await request(app)
+      .get('/api/destinations')
+      .set('Authorization', mockAuthHeader)
+      .expect(200);
 
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body).toHaveLength(2);
@@ -93,7 +100,10 @@ describe('GET /destinations', () => {
   it('handles no destinations in DB', async () => {
     mockedFetchDestinations.mockResolvedValue([]);
 
-    const res = await request(app).get('/api/destinations').expect(200);
+    const res = await request(app)
+      .get('/api/destinations')
+      .set('Authorization', mockAuthHeader)
+      .expect(200);
 
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body).toHaveLength(0);
@@ -103,7 +113,10 @@ describe('GET /destinations', () => {
   it('handles database errors', async () => {
     mockedFetchDestinations.mockRejectedValue(new Error('DB connection error'));
 
-    const res = await request(app).get('/api/destinations').expect(500);
+    const res = await request(app)
+      .get('/api/destinations')
+      .set('Authorization', mockAuthHeader)
+      .expect(500);
 
     expect(res.body.error).toBe('Something went wrong');
   });
@@ -139,7 +152,10 @@ describe('GET /destinations', () => {
 
     mockedFetchDestinations.mockResolvedValue([fullDestination]);
 
-    const res = await request(app).get('/api/destinations').expect(200);
+    const res = await request(app)
+      .get('/api/destinations')
+      .set('Authorization', mockAuthHeader)
+      .expect(200);
 
     // Check the key fields we care about
     expect(res.body[0]).toMatchObject({

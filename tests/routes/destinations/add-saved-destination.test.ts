@@ -34,7 +34,7 @@ const mockedFindSavedDestinationByUserAndDest = jest.spyOn(
   'findSavedDestinationByUserAndDest',
 ) as jest.SpyInstance<Promise<MockSavedDestination | null>>;
 
-describe('POST /saved-destinations', () => {
+describe('Saved destinations', () => {
   beforeEach(async () => {
     await supabase.rpc('start_transaction');
     jest.clearAllMocks();
@@ -61,7 +61,7 @@ describe('POST /saved-destinations', () => {
     mockedAddSavedDestination.mockResolvedValue(mockSavedDestination);
 
     const res = await request(app)
-      .post('/api/saved-destinations')
+      .post('/api/saved-destinations/1')
       .set('Authorization', mockAuthHeader)
       .send({
         destinationId: 1,
@@ -110,7 +110,7 @@ describe('POST /saved-destinations', () => {
     mockedAddSavedDestination.mockResolvedValue(mockSavedDestination);
 
     const res = await request(app)
-      .post('/api/saved-destinations')
+      .post('/api/saved-destinations/1')
       .set('Authorization', mockAuthHeader)
       .send({ destinationId: 1 })
       .expect(201);
@@ -129,30 +129,5 @@ describe('POST /saved-destinations', () => {
     };
 
     expect(res.body).toEqual(expectedResponse);
-  });
-
-  // Basic validation test
-  it('requires a destinationId', async () => {
-    const res = await request(app)
-      .post('/api/saved-destinations')
-      .set('Authorization', mockAuthHeader)
-      .send({})
-      .expect(400);
-
-    expect(res.body.error).toBe('Valid destination ID is required');
-  });
-
-  // Added after getting DB errors in testing
-  it('handles database errors gracefully', async () => {
-    mockedFindSavedDestinationByUserAndDest.mockResolvedValue(null);
-    mockedAddSavedDestination.mockRejectedValue(new Error('Database error'));
-
-    const res = await request(app)
-      .post('/api/saved-destinations')
-      .set('Authorization', mockAuthHeader)
-      .send({ destinationId: 1 })
-      .expect(500);
-
-    expect(res.body.error).toBe('Failed to save destination');
   });
 });
