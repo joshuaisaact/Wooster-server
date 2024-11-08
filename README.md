@@ -28,7 +28,7 @@ The backend manages trip and destination data, providing API routes for creating
 
 ## Related Repositories
 
-This is the backend repository for the Wooster project. The frontend code can be found in the [frontend repository](https://github.com/yourusername/wooster).
+This is the backend repository for the Wooster project. The frontend code can be found in the [frontend repository](https://github.com/joshuaisaact/wooster).
 
 ## Live Deployment
 
