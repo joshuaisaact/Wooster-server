@@ -31,7 +31,7 @@ The backend manages trip and destination data, providing API routes for creating
 Here’s an overview of the database schema for Wooster, managing user trips, itineraries, activities, and destinations:
 
 <div align="center">
-  <img src="./docs/database.png" alt="Database Schema" style="width:800px;"/>
+  <img src="./docs/databaseupdate.png" alt="Database Schema" style="width:800px;"/>
 </div>
 
 ## Table of Contents
