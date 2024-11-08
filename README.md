@@ -30,7 +30,7 @@ This is the backend repository for the Wooster project. The frontend code can be
 
 ## Live Deployment
 
-The full application is deployed and accessible at [www.trywooster.live](https://www.trywooster.live), where you can experience the app in action.
+The full application is deployed and accessible at [www.trywooster.live](https://www.trywooster.live).
 
 </div>
 
