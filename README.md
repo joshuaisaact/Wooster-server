@@ -133,24 +133,27 @@ The server will start on the port specified in your `.env` file.
 
 Here are the available API routes in the application:
 
-### Auth Routes
-
-- **`POST /auth/register`**: Register a new user.
-- **`POST /auth/login`**: Login an existing user.
-- **`POST /auth/logout`**: Logout the current user (requires authentication).
-
 ### Trip Routes
 
-- **`GET /trips`**: Fetch all trips from the Supabase database.
-- **`POST /trip`**: Save a new trip to the Supabase database.
-- **`DELETE /trips/:tripId`**: Delete a trip by its ID from the Supabase database.
+- **`GET /trips`**: Fetch all trips from the Supabase database. (Requires authentication)
+- **`GET /trips/:id`**: Fetch detailed information for a specific trip by its ID. (Requires authentication)
+- **`POST /trips`**: Save a new trip to the Supabase database. (Rate-limited, requires authentication)
+- **`DELETE /trips/:tripId`**: Delete a trip by its ID from the Supabase database. (Requires authentication)
 
 ### Destination Routes
 
-- **`GET /destinations`**: Fetch a list of all destinations.
-- **`GET /destinations/:destinationId`**: Fetch detailed information about a specific destination by ID.
-- **`POST /destination`**: Add a new destination to the Supabase database.
+- **`GET /destinations/search`**:  Search for destinations based on query parameters.
+- **`GET /destinations/destinationName`**:  Fetch detailed information about a specific destination by name.
+- **`GET /destinations`**: Fetch a list of all destinations. (Requires authentication)
+- **`GET /destination/:destinationName/activities`**: Retrieve a list of activities for a specific destination by name. (Requires authentication)
+- **`POST /destination`**: Add a new destination to the Supabase database. (Rate-limited, requires authentication)
 - **`DELETE /destinations/:destinationId`**: Remove a destination by its ID from the Supabase database.
+
+### Saved Destination Routes
+- **`GET /saved-destinations`**: Retrieve a list of saved destinations for the current user. (Requires authentication)
+- **`POST /saved-destinations/:destinationId`**: Save a destination to the user's saved list by its ID. (Requires authentication)
+- **`DELETE /saved-destinations/:destinationId`**: Remove a saved destination by its ID for the current user. (Requires authentication)
+
 
 ## Testing
 
