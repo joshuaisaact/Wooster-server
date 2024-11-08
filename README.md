@@ -24,8 +24,6 @@ The backend manages trip and destination data, providing API routes for creating
 [![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
 [![Supertest](https://img.shields.io/badge/supertest-ff69b4?style=for-the-badge)](https://github.com/visionmedia/supertest)
 
-</div>
-
 ## Related Repositories
 
 This is the backend repository for the Wooster project. The frontend code can be found in the [frontend repository](https://github.com/joshuaisaact/wooster).
@@ -33,6 +31,10 @@ This is the backend repository for the Wooster project. The frontend code can be
 ## Live Deployment
 
 The full application is deployed and accessible at [www.trywooster.live](https://www.trywooster.live), where you can experience the app in action.
+
+</div>
+
+
 
 
 ## Database Schema
