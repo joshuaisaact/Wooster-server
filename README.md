@@ -26,6 +26,15 @@ The backend manages trip and destination data, providing API routes for creating
 
 </div>
 
+## Related Repositories
+
+This is the backend repository for the Wooster project. The frontend code can be found in the [frontend repository](https://github.com/yourusername/wooster).
+
+## Live Deployment
+
+The full application is deployed and accessible at [www.trywooster.live](https://www.trywooster.live), where you can experience the app in action.
+
+
 ## Database Schema
 
 Here’s an overview of the database schema for Wooster, managing user trips, itineraries, activities, and destinations:
