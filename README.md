@@ -185,6 +185,31 @@ Below is a summary of an example test suite for POST /destinations in the Destin
 - Service Error Handling: Tests how the application handles errors from external services, like the AI-based destination generation.
 - Duplicate Handling: Ensures the system handles cases where a destination is already saved, returning a 409 conflict.
 
+### Transactional Testing
+To maintain test isolation and avoid side effects, each test case wraps Supabase operations within transactions that are rolled back after each test. This helps simulate real scenarios without affecting the database.
+
+### Sample Code
+Here is an example code snippet demonstrating a test case for creating a new destination in POST /destinations:
+```
+it('creates a new destination', async () => {
+  const createdDestination = { /* mock destination data */ };
+  const savedDestination = { /* mock saved data */ };
+
+  mockedFindDestinationByName.mockResolvedValue(null); // Simulate no pre-existing destination
+  mockedGenerateDestinationData.mockResolvedValue(JSON.stringify(mockDestinationData));
+  mockedAddDestination.mockResolvedValue(createdDestination);
+  mockedAddSavedDestination.mockResolvedValue(savedDestination);
+
+  const res = await request(app)
+    .post('/api/destinations')
+    .set('Authorization', mockAuthHeader)
+    .send({ destination: 'Paris' })
+    .expect(201);
+
+  expect(res.body.destination).toEqual(expectedResponse);
+});
+```
+
 ## Utilities
 
 ### Clean LLM JSON Response
