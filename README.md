@@ -167,24 +167,30 @@ npm test
 
 ### Clean LLM JSON Response
 
-The cleanLLMJsonResponse utility function cleans the response from a language model by removing markdown code blocks and comments, ensuring the result is a clean string for further parsing.
+The cleanLLMJsonResponse utility function cleans the response from a language model by removing markdown code blocks, comments, and incomplete URLs. This ensures the result is a clean string for further parsing.
 
 ```typescript
 const cleanLLMJsonResponse = (text: string): string => {
-  // Remove markdown code blocks with any language specification
+  // Step 1: Remove markdown code blocks with any language specification
   const withoutCodeBlocks = text.replace(
     /```(?:json)?\s*([\s\S]*?)\s*```/g,
     '$1'
   );
 
-  // Remove any potential comments
+  // Step 2: Remove potential comments
   const withoutComments = withoutCodeBlocks.replace(
     /\/\*[\s\S]*?\*\/|\/\/.*/g,
     ''
   );
 
-  // Remove any leading/trailing whitespace
-  return withoutComments.trim();
+  // Step 3: Detect and replace incomplete URLs by adding a placeholder if needed
+  const withCompleteUrls = withoutComments.replace(
+    /"website":\s*"https:([^",}]*)/g,
+    `"website": "https://example.com"`
+  );
+
+  // Step 4: Trim whitespace from start and end
+  return withCompleteUrls.trim();
 };
 ```
 
