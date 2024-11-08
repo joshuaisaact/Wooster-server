@@ -157,11 +157,33 @@ Here are the available API routes in the application:
 
 ## Testing
 
-This project includes unit and integration tests using **Jest** and **Supertest**. To run the tests, use the following command:
+This project includes both unit and integration tests using **Jest** and **Supertest**. The tests cover core application functionalities, including routes, services, and middleware behavior. Tests use mocks and stubs for dependencies to isolate components and validate error handling, input validation, and response formats.
+
+### Test Categories
+
+- **Unit Tests**: Verify individual functions and modules, ensuring that they behave as expected in isolation. Mocks are used to simulate dependencies.
+- **Integration Tests**: Validate the interaction between different parts of the system, primarily focusing on API routes and the responses returned by the application.
+
+### Mocking and Setup
+
+The tests use Jest to mock dependencies such as services and middleware, enabling isolated testing of specific components. For example, `auth-middleware` and services like `destination-service` and `saved-destination-service` are mocked to simulate responses and control test outcomes. Supabase database operations are also mocked, allowing tests to run without altering live data.
+
+### Running Tests
+
+To run all tests, use:
 
 ```bash
 npm test
 ```
+
+### Example Test Suite
+
+Below is a summary of an example test suite for POST /destinations in the Destination Routes. It includes various scenarios to validate route behavior under different conditions:
+
+- Success Case: Verifies that a new destination is created and saved successfully when valid data is provided.
+- Validation Error: Ensures that a 400 error is returned when required fields are missing.
+- Service Error Handling: Tests how the application handles errors from external services, like the AI-based destination generation.
+- Duplicate Handling: Ensures the system handles cases where a destination is already saved, returning a 409 conflict.
 
 ## Utilities
 
