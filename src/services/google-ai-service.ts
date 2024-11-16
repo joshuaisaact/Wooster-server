@@ -4,13 +4,18 @@ import {
   cleanLLMJsonResponse,
   validateJSON,
 } from '../utils/llm-utils';
+import { createAIServiceError, createValidationError } from '../types/errors';
+import { logger } from '../utils/logger';
 
 export const generateDestinationData = async (
   prompt: string,
 ): Promise<string> => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error('Server configuration error: GEMINI_API_KEY is not set');
+    const errorMessage =
+      'Server configuration error: GEMINI_API_KEY is not set';
+    logger.error({ prompt }, errorMessage);
+    throw createAIServiceError(errorMessage);
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
@@ -21,16 +26,38 @@ export const generateDestinationData = async (
     const responseText = result.response.text();
 
     if (!responseText) {
-      throw new Error('Empty response from LLM');
+      const errorMessage = 'Empty response from LLM';
+      logger.warn({ prompt }, errorMessage);
+      throw createAIServiceError(errorMessage, { prompt });
     }
 
     const response = cleanLLMJsonResponse(responseText);
-    validateJSON(response);
+    try {
+      validateJSON(response);
+    } catch (validationError) {
+      const errorMessage = 'Invalid JSON response from LLM';
+      logger.error(
+        { error: validationError, rawResponse: responseText },
+        errorMessage,
+      );
+      throw createValidationError(errorMessage, {
+        error:
+          validationError instanceof Error
+            ? validationError.message
+            : 'Unknown validation error',
+        rawResponse: responseText,
+      });
+    }
+
+    logger.debug({ prompt, response }, 'Generated destination data');
     return response;
   } catch (error) {
-    throw new Error(
-      `Failed to generate destination data: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
+    const errorMessage = 'Failed to generate destination data';
+    logger.error({ error, prompt }, errorMessage);
+    throw createAIServiceError(errorMessage, {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+      prompt,
+    });
   }
 };
 
@@ -40,7 +67,10 @@ export const generateTripItinerary = async (
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    throw new Error('Server configuration error: GEMINI_API_KEY is not set');
+    const errorMessage =
+      'Server configuration error: GEMINI_API_KEY is not set';
+    logger.error({ prompt }, errorMessage);
+    throw createAIServiceError(errorMessage);
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
@@ -51,19 +81,44 @@ export const generateTripItinerary = async (
     const responseText = result.response.text();
 
     if (!responseText) {
-      throw new Error('Empty response from LLM');
+      const errorMessage = 'Empty response from LLM';
+      logger.warn({ prompt }, errorMessage);
+      throw createAIServiceError(errorMessage, { prompt });
     }
-    console.log(responseText);
-    console.log('Original responseText:', responseText);
+
+    logger.debug({ prompt, responseText }, 'Raw response from LLM');
+
     const withoutMarkdown = cleanLLMJsonResponse(responseText);
-    console.log('After cleanLLMJsonResponse:', withoutMarkdown);
+    logger.debug({ withoutMarkdown }, 'Cleaned LLM response');
+
     const fullyCleaned = cleanJSON(withoutMarkdown);
-    console.log('After cleanJSON:', fullyCleaned);
-    validateJSON(fullyCleaned);
+    logger.debug({ fullyCleaned }, 'Cleaned JSON');
+
+    try {
+      validateJSON(fullyCleaned);
+    } catch (validationError) {
+      const errorMessage = 'Invalid JSON response from LLM';
+      logger.error(
+        { error: validationError, rawResponse: responseText },
+        errorMessage,
+      );
+      throw createValidationError(errorMessage, {
+        error:
+          validationError instanceof Error
+            ? validationError.message
+            : 'Unknown validation error',
+        rawResponse: responseText,
+      });
+    }
+
+    logger.debug({ prompt, fullyCleaned }, 'Generated trip itinerary');
     return fullyCleaned;
   } catch (error) {
-    throw new Error(
-      `Failed to generate trip itinerary: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
+    const errorMessage = 'Failed to generate trip itinerary';
+    logger.error({ error, prompt }, errorMessage);
+    throw createAIServiceError(errorMessage, {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+      prompt,
+    });
   }
 };

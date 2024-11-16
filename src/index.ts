@@ -4,13 +4,14 @@ import routes from './routes/routes';
 import { errorHandler } from './middleware/error-handler';
 import { generalLimiter } from './middleware/rate-limits';
 import 'dotenv/config';
+import { logger } from './utils/logger';
 
 const app = express();
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
-console.log('Supabase URL:', process.env.SUPABASE_URL);
-console.log('Allowed CORS Origin:', CLIENT_URL);
+logger.info('Supabase URL:', process.env.SUPABASE_URL);
+logger.info('Allowed CORS Origin:', CLIENT_URL);
 
 app.use(generalLimiter);
 
@@ -25,7 +26,7 @@ const allowedOrigins = isDevelopment
       'https://www.trywooster.live',
     ];
 
-console.log('Allowed CORS Origins:', allowedOrigins); // Debug log
+logger.info('Allowed CORS Origins:', allowedOrigins);
 
 app.use(
   cors({
@@ -40,7 +41,7 @@ app.get('/', (_: Request, res: Response) => {
 });
 
 app.use((req: Request, _: Response, next) => {
-  console.log(`🔥 ${req.method} ${req.originalUrl}`);
+  logger.info(`🔥 ${req.method} ${req.originalUrl}`);
   next();
 });
 

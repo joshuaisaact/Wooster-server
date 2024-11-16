@@ -164,7 +164,7 @@ describe('Destination Routes', () => {
 
       expect(res.body).toHaveProperty(
         'error',
-        'Failed to generate destination data',
+        'An unexpected error occurred. Please try again later.',
       );
       expect(mockedAddDestination).not.toHaveBeenCalled();
     });
@@ -190,7 +190,7 @@ describe('Destination Routes', () => {
         .send({ destination: 'Paris' })
         .expect(409);
 
-      expect(res.body).toHaveProperty('error', 'Destination already saved');
+      expect(res.body).toHaveProperty('error', 'Destination is already saved');
     });
   });
 });

@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
+import { createAuthenticationError } from '../types/errors';
+import { logger } from '../utils/logger';
 
 export const requireAuth = async (
   req: Request,
@@ -10,7 +12,9 @@ export const requireAuth = async (
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      return res.status(401).json({ error: 'No authorization header' });
+      const errorMessage = 'No authorization header';
+      logger.warn({ req }, errorMessage);
+      return res.status(401).json({ error: errorMessage });
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -25,15 +29,19 @@ export const requireAuth = async (
     } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      const errorMessage = 'Unauthorized';
+      logger.warn({ error, user }, errorMessage);
+      return res.status(401).json({ error: errorMessage });
     }
 
     req.user = user;
+    logger.info({ user: user.id }, 'User authenticated');
     next();
   } catch (error) {
-    if (error instanceof Error) {
-      return res.status(401).json({ error: error.message });
-    }
-    return res.status(401).json({ error: 'Authentication failed' });
+    const errorMessage = 'Authentication failed';
+    logger.error({ error }, errorMessage);
+    throw createAuthenticationError(errorMessage, {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { fetchDestinationDetailsByName } from '../../services/destination-service';
+import { logger } from '../../utils/logger';
 
 export const handleGetDestinationByName = async (
   req: Request,
@@ -30,14 +31,9 @@ export const handleGetDestinationByName = async (
       safetyRating: String(destination.safetyRating),
     });
   } catch (error) {
-    console.error('Error fetching destination details:', error);
+    logger.error('Error fetching destination details:', { error });
 
-    if (error instanceof Error) {
-      if (error.message.includes('not found')) {
-        return res.status(404).json({ error: 'Destination not found' });
-      }
-    }
-
+    // Return a general error response
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };

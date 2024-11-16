@@ -55,7 +55,7 @@ describe('DELETE /destinations/:destinationId', () => {
 
       expect(res.body).toHaveProperty(
         'message',
-        'Destination deleted successfully',
+        'Destination deleted successfully:',
       );
       expect(mockedDeleteDestination).toHaveBeenCalledWith(destinationId);
     });
@@ -100,7 +100,7 @@ describe('DELETE /destinations/:destinationId', () => {
         .set('Authorization', mockAuthHeader) // Add auth header
         .expect(500);
 
-      expect(res.body).toHaveProperty('error', 'Something went wrong');
+      expect(res.body).toHaveProperty('error', 'Internal server error');
       expect(mockedDeleteDestination).toHaveBeenCalledWith(destinationId);
     });
 
@@ -113,7 +113,7 @@ describe('DELETE /destinations/:destinationId', () => {
         .set('Authorization', mockAuthHeader) // Add auth header
         .expect(500);
 
-      expect(res.body).toHaveProperty('error', 'Something went wrong');
+      expect(res.body).toHaveProperty('error', 'Internal server error');
     });
   });
 });

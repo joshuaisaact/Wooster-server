@@ -1,5 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 import { activities, db, destinations, itineraryDays, trips } from '../../db';
+import { createDBQueryError, createDBNotFoundError } from '../../types/errors';
+import { logger } from '../../utils/logger';
 
 export const fetchTripsFromDB = async (userId: string) => {
   try {
@@ -60,13 +62,13 @@ export const fetchTripsFromDB = async (userId: string) => {
         eq(activities.activityId, itineraryDays.activityId),
       );
 
+    logger.info({ userId }, 'Fetched trips successfully');
     return tripData;
   } catch (error) {
-    throw new Error(
-      `Error fetching trips: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
-    );
+    logger.error({ error, userId }, 'Error fetching trips');
+    throw createDBQueryError('Error fetching trips', {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };
 
@@ -89,11 +91,19 @@ export const addTrip = async (
       })
       .returning({ tripId: trips.tripId });
 
+    logger.info(
+      { userId, destinationId, startDate, numDays },
+      'Inserted trip successfully',
+    );
     return insertedTrip.tripId;
   } catch (error) {
-    throw new Error(
-      `Failed to insert trip: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    logger.error(
+      { error, userId, destinationId, startDate, numDays },
+      'Error inserting trip',
     );
+    throw createDBQueryError('Failed to insert trip', {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };
 
@@ -104,16 +114,19 @@ export const deleteTripById = async (tripId: number) => {
       .where(eq(trips.tripId, tripId))
       .returning();
 
-    // Check if any rows were deleted
     if (deletedTrips.length === 0) {
-      throw new Error(`No trip found with ID ${tripId}`);
+      const errorMessage = `No trip found with ID ${tripId}`;
+      logger.warn({ tripId }, errorMessage);
+      throw createDBNotFoundError(errorMessage, { tripId });
     }
 
+    logger.info({ tripId }, 'Deleted trip successfully');
     return deletedTrips.length;
   } catch (error) {
-    throw new Error(
-      `Error deleting trip with ID ${tripId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
+    logger.error({ error, tripId }, 'Error deleting trip');
+    throw createDBQueryError(`Error deleting trip with ID ${tripId}`, {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };
 
@@ -122,7 +135,9 @@ export const fetchTripFromDB = async (tripId: string, userId: string) => {
     const parsedTripId = parseInt(tripId, 10);
 
     if (isNaN(parsedTripId)) {
-      throw new Error('Invalid trip ID');
+      const errorMessage = 'Invalid trip ID';
+      logger.warn({ tripId }, errorMessage);
+      throw createDBQueryError(errorMessage, { tripId });
     }
 
     const tripData = await db
@@ -183,13 +198,17 @@ export const fetchTripFromDB = async (tripId: string, userId: string) => {
       );
 
     if (!tripData.length) {
-      throw new Error('Trip not found');
+      const errorMessage = 'Trip not found';
+      logger.warn({ tripId, userId }, errorMessage);
+      throw createDBNotFoundError(errorMessage, { tripId, userId });
     }
 
+    logger.info({ tripId, userId }, 'Fetched trip successfully');
     return tripData[0];
   } catch (error) {
-    throw new Error(
-      `Error fetching trip: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
+    logger.error({ error, tripId, userId }, 'Error fetching trip');
+    throw createDBQueryError('Error fetching trip', {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };

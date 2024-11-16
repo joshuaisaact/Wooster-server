@@ -5,17 +5,19 @@ import {
   findDestinationByName,
   generateNewDestination,
 } from '../../services/destination-service';
-import { handleControllerError } from '../../utils/error-handlers';
 import {
   addSavedDestination,
   findSavedDestinationByUserAndDest,
 } from '../../services/saved-destination-service';
+import { logger } from '../../utils/logger';
 
 interface CreateDestinationRequestBody {
   destination: string;
 }
 
-console.log('findDestinationByName:', findDestinationByName);
+interface CreateDestinationRequestBody {
+  destination: string;
+}
 
 export const handleAddDestination = async (
   req: Request<object, object, CreateDestinationRequestBody>,
@@ -26,9 +28,10 @@ export const handleAddDestination = async (
     const userId = req.user!.id;
 
     if (!destination?.trim()) {
-      return res.status(400).json({ error: 'Destination is required' });
+      return res.status(400).json({
+        error: 'Destination is required',
+      });
     }
-
     try {
       const existingDestination = await findDestinationByName(destination);
 
@@ -41,8 +44,7 @@ export const handleAddDestination = async (
 
         if (existingSaved) {
           return res.status(409).json({
-            error: 'Destination already saved',
-            destination: existingSaved,
+            error: 'Destination is already saved',
           });
         }
 
@@ -79,11 +81,15 @@ export const handleAddDestination = async (
         },
       });
     } catch (error) {
-      const { status, message } = handleControllerError(error);
-      return res.status(status).json({ error: message });
+      logger.error('Error processing destination request:', error);
+      return res.status(500).json({
+        error: 'An unexpected error occurred. Please try again later.',
+      });
     }
   } catch (error) {
     console.error('Unhandled Error:', error);
-    return res.status(500).json({ error: 'An unknown error occurred' });
+    return res.status(500).json({
+      error: 'An unexpected error occurred. Please try again later.',
+    });
   }
 };

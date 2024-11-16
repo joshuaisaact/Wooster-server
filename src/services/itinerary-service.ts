@@ -1,6 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { db, itineraryDays } from '../db';
 import { DayItinerary } from '../types/trip-types';
+import { createDBQueryError, createValidationError } from '../types/errors';
+import { logger } from '../utils/logger';
 
 export const addItineraryDays = async (
   tripId: number,
@@ -8,21 +10,30 @@ export const addItineraryDays = async (
   activityIds: number[][],
 ) => {
   if (!itinerary || itinerary.length === 0) {
-    throw new Error('Itinerary cannot be empty');
+    const errorMessage = 'Itinerary cannot be empty';
+    logger.warn({ tripId, itinerary }, errorMessage);
+    throw createValidationError(errorMessage, { tripId, itinerary });
   }
 
   if (itinerary.length !== activityIds.length) {
-    throw new Error('Activity IDs must match itinerary length');
+    const errorMessage = 'Activity IDs must match itinerary length';
+    logger.warn({ tripId, itinerary, activityIds }, errorMessage);
+    throw createValidationError(errorMessage, {
+      tripId,
+      itinerary,
+      activityIds,
+    });
   }
 
   const itineraryDaysData = [];
 
-  // Collect all the entries to insert in one go
   for (let i = 0; i < itinerary.length; i++) {
     const dayNumber = i + 1;
 
     if (!activityIds[i] || activityIds[i].length === 0) {
-      throw new Error(`No activity IDs provided for day ${dayNumber}`);
+      const errorMessage = `No activity IDs provided for day ${dayNumber}`;
+      logger.warn({ tripId, dayNumber }, errorMessage);
+      throw createValidationError(errorMessage, { tripId, dayNumber });
     }
 
     for (const activityId of activityIds[i]) {
@@ -34,21 +45,28 @@ export const addItineraryDays = async (
     }
   }
 
-  // Insert all records into the `itinerary_days` table in one batch
   try {
     await db.insert(itineraryDays).values(itineraryDaysData);
-  } catch (error) {
-    throw new Error(
-      `Error inserting itinerary days: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
+    logger.info(
+      { tripId, itineraryDaysData },
+      'Inserted itinerary days successfully',
     );
+  } catch (error) {
+    const errorMessage = 'Error inserting itinerary days';
+    logger.error({ error, tripId, itineraryDaysData }, errorMessage);
+    throw createDBQueryError(errorMessage, {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+      tripId,
+      itineraryDaysData,
+    });
   }
 };
 
 export const deleteItineraryDaysByTripId = async (tripId: number) => {
   if (!tripId || tripId <= 0) {
-    throw new Error('Invalid trip ID provided');
+    const errorMessage = 'Invalid trip ID provided';
+    logger.warn({ tripId }, errorMessage);
+    throw createValidationError(errorMessage, { tripId });
   }
 
   try {
@@ -56,13 +74,19 @@ export const deleteItineraryDaysByTripId = async (tripId: number) => {
       .delete(itineraryDays)
       .where(eq(itineraryDays.tripId, tripId));
 
-    // Optionally check if any rows were deleted and handle accordingly
     if (result.count === 0) {
-      throw new Error(`No itinerary days found for trip ID ${tripId}`);
+      const errorMessage = `No itinerary days found for trip ID ${tripId}`;
+      logger.warn({ tripId }, errorMessage);
+      throw createDBQueryError(errorMessage, { tripId });
     }
+
+    logger.info({ tripId }, 'Deleted itinerary days successfully');
   } catch (error) {
-    throw new Error(
-      `Error deleting itinerary days for trip ${tripId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
+    const errorMessage = `Error deleting itinerary days for trip ${tripId}`;
+    logger.error({ error, tripId }, errorMessage);
+    throw createDBQueryError(errorMessage, {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+      tripId,
+    });
   }
 };

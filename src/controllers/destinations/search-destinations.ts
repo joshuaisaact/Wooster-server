@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { db } from '../../db';
 import { destinations } from '../../db';
 import { and, ilike, eq, sql, SQL } from 'drizzle-orm';
+import { logger } from '../../utils/logger';
 
 interface SearchParams {
   page?: string;
@@ -36,13 +37,13 @@ export async function handleSearchDestinations(
     ? req.query.country[0] || 'all'
     : req.query.country || 'all';
 
-  console.log('Search params:', { page, search, country }); // Add logging
+  logger.info('Search params:', { page, search, country });
 
   const ITEMS_PER_PAGE = 12;
   const offset = (page - 1) * ITEMS_PER_PAGE;
 
   try {
-    // Build where conditions array
+    // Build where conditions array based on search params
     const conditions: SQL[] = [];
 
     if (search) {
@@ -79,7 +80,8 @@ export async function handleSearchDestinations(
       hasMore: totalCount > offset + ITEMS_PER_PAGE,
     });
   } catch (error) {
-    console.error('Error searching destinations:', error);
+    logger.error('Error searching destinations:', { error });
+
     return res.status(500).json({
       error: 'Failed to search destinations',
     });

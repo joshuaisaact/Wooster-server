@@ -1,5 +1,7 @@
 import { and, desc, eq } from 'drizzle-orm';
 import { db, destinations, savedDestinations } from '../../db';
+import { createDBQueryError, createDBNotFoundError } from '../../types/errors';
+import { logger } from '../../utils/logger';
 
 export const fetchSavedDestinations = async (userId: string) => {
   try {
@@ -26,13 +28,13 @@ export const fetchSavedDestinations = async (userId: string) => {
       ...entry.destination, // Flattens all fields in destination into the root object
     }));
 
+    logger.info({ userId }, 'Fetched saved destinations successfully');
     return flattenedList;
   } catch (error) {
-    throw new Error(
-      `Error fetching saved destinations: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
-    );
+    logger.error({ error, userId }, 'Error fetching saved destinations');
+    throw createDBQueryError('Error fetching saved destinations', {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };
 
@@ -53,13 +55,19 @@ export const addSavedDestination = async (
       })
       .returning();
 
+    logger.info(
+      { userId, destinationId },
+      'Inserted saved destination successfully',
+    );
     return savedDestination;
   } catch (error) {
-    throw new Error(
-      `Failed to save destination: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
+    logger.error(
+      { error, userId, destinationId },
+      'Error inserting saved destination',
     );
+    throw createDBQueryError('Failed to save destination', {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };
 
@@ -84,18 +92,24 @@ export const updateSavedDestination = async (
       .returning();
 
     if (!updatedDestination) {
-      throw new Error(
-        `No saved destination found for user ${userId} and destination ${destinationId}`,
-      );
+      const errorMessage = `No saved destination found for user ${userId} and destination ${destinationId}`;
+      logger.warn({ userId, destinationId }, errorMessage);
+      throw createDBNotFoundError(errorMessage, { userId, destinationId });
     }
 
+    logger.info(
+      { userId, destinationId },
+      'Updated saved destination successfully',
+    );
     return updatedDestination;
   } catch (error) {
-    throw new Error(
-      `Error updating saved destination: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
+    logger.error(
+      { error, userId, destinationId },
+      'Error updating saved destination',
     );
+    throw createDBQueryError('Error updating saved destination', {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };
 
@@ -115,18 +129,24 @@ export const deleteSavedDestination = async (
       .returning();
 
     if (!deletedDestination) {
-      throw new Error(
-        `No saved destination found for user ${userId} and destination ${destinationId}`,
-      );
+      const errorMessage = `No saved destination found for user ${userId} and destination ${destinationId}`;
+      logger.warn({ userId, destinationId }, errorMessage);
+      throw createDBNotFoundError(errorMessage, { userId, destinationId });
     }
 
+    logger.info(
+      { userId, destinationId },
+      'Deleted saved destination successfully',
+    );
     return deletedDestination;
   } catch (error) {
-    throw new Error(
-      `Error deleting saved destination: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
+    logger.error(
+      { error, userId, destinationId },
+      'Error deleting saved destination',
     );
+    throw createDBQueryError('Error deleting saved destination', {
+      originalError: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };
 
@@ -148,10 +168,15 @@ export const findSavedDestinationByUserAndDest = async (
 
     return foundDestination[0] || null;
   } catch (error) {
-    throw new Error(
-      `Error finding saved destination for user ${userId} and destination ${destinationId}: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
+    logger.error(
+      { error, userId, destinationId },
+      'Error finding saved destination',
+    );
+    throw createDBQueryError(
+      `Error finding saved destination for user ${userId} and destination ${destinationId}`,
+      {
+        originalError: error instanceof Error ? error.message : 'Unknown error',
+      },
     );
   }
 };

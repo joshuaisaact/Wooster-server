@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { fetchSavedDestinations } from '../../services/saved-destination-service/';
+import { logger } from '../../utils/logger';
 
 export const handleGetSavedDestinations = async (
   req: Request,
@@ -7,9 +8,15 @@ export const handleGetSavedDestinations = async (
 ) => {
   try {
     const savedDestinations = await fetchSavedDestinations(req.user!.id);
-    res.json(savedDestinations);
+    return res.status(200).json({
+      message: 'Fetched saved destinations successfully',
+      savedDestinations,
+    });
   } catch (error) {
-    console.error('Error fetching saved destinations:', error);
-    res.status(500).json({ error: 'Something went wrong' });
+    logger.error('Error fetching saved destinations:', error);
+
+    return res.status(500).json({
+      error: 'Failed to fetch saved destinations. Please try again later.',
+    });
   }
 };

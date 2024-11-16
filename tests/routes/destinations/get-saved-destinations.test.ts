@@ -101,6 +101,8 @@ describe('GET /saved-destinations', () => {
       .set('Authorization', mockAuthHeader)
       .expect(500);
 
-    expect(res.body.error).toBe('Something went wrong');
+    expect(res.body.error).toBe(
+      'Failed to fetch saved destinations. Please try again later.',
+    );
   });
 });

@@ -3,6 +3,7 @@ import {
   addSavedDestination,
   findSavedDestinationByUserAndDest,
 } from '../../services/saved-destination-service';
+import { logger } from '../../utils/logger';
 
 export const handleAddSavedDestination = async (
   req: Request,
@@ -42,7 +43,9 @@ export const handleAddSavedDestination = async (
       savedDestination,
     });
   } catch (error) {
-    console.error('Error saving destination:', error);
-    return res.status(500).json({ error: 'Failed to save destination' });
+    logger.error('Error saving destination:', error); // Log the error
+    return res.status(500).json({
+      error: 'Failed to save destination',
+    });
   }
 };

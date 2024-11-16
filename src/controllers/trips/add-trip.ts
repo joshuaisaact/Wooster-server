@@ -12,6 +12,7 @@ import { addActivities } from '../../services/activity-service';
 import { createPrompt } from '../../config/trip-prompt-template';
 import { eq } from 'drizzle-orm';
 import { db, destinations } from '../../db';
+import { logger } from '../../utils/logger';
 
 interface CreateTripRequestBody {
   days: number;
@@ -27,19 +28,22 @@ async function getOrCreateDestination(location: string): Promise<number> {
     const existingDestination = await findDestinationByName(location);
 
     if (existingDestination) {
-      console.log('Found existing destination:', location);
+      logger.info(`Found existing destination: ${location}`);
       return existingDestination.destinationId;
     }
 
     // If not found, generate and create new destination
-    console.log('Generating new destination:', location);
+    logger.info(`Generating new destination: ${location}`);
     const destinationData = await generateNewDestination(location);
     const newDestination = await addDestination(destinationData);
     return newDestination.destinationId;
   } catch (error) {
+    logger.error(
+      `Failed to process destination: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
     throw {
       status: 500,
-      message: `Failed to process destination: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      message: 'Failed to process destination',
     };
   }
 }
@@ -52,12 +56,12 @@ async function generateItinerary(
   selectedCategories?: string[],
 ): Promise<DayItinerary[]> {
   const prompt = createPrompt(days, location, startDate, selectedCategories); // Updated this line
-  const itineraryText = await generateTripItinerary(prompt);
 
   try {
+    const itineraryText = await generateTripItinerary(prompt);
     return JSON.parse(itineraryText);
   } catch (error) {
-    console.error('Failed to generate or parse itinerary:', error);
+    logger.error('Failed to generate or parse itinerary:', error);
     throw {
       status: 500,
       message: 'Failed to parse itinerary',
@@ -88,7 +92,9 @@ export const handleAddTrip = async (
     const userId = req.user!.id;
 
     if (!validateTripInput(days, location, startDate)) {
-      return res.status(400).json({ error: 'Missing required fields' });
+      return res.status(400).json({
+        error: 'Missing required fields',
+      });
     }
 
     try {
@@ -102,7 +108,11 @@ export const handleAddTrip = async (
         .where(eq(destinations.destinationId, destinationId));
 
       if (!destinationData) {
-        throw new Error('Failed to fetch destination data');
+        logger.error('Failed to fetch destination data');
+        throw {
+          status: 500,
+          message: 'Failed to fetch destination data',
+        };
       }
 
       // Generate itinerary - updated to include selectedCategories
@@ -123,6 +133,7 @@ export const handleAddTrip = async (
       );
 
       // Return success response with properly structured data
+      logger.info(`Trip created successfully with tripId: ${tripId}`);
       return res.status(201).json({
         message: 'Trip created successfully',
         trip: {
@@ -160,7 +171,7 @@ export const handleAddTrip = async (
         },
       });
     } catch (error: unknown) {
-      console.error('Error in handleAddTrip:', error);
+      logger.error('Error in handleAddTrip:', error);
 
       if (
         error &&
@@ -179,7 +190,9 @@ export const handleAddTrip = async (
       });
     }
   } catch (error) {
-    console.error('Error creating new trip:', error);
-    return res.status(500).json({ error: 'Something went wrong' });
+    logger.error('Error creating new trip:', error);
+    return res.status(500).json({
+      error: 'Something went wrong',
+    });
   }
 };
