@@ -63,7 +63,7 @@ describe('GET /saved-destinations', () => {
     expect(mockedFetchSavedDestinations).toHaveBeenCalledWith('test-user-id');
 
     // Check response format
-    expect(res.body[0]).toMatchObject({
+    expect(res.body.savedDestinations[0]).toMatchObject({
       id: 1,
       notes: 'Want to visit',
       isVisited: false,
@@ -82,7 +82,10 @@ describe('GET /saved-destinations', () => {
       .set('Authorization', mockAuthHeader)
       .expect(200);
 
-    expect(res.body).toEqual([]);
+    expect(res.body).toEqual({
+      message: 'Fetched saved destinations successfully',
+      savedDestinations: [],
+    });
   });
 
   // Basic auth check

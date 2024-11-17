@@ -14,7 +14,6 @@ export const handleGetSavedDestinations = async (
     });
   } catch (error) {
     logger.error('Error fetching saved destinations:', error);
-
     return res.status(500).json({
       error: 'Failed to fetch saved destinations. Please try again later.',
     });

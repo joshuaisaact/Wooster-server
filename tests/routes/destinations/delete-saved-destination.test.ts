@@ -8,6 +8,7 @@ import app from '../../../src/index';
 import supabase from '../../../src/models/supabase-client';
 import * as destinationService from '../../../src/services/saved-destination-service';
 import { mockAuthHeader } from '../../mocks/auth-mocks';
+import { createDBNotFoundError } from '../../../src/types/errors';
 
 // Mock the service
 jest.mock('../../../src/services/saved-destination-service');
@@ -81,16 +82,23 @@ describe('Saved Destinations Routes', () => {
       });
 
       it('should handle not found errors', async () => {
+        const nonexistentId = 999999;
         mockedDeleteSavedDestination.mockRejectedValue(
-          new Error('No saved destination found'),
+          createDBNotFoundError(
+            `No saved destination found with ID ${nonexistentId}`,
+            { userId: 'test-user-id', destinationId: nonexistentId },
+          ),
         );
 
         const res = await request(app)
-          .delete('/api/saved-destinations/1')
-          .set('Authorization', mockAuthHeader)
-          .expect(404);
+          .delete(`/api/saved-destinations/${nonexistentId}`)
+          .set('Authorization', mockAuthHeader);
 
-        expect(res.body).toHaveProperty('error', 'Saved destination not found');
+        expect(res.status).toBe(404);
+        expect(res.body).toHaveProperty(
+          'error',
+          `No saved destination found with ID ${nonexistentId}`,
+        );
       });
 
       it('should handle service errors', async () => {

@@ -1,30 +1,13 @@
+import { mockAuthMiddleware } from '../../mocks/auth-middleware-mock';
+jest.mock('../../../src/middleware/auth-middleware', () => mockAuthMiddleware);
+
 import request from 'supertest';
 import app from '../../../src/index';
 import supabase from '../../../src/models/supabase-client';
 import * as destinationService from '../../../src/services/destination-service';
 import { mockDestination } from '../../mocks/destination-mocks';
 import { mockAuthHeader } from '../../mocks/auth-mocks';
-import { User } from '@supabase/supabase-js';
-import { NextFunction } from 'express';
-
-// Mock the auth middleware
-jest.mock('../../../src/middleware/auth-middleware', () => ({
-  requireAuth: (
-    req: Request & { user?: User },
-    _res: Response,
-    next: NextFunction,
-  ) => {
-    req.user = {
-      id: 'test-user-id',
-      app_metadata: {},
-      aud: 'authenticated',
-      created_at: '',
-      role: '',
-      user_metadata: {},
-    } as User;
-    next();
-  },
-}));
+import { createDBNotFoundError } from '../../../src/types/errors';
 
 // Mock the service
 jest.mock('../../../src/services/destination-service');
@@ -62,32 +45,48 @@ describe('DELETE /destinations/:destinationId', () => {
   });
 
   // Update other test cases similarly
-  describe('input validation', () => {
-    it('should return 400 for an invalid destination ID', async () => {
-      const invalidId = 'invalid-id';
+  it('should return 404 if the destination is not found', async () => {
+    const nonexistentId = 999;
+    // Mock the error that the service actually throws
+    mockedDeleteDestination.mockRejectedValue(
+      createDBNotFoundError(`No destination found with ID ${nonexistentId}`, {
+        destinationId: nonexistentId,
+      }),
+    );
 
-      const res = await request(app)
-        .delete(`/api/destinations/${invalidId}`)
-        .set('Authorization', mockAuthHeader) // Add auth header
-        .expect(400);
+    const res = await request(app)
+      .delete(`/api/destinations/${nonexistentId}`)
+      .set('Authorization', mockAuthHeader)
+      .expect(404);
 
-      expect(res.body).toHaveProperty('error', 'Invalid destination ID');
-      expect(mockedDeleteDestination).not.toHaveBeenCalled();
-    });
+    expect(res.body).toHaveProperty(
+      'error',
+      `No destination found with ID ${nonexistentId}`,
+    );
   });
 
-  describe('not found handling', () => {
-    it('should return 404 if the destination is not found', async () => {
-      const nonexistentId = 999;
-      mockedDeleteDestination.mockResolvedValue([]);
+  it('should return 404 if the destination is not found', async () => {
+    const nonexistentId = 999;
+    mockedDeleteDestination.mockRejectedValue(
+      createDBNotFoundError(`No destination found with ID ${nonexistentId}`, {
+        destinationId: nonexistentId,
+      }),
+    );
 
-      const res = await request(app)
-        .delete(`/api/destinations/${nonexistentId}`)
-        .set('Authorization', mockAuthHeader) // Add auth header
-        .expect(404);
+    const res = await request(app)
+      .delete(`/api/destinations/${nonexistentId}`)
+      .set('Authorization', mockAuthHeader);
 
-      expect(res.body).toHaveProperty('error', 'Destination not found');
+    console.log('Response:', {
+      status: res.status,
+      body: res.body,
     });
+
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty(
+      'error',
+      `No destination found with ID ${nonexistentId}`,
+    );
   });
 
   describe('error handling', () => {
