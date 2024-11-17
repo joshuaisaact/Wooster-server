@@ -1,3 +1,14 @@
+// Mock the DB to avoid actual DB calls in tests
+jest.mock('../../src/db');
+jest.mock('../../src/utils/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 import {
   fetchDestinations,
   fetchDestinationDetailsByName,
@@ -6,9 +17,6 @@ import {
 } from '../../src/services/destination-service';
 import { db } from '../../src/db';
 import { mockDestination } from '../mocks/destination-mocks';
-
-// Mock the DB to avoid actual DB calls in tests
-jest.mock('../../src/db');
 
 describe('Destination Service', () => {
   afterEach(() => {
@@ -55,13 +63,19 @@ describe('Destination Service', () => {
 
   // Added error handling test after seeing DB issues
   it('handles fetch errors', async () => {
-    (db.select as jest.Mock).mockReturnValueOnce({
-      from: jest.fn().mockRejectedValue(new Error('DB error')),
-    });
+    const mockFrom = jest.fn().mockRejectedValue(new Error('DB error'));
+    (db.select as jest.Mock).mockReturnValue({ from: mockFrom });
 
-    await expect(fetchDestinations()).rejects.toThrow(
-      'Error fetching destinations',
-    );
+    try {
+      await fetchDestinations();
+      fail('Expected an error to be thrown');
+    } catch (error) {
+      expect(error).toMatchObject({
+        message: 'Error fetching destinations',
+        status: 500,
+        code: 'DB_QUERY_FAILED',
+      });
+    }
   });
 
   // Added when implementing destination detail page
@@ -84,9 +98,16 @@ describe('Destination Service', () => {
       }),
     });
 
-    await expect(fetchDestinationDetailsByName('Unknown')).rejects.toThrow(
-      'not found',
-    );
+    try {
+      await fetchDestinationDetailsByName('Unknown');
+      fail('Expected an error to be thrown');
+    } catch (error) {
+      expect(error).toMatchObject({
+        message: 'Error fetching destination with name Unknown',
+        status: 500,
+        code: 'DB_QUERY_FAILED',
+      });
+    }
   });
 
   // Basic create test
@@ -109,9 +130,16 @@ describe('Destination Service', () => {
       }),
     });
 
-    await expect(addDestination(newDestinationData)).rejects.toThrow(
-      'Failed to insert',
-    );
+    try {
+      await addDestination(newDestinationData);
+      fail('Expected an error to be thrown');
+    } catch (error) {
+      expect(error).toMatchObject({
+        message: 'Failed to insert destination',
+        status: 500,
+        code: 'DB_QUERY_FAILED',
+      });
+    }
   });
 
   // Basic delete test
@@ -134,6 +162,15 @@ describe('Destination Service', () => {
       }),
     });
 
-    await expect(deleteDestinationById(1)).rejects.toThrow('Error deleting');
+    try {
+      await deleteDestinationById(1);
+      fail('Expected an error to be thrown');
+    } catch (error) {
+      expect(error).toMatchObject({
+        message: 'Error deleting destination with ID 1',
+        status: 500,
+        code: 'DB_QUERY_FAILED',
+      });
+    }
   });
 });

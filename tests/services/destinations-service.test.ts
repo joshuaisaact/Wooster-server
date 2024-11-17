@@ -59,9 +59,16 @@ describe('Destination Service Tests', () => {
       from: jest.fn().mockRejectedValue(new Error('DB error')),
     });
 
-    await expect(fetchDestinations()).rejects.toThrow(
-      'Error fetching destinations',
-    );
+    try {
+      await fetchDestinations();
+      fail('Expected an error to be thrown');
+    } catch (error) {
+      expect(error).toMatchObject({
+        message: 'Error fetching destinations',
+        status: 500,
+        code: 'DB_QUERY_FAILED',
+      });
+    }
   });
 
   // Added when implementing destination details page
@@ -84,9 +91,16 @@ describe('Destination Service Tests', () => {
       }),
     });
 
-    await expect(deleteDestinationById(999)).rejects.toThrow(
-      'Error deleting destination with ID 999: No destination found with ID 999',
-    );
+    try {
+      await deleteDestinationById(999);
+      fail('Expected an error to be thrown');
+    } catch (error) {
+      expect(error).toMatchObject({
+        message: 'Error deleting destination with ID 999',
+        status: 500,
+        code: 'DB_QUERY_FAILED',
+      });
+    }
   });
 
   // Basic fetch by ID test
@@ -122,9 +136,16 @@ describe('Destination Service Tests', () => {
       }),
     });
 
-    await expect(addDestination(newDestination)).rejects.toThrow(
-      'Failed to insert',
-    );
+    try {
+      await addDestination(newDestination);
+      fail('Expected an error to be thrown');
+    } catch (error) {
+      expect(error).toMatchObject({
+        message: 'Failed to insert destination',
+        status: 500,
+        code: 'DB_QUERY_FAILED',
+      });
+    }
   });
 
   // Basic delete functionality
