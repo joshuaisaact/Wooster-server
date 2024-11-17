@@ -1,6 +1,11 @@
 import { and, desc, eq } from 'drizzle-orm';
 import { db, destinations, savedDestinations } from '../../db';
-import { createDBQueryError, createDBNotFoundError } from '../../types/errors';
+import {
+  createDBQueryError,
+  createDBNotFoundError,
+  isServiceError,
+  createServiceError,
+} from '../../types/errors';
 import { logger } from '../../utils/logger';
 
 export const fetchSavedDestinations = async (userId: string) => {
@@ -37,6 +42,44 @@ export const fetchSavedDestinations = async (userId: string) => {
     });
   }
 };
+
+export async function saveDestinationForUser(
+  destinationId: number,
+  userId: string,
+) {
+  try {
+    const existingSaved = await findSavedDestinationByUserAndDest(
+      userId,
+      destinationId,
+    );
+
+    if (existingSaved) {
+      throw createServiceError(
+        'Destination is already saved',
+        409,
+        'DESTINATION_ALREADY_SAVED',
+        { userId, destinationId },
+      );
+    }
+
+    return await addSavedDestination(userId, destinationId);
+  } catch (error) {
+    logger.error(
+      { error, destinationId, userId },
+      'Failed to save destination',
+    );
+
+    if (isServiceError(error)) {
+      throw error;
+    }
+
+    throw createDBQueryError('Failed to save destination', {
+      userId,
+      destinationId,
+      error,
+    });
+  }
+}
 
 export const addSavedDestination = async (
   userId: string,

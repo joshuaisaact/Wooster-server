@@ -1,8 +1,14 @@
 import { desc, eq } from 'drizzle-orm';
 import { activities, db, destinations } from '../../db';
 import { NewDestination } from '../../types/destination-type';
-import { createDBQueryError, createDBNotFoundError } from '../../types/errors';
+import {
+  createDBQueryError,
+  createDBNotFoundError,
+  isServiceError,
+  createDestinationGenerationError,
+} from '../../types/errors';
 import { logger } from '../../utils/logger';
+import { generateNewDestination } from './destination-generator';
 
 export const fetchDestinations = async () => {
   try {
@@ -183,3 +189,36 @@ export const fetchActivitiesByDestinationName = async (
     );
   }
 };
+
+export async function getOrCreateDestination(location: string) {
+  try {
+    const existingDestination = await findDestinationByName(location);
+
+    if (existingDestination) {
+      logger.info({ location }, 'Found existing destination');
+      return existingDestination;
+    }
+
+    logger.info({ location }, 'Creating new destination');
+    try {
+      const destinationData = await generateNewDestination(location);
+      return await addDestination(destinationData);
+    } catch (error) {
+      throw createDestinationGenerationError(
+        'Failed to generate destination data',
+        { location, error },
+      );
+    }
+  } catch (error) {
+    logger.error({ error, location }, 'Failed to process destination');
+
+    if (isServiceError(error)) {
+      throw error;
+    }
+
+    throw createDBQueryError('Failed to process destination', {
+      location,
+      error,
+    });
+  }
+}
