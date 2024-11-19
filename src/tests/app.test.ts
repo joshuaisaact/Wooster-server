@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../src';
+import app from '..';
 
 describe('Express App Setup', () => {
   it('should allow CORS from allowed origins', async () => {

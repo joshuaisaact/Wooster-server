@@ -20,7 +20,19 @@ if (!databaseUrl) {
   throw createDatabaseConnectionError(errorMessage);
 }
 
-const sql = postgres(databaseUrl);
+// Add debug options to postgres client
+const sql = postgres(databaseUrl, {
+  debug: (_, query, params) => {
+    console.log('🔍 DB DEBUG:', { query, params, databaseUrl });
+  },
+  onnotice: (notice) => {
+    console.log('🔍 DB NOTICE:', notice);
+  },
+  onparameter: (parameterName, value) => {
+    console.log('🔍 DB PARAMETER:', { parameterName, value });
+  },
+});
+
 const db = drizzle(sql);
 
 export {

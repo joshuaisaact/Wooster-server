@@ -1,7 +1,7 @@
-import { addActivities } from '../../src/services/activity-service';
-import { db } from '../../src/db';
-import { activities } from '../../src/db';
-import { DayItinerary } from '../../src/types/trip-types';
+import { addActivities } from '../../services/activity-service';
+import { db } from '../../db';
+import { activities } from '../../db';
+import { DayItinerary } from '../../types/trip-types';
 
 // Need to mock the DB since we don't want to hit it in tests
 jest.mock('../../src/db', () => ({

@@ -2,18 +2,18 @@ import { mockAuthMiddleware } from '../../mocks/auth-middleware-mock';
 jest.mock('../../../src/middleware/auth-middleware', () => mockAuthMiddleware);
 
 import request from 'supertest';
-import app from '../../../src/index';
-import supabase from '../../../src/models/supabase-client';
-import { generateDestinationData } from '../../../src/services/google-ai-service';
-import * as destinationService from '../../../src/services/destination-service';
-import * as savedDestinationService from '../../../src/services/saved-destination-service';
+import app from '../../../index';
+import supabase from '../../../models/supabase-client';
+import { generateDestinationData } from '../../../services/google-ai-service';
+import * as destinationService from '../../../services/destination-service';
+import * as savedDestinationService from '../../../services/saved-destination-service';
 import {
   FullMockDestination,
   MockSavedDestination,
-} from '../../../src/types/test-types';
+} from '../../../types/test-types';
 import { mockAuthHeader } from '../../mocks/auth-mocks';
-import { NewDestination } from '../../../src/types/destination-type';
-import { ServiceError } from '../../../src/utils/error-handlers';
+import { NewDestination } from '../../../types/destination-type';
+import { ServiceError } from '../../../utils/error-handlers';
 
 // Mock our services
 jest.mock('../../../src/services/google-ai-service');

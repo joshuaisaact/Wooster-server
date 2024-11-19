@@ -2,12 +2,12 @@ import { mockAuthMiddleware } from '../../mocks/auth-middleware-mock';
 jest.mock('../../../src/middleware/auth-middleware', () => mockAuthMiddleware);
 
 import request from 'supertest';
-import app from '../../../src/index';
-import supabase from '../../../src/models/supabase-client';
-import * as destinationService from '../../../src/services/destination-service';
+import app from '../../../index';
+import supabase from '../../../models/supabase-client';
+import * as destinationService from '../../../services/destination-service';
 import { mockDestination } from '../../mocks/destination-mocks';
 import { mockAuthHeader } from '../../mocks/auth-mocks';
-import { createDBNotFoundError } from '../../../src/types/errors';
+import { createDBNotFoundError } from '../../../types/errors';
 
 // Mock the service
 jest.mock('../../../src/services/destination-service');

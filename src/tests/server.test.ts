@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { Server } from 'http';
-import app from '../src/index';
+import app from '../index';
 
 describe('Server Tests', () => {
   let server: Server;

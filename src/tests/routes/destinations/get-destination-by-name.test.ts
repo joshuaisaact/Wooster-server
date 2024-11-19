@@ -1,8 +1,8 @@
 import request from 'supertest';
-import app from '../../../src/index';
-import supabase from '../../../src/models/supabase-client';
-import * as destinationService from '../../../src/services/destination-service';
-import { FullMockDestination } from '../../../src/types/test-types';
+import app from '../../../index';
+import supabase from '../../../models/supabase-client';
+import * as destinationService from '../../../services/destination-service';
+import { FullMockDestination } from '../../../types/test-types';
 
 // Mock the service
 jest.mock('../../../src/services/destination-service');

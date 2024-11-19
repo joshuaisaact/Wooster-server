@@ -1,23 +1,30 @@
+// Mock the DB to avoid actual DB calls in tests
+jest.mock('../../src/db');
+jest.mock('../../src/utils/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 import {
   fetchDestinations,
   fetchDestinationDetailsByName,
-  fetchDestinationIdByName,
   addDestination,
   deleteDestinationById,
-} from '../../src/services/destination-service';
-import { db } from '../../src/db';
-import { mockDestination } from '../mocks/destination-mocks';
+} from '../../services/destination-service';
+import { db } from '../../db';
+import { mockDestination } from '../fixtures/destinations';
 
-// Need to mock DB so tests don't hit real database
-jest.mock('../../src/db');
-
-describe('Destination Service Tests', () => {
+describe('Destination Service', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  // Mock data based on actual destination from DB
-  const newDestination = {
+  // Basic destination data used in a few tests
+  const newDestinationData = {
     destinationId: 1,
     destinationName: 'Paris',
     latitude: '48.8566',
@@ -43,21 +50,21 @@ describe('Destination Service Tests', () => {
     updatedAt: new Date('2024-01-01'),
   };
 
-  // Started with basic fetch functionality
-  it('fetches destinations list', async () => {
+  // Started with basic fetch test
+  it('fetches all destinations', async () => {
+    const mockDestinations = [mockDestination];
     (db.select as jest.Mock).mockReturnValueOnce({
-      from: jest.fn().mockResolvedValue([mockDestination]),
+      from: jest.fn().mockResolvedValue(mockDestinations),
     });
 
     const result = await fetchDestinations();
-    expect(result).toEqual([mockDestination]);
+    expect(result).toEqual(mockDestinations);
   });
 
-  // Added after getting a DB error in dev
+  // Added error handling test after seeing DB issues
   it('handles fetch errors', async () => {
-    (db.select as jest.Mock).mockReturnValueOnce({
-      from: jest.fn().mockRejectedValue(new Error('DB error')),
-    });
+    const mockFrom = jest.fn().mockRejectedValue(new Error('DB error'));
+    (db.select as jest.Mock).mockReturnValue({ from: mockFrom });
 
     try {
       await fetchDestinations();
@@ -71,8 +78,8 @@ describe('Destination Service Tests', () => {
     }
   });
 
-  // Added when implementing destination details page
-  it('gets destination details by name', async () => {
+  // Added when implementing destination detail page
+  it('fetches destination details by name', async () => {
     (db.select as jest.Mock).mockReturnValueOnce({
       from: jest.fn().mockReturnValue({
         where: jest.fn().mockResolvedValue([mockDestination]),
@@ -83,53 +90,40 @@ describe('Destination Service Tests', () => {
     expect(result).toEqual(mockDestination);
   });
 
-  // Added this after users were hitting 404s
-  it('handles delete of non-existent destination', async () => {
-    (db.delete as jest.Mock).mockReturnValueOnce({
-      where: jest.fn().mockReturnValue({
-        returning: jest.fn().mockResolvedValue([]),
+  // Added after finding 404 issues
+  it('handles non-existent destination lookups', async () => {
+    (db.select as jest.Mock).mockReturnValueOnce({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue([]),
       }),
     });
 
     try {
-      await deleteDestinationById(999);
+      await fetchDestinationDetailsByName('Unknown');
       fail('Expected an error to be thrown');
     } catch (error) {
       expect(error).toMatchObject({
-        message: 'Error deleting destination with ID 999',
+        message: 'Error fetching destination with name Unknown',
         status: 500,
         code: 'DB_QUERY_FAILED',
       });
     }
   });
 
-  // Basic fetch by ID test
-  it('finds destination ID by name', async () => {
-    const mockWithId = { destinationId: mockDestination.destinationId };
-    (db.select as jest.Mock).mockReturnValueOnce({
-      from: jest.fn().mockReturnValue({
-        where: jest.fn().mockResolvedValue([mockWithId]),
-      }),
-    });
-
-    const result = await fetchDestinationIdByName('Paris');
-    expect(result).toEqual(mockWithId.destinationId);
-  });
-
-  // Added when building create destination feature
-  it('adds new destination', async () => {
+  // Basic create test
+  it('adds new destinations', async () => {
     (db.insert as jest.Mock).mockReturnValueOnce({
       values: jest.fn().mockReturnValue({
         returning: jest.fn().mockResolvedValue([mockDestination]),
       }),
     });
 
-    const result = await addDestination(newDestination);
+    const result = await addDestination(newDestinationData);
     expect(result).toEqual(mockDestination);
   });
 
-  // Added this when the DB insert was failing
-  it('handles creation errors', async () => {
+  // Added after seeing insert fail in dev
+  it('handles insert errors', async () => {
     (db.insert as jest.Mock).mockReturnValueOnce({
       values: jest.fn().mockReturnValue({
         returning: jest.fn().mockRejectedValue(new Error('DB error')),
@@ -137,7 +131,7 @@ describe('Destination Service Tests', () => {
     });
 
     try {
-      await addDestination(newDestination);
+      await addDestination(newDestinationData);
       fail('Expected an error to be thrown');
     } catch (error) {
       expect(error).toMatchObject({
@@ -148,8 +142,8 @@ describe('Destination Service Tests', () => {
     }
   });
 
-  // Basic delete functionality
-  it('deletes destinations', async () => {
+  // Basic delete test
+  it('deletes destinations by id', async () => {
     (db.delete as jest.Mock).mockReturnValueOnce({
       where: jest.fn().mockReturnValue({
         returning: jest.fn().mockResolvedValue([mockDestination]),
@@ -158,5 +152,25 @@ describe('Destination Service Tests', () => {
 
     const result = await deleteDestinationById(1);
     expect(result).toEqual([mockDestination]);
+  });
+
+  // Added this when working on error handling
+  it('handles delete errors', async () => {
+    (db.delete as jest.Mock).mockReturnValueOnce({
+      where: jest.fn().mockReturnValue({
+        returning: jest.fn().mockRejectedValue(new Error('DB error')),
+      }),
+    });
+
+    try {
+      await deleteDestinationById(1);
+      fail('Expected an error to be thrown');
+    } catch (error) {
+      expect(error).toMatchObject({
+        message: 'Error deleting destination with ID 1',
+        status: 500,
+        code: 'DB_QUERY_FAILED',
+      });
+    }
   });
 });

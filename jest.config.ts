@@ -1,14 +1,29 @@
-import type { JestConfigWithTsJest } from 'ts-jest';
+import type { Config } from 'jest';
 
-const jestConfig: JestConfigWithTsJest = {
+const config: Config = {
+  rootDir: __dirname,
   preset: 'ts-jest',
   testEnvironment: 'node',
-  collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts'],
-  coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov'],
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  silent: true,
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  collectCoverage: false,
+  silent: false,
+  verbose: true,
+  testMatch: [
+    '**/tests/unit/**/*.test.ts',
+    '**/tests/integration/**/*.test.ts',
+  ],
+  moduleDirectories: ['node_modules', 'src'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.test.json',
+      },
+    ],
+  },
 };
 
-export default jestConfig;
+export default config;
