@@ -1,14 +1,9 @@
-import supabase from './src/models/supabase-client';
+import cleanupTestData from './src/tests/utils/test-cleanup';
 
-beforeEach(() => {
-  console.log('🔄 Resetting mocks');
+beforeEach(async () => {
   jest.clearAllMocks();
 });
 
-beforeEach(async () => {
-  await supabase.rpc('start_transaction');
-});
-
 afterEach(async () => {
-  await supabase.rpc('rollback_transaction');
+  await cleanupTestData();
 });

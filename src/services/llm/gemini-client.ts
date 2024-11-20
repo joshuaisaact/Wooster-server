@@ -3,6 +3,7 @@ import { logger } from '../../utils/logger';
 import {
   createAIServiceError,
   createValidationError,
+  isAIServiceError,
 } from '../../types/errors';
 import { cleanLLMJsonResponse, validateJSON } from '../../utils/llm-utils';
 
@@ -24,48 +25,55 @@ export const generateValidJsonResponse = async (
   context: string,
 ): Promise<string> => {
   const model = createGeminiClient();
-  let responseText: string = ''; // Initialize responseText variable
+  let responseText: string = '';
 
   try {
-    // Attempt to generate the response
-    const result = await model.generateContent(prompt);
-    responseText = await result.response.text(); // Capture responseText here
+    // Add basic timeout using AbortController
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-    if (!responseText) {
-      const errorMessage = 'Empty response from LLM';
-      logger.warn({ prompt }, errorMessage);
-      throw createAIServiceError(errorMessage, { prompt });
+    const result = await model.generateContent(prompt, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    responseText = await result.response.text();
+
+    if (!responseText?.trim()) {
+      throw createAIServiceError('Empty response from LLM', { prompt });
     }
 
-    // Clean the response and validate it
+    // Clean and validate JSON using your existing methods
     const cleanedResponse = cleanLLMJsonResponse(responseText);
-
-    // Perform validation after cleaning the response
     validateJSON(cleanedResponse);
 
-    // Return the valid response if everything passes
-    logger.debug({ prompt, response: cleanedResponse }, `Generated ${context}`);
     return cleanedResponse;
   } catch (error) {
-    let errorMessage = `Failed to generate ${context}`;
-
-    if (
-      error instanceof Error &&
-      error.message.includes('Invalid JSON response')
-    ) {
-      // This is a validation error
-      errorMessage = `Invalid JSON response from LLM for ${context}`;
-      // Log and throw the validation error with the responseText
-      logger.error({ error, rawResponse: responseText }, errorMessage);
-      throw createValidationError(errorMessage, {
-        error: error.message,
-        rawResponse: responseText, // Include responseText here
+    // Handle abort/timeout
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw createAIServiceError(`LLM request timed out for ${context}`, {
+        prompt,
       });
     }
 
-    // Log and throw a generic AI service error
-    logger.error({ error, prompt }, errorMessage);
-    throw createAIServiceError(errorMessage, {
+    // Handle validation errors with exact message format
+    if (error instanceof Error && error.message.includes('Invalid JSON')) {
+      throw createValidationError(
+        `Invalid JSON response from LLM for ${context}`,
+        {
+          error: `Invalid JSON response: ${error.message}`,
+          rawResponse: responseText,
+        },
+      );
+    }
+
+    // Pass through any AI service errors (like empty response)
+    if (isAIServiceError(error)) {
+      throw error;
+    }
+
+    // Generic AI service error
+    throw createAIServiceError(`Failed to generate ${context}`, {
       originalError: error instanceof Error ? error.message : 'Unknown error',
       prompt,
     });

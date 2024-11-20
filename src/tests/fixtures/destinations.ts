@@ -1,7 +1,7 @@
 export const mockLLMDestinations = {
   tokyo: {
-    destinationName: 'Tokyo',
-    normalizedName: 'tokyo',
+    destinationName: 'TEST_DESTINATION_TOKYO',
+
     latitude: '35.6762',
     longitude: '139.6503',
     description: 'A city where tradition meets modernity',
@@ -22,8 +22,8 @@ export const mockLLMDestinations = {
     culturalSignificance: 'High',
   },
   paris: {
-    destinationName: 'Paris',
-    normalizedName: 'paris',
+    destinationName: 'TEST_DESTINATION_PARIS',
+
     latitude: '48.8566',
     longitude: '2.3522',
     description: 'The City of Light',
@@ -44,7 +44,7 @@ export const mockLLMDestinations = {
     culturalSignificance: 'High',
   },
   kerry: {
-    destinationName: 'Kerry',
+    destinationName: 'TEST_DESTINATION_KERRY',
     latitude: '52.0662',
     longitude: '-9.6737',
     description:

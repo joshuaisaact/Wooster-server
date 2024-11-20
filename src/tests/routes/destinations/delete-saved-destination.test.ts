@@ -1,4 +1,4 @@
-import { mockAuthMiddleware } from '../../mocks/auth-middleware-mock';
+import { mockAuthMiddleware } from '../../../__mocks__/auth-middleware';
 
 // Mock auth middleware
 jest.mock('../../../src/middleware/auth-middleware', () => mockAuthMiddleware);

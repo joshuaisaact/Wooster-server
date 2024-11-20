@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '../../..';
 import * as destinationService from '../../services/destination-service';
 import { mockAuthHeader } from '../../mocks/auth-mocks';
-import { mockAuthMiddleware } from '../../mocks/auth-middleware-mock';
+import { mockAuthMiddleware } from '../../../__mocks__/auth-middleware';
 
 jest.mock('../../middleware/auth-middleware', () => mockAuthMiddleware);
 jest.mock('../../services/destination-service');

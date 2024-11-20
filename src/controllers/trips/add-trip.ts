@@ -40,6 +40,10 @@ async function getOrCreateDestination(location: string): Promise<number> {
   } catch (error) {
     logger.error(
       `Failed to process destination: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      {
+        location,
+        errorDetails: error instanceof Error ? error.stack : error,
+      },
     );
     throw {
       status: 500,

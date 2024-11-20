@@ -1,4 +1,5 @@
 import { mockLLMDestinations } from '../fixtures/destinations';
+import { mockLLMTrips } from '../fixtures/trips';
 
 const mockGenerateContent = jest.fn();
 
@@ -8,31 +9,34 @@ export const mockGeminiClient = {
   }),
 };
 
-export const setLLMResponse = (type: 'success' | 'malformed') => {
-  console.log('Setting LLM response to:', type);
+export const setLLMResponse = (
+  type: 'success' | 'malformed' | 'timeout' | 'empty',
+  dataType: 'destination' | 'trip',
+) => {
   if (type === 'success') {
     mockGenerateContent.mockResolvedValue({
       response: {
-        text: () => JSON.stringify(mockLLMDestinations.tokyo),
+        text: () =>
+          JSON.stringify(
+            dataType === 'destination'
+              ? mockLLMDestinations.tokyo
+              : mockLLMTrips.tokyo,
+          ),
       },
     });
-  } else {
+  } else if (type === 'malformed') {
     mockGenerateContent.mockResolvedValue({
       response: {
         text: () => '{broken json',
       },
     });
+  } else if (type === 'timeout') {
+    mockGenerateContent.mockRejectedValue(new Error('AbortError'));
+  } else if (type === 'empty') {
+    mockGenerateContent.mockResolvedValue({
+      response: {
+        text: () => '',
+      },
+    });
   }
 };
-
-// Log when the mock is set up
-console.log('Setting up Google AI mock');
-jest.mock('@google/generative-ai', () => {
-  console.log('Mock constructor called');
-  return {
-    GoogleGenerativeAI: jest.fn(() => {
-      console.log('Creating mock client');
-      return mockGeminiClient;
-    }),
-  };
-});
