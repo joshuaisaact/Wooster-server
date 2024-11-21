@@ -126,6 +126,56 @@ describe('Destination API', () => {
     });
   });
 
+  it.only('can search for destinations', async () => {
+    await retry(async () => {
+      // Create a couple of destinations
+      setLLMResponse('success', 'destination');
+      await api
+        .post('/api/destinations')
+        .set('Authorization', authHeader)
+        .set('Content-Type', 'application/json')
+        .send({ destination: 'Tokyo' })
+        .expect(201);
+
+      setLLMResponse('success', 'destination', mockLLMDestinations.paris);
+      await api
+        .post('/api/destinations')
+        .set('Authorization', authHeader)
+        .set('Content-Type', 'application/json')
+        .send({ destination: 'Paris' })
+        .expect(201);
+
+      // Test partial name search
+      const partialResponse = await api
+        .get('/api/destinations/search?search=pa')
+        .expect(200);
+
+      expect(partialResponse.body.destinations.length).toBe(1);
+      expect(partialResponse.body.destinations[0].destinationName).toBe(
+        'Paris',
+      );
+
+      // Test country filter
+      const franceResponse = await api
+        .get('/api/destinations/search?country=France')
+        .expect(200);
+
+      expect(franceResponse.body.destinations.length).toBe(1);
+      expect(franceResponse.body.destinations[0].country).toBe('France');
+
+      // Test combined search
+      const combinedResponse = await api
+        .get('/api/destinations/search?search=to&country=Japan')
+        .expect(200);
+
+      expect(combinedResponse.body.destinations.length).toBe(1);
+      expect(combinedResponse.body.destinations[0].destinationName).toBe(
+        'Tokyo',
+      );
+      expect(combinedResponse.body.destinations[0].country).toBe('Japan');
+    });
+  });
+
   it('can delete a destination', async () => {
     await retry(async () => {
       const destinationName = 'Tokyo';

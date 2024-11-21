@@ -88,13 +88,11 @@ describe('Saved destination API', () => {
 
       const id = createResponse.body.destination.destinationId;
 
-      // Then delete it
       await api
         .delete(`/api/saved-destinations/${id}`)
         .set('Authorization', authHeader)
         .expect(200);
 
-      // Verify it's gone from saved list
       const getResponse = await api
         .get('/api/saved-destinations')
         .set('Authorization', authHeader);
