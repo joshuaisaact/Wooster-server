@@ -1,20 +1,11 @@
-import {
-  activities,
-  db,
-  destinations,
-  itineraryDays,
-  savedDestinations,
-  trips,
-} from './src/db';
+import { closeTestDb } from './src/tests/setup/test-db'; // Adjust path accordingly
 
 beforeEach(async () => {
+  // await clearAllTables();
   jest.clearAllMocks();
 });
 
-afterEach(async () => {
-  await db.delete(trips);
-  await db.delete(itineraryDays);
-  await db.delete(activities);
-  await db.delete(destinations);
-  await db.delete(savedDestinations);
+afterAll(() => {
+  // Close the SQLite database after all tests
+  closeTestDb();
 });

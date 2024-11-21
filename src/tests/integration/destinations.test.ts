@@ -1,3 +1,13 @@
+import { testDb } from '../setup/test-db';
+
+jest.mock('../../db', () => {
+  const originalModule = jest.requireActual('../../db');
+  return {
+    ...originalModule,
+    db: testDb,
+  };
+});
+
 import { mockGeminiClient } from '@/tests/mocks/llm';
 import { requireAuth } from '@/__mocks__/auth-middleware';
 
@@ -12,7 +22,7 @@ jest.mock('@google/generative-ai', () => ({
 import request from 'supertest';
 import app from '@/index';
 import { setLLMResponse } from '../mocks/llm';
-import { db } from '@/db';
+import { destinations } from '@/db';
 
 const api = request(app);
 
@@ -42,6 +52,7 @@ describe('Destination API', () => {
   });
 
   it.only('can create a new destination', async () => {
+    console.log(await testDb.select().from(destinations));
     const randomDestination = generateRandomDestination();
 
     setLLMResponse('success', 'destination');
@@ -79,7 +90,7 @@ describe('Destination API', () => {
     });
 
     expect(response.status).toBe(201);
-    expect(db.insert).toHaveBeenCalledWith(
+    expect(testDb.insert).toHaveBeenCalledWith(
       expect.objectContaining({
         destination: 'Tokyo',
       }),
