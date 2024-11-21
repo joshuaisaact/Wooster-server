@@ -22,10 +22,9 @@ export const generateNewDestination = async (
 
     if (!generatedDestination) {
       const errorMessage = 'AI service returned no data';
-      logger.warn({ destinationName, prompt }, errorMessage);
+      logger.warn({ destinationName }, errorMessage);
       throw createAIServiceError(errorMessage, {
         destinationName,
-        prompt,
       });
     }
 

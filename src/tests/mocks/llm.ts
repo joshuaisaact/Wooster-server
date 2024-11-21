@@ -12,6 +12,9 @@ export const mockGeminiClient = {
 export const setLLMResponse = (
   type: 'success' | 'malformed' | 'timeout' | 'empty',
   dataType: 'destination' | 'trip',
+  destinationData:
+    | (typeof mockLLMDestinations)[keyof typeof mockLLMDestinations]
+    | null = null,
 ) => {
   if (type === 'success') {
     mockGenerateContent.mockResolvedValue({
@@ -19,7 +22,7 @@ export const setLLMResponse = (
         text: () =>
           JSON.stringify(
             dataType === 'destination'
-              ? mockLLMDestinations.tokyo
+              ? destinationData || mockLLMDestinations.tokyo
               : mockLLMTrips.tokyo,
           ),
       },

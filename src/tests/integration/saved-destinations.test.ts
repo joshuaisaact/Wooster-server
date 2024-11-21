@@ -29,13 +29,11 @@ import {
   savedDestinations,
   trips,
 } from '@/db';
-import { mockLLMDestinations } from '../fixtures/destinations';
-import { normalizeDestinationName } from '@/services/destination-service';
 import { retry } from '../helpers/retry';
 
 const api = request(app);
 
-describe('Destination API', () => {
+describe('Saved destination API', () => {
   const authHeader = 'Bearer test-token';
 
   beforeAll(async () => {
@@ -56,16 +54,7 @@ describe('Destination API', () => {
     return Math.random().toString(36).substring(2, 15);
   }
 
-  it('can get a list of destinations', async () => {
-    await retry(async () => {
-      await api
-        .get('/api/destinations')
-        .set('Authorization', authHeader)
-        .expect(200);
-    });
-  });
-
-  it('can create a new destination', async () => {
+  it('can get a list of saved destinations', async () => {
     await retry(async () => {
       const randomDestination = generateRandomDestination();
       setLLMResponse('success', 'destination');
@@ -76,57 +65,15 @@ describe('Destination API', () => {
         .set('Content-Type', 'application/json')
         .send({ destination: randomDestination })
         .expect(201);
-    });
-  });
 
-  it('gives a conflict error if destination is already saved', async () => {
-    await retry(async () => {
-      const destinationName = 'Tokyo';
-
-      setLLMResponse('success', 'destination');
       await api
-        .post('/api/destinations')
+        .get('/api/saved-destinations')
         .set('Authorization', authHeader)
-        .set('Content-Type', 'application/json')
-        .send({ destination: destinationName })
-        .expect(201);
-
-      setLLMResponse('success', 'destination');
-      const response = await api
-        .post('/api/destinations')
-        .set('Authorization', authHeader)
-        .set('Content-Type', 'application/json')
-        .send({ destination: destinationName });
-
-      expect(response.status).toBe(409);
-      expect(response.body.code).toBe('DESTINATION_ALREADY_SAVED');
-      expect(response.body.error).toBe('Destination is already saved');
+        .expect(200);
     });
   });
 
-  it('can save an existing destination to the saved destinations list', async () => {
-    await retry(async () => {
-      const mockDestination = mockLLMDestinations.tokyo;
-
-      await testDb.insert(destinations).values({
-        ...mockDestination,
-        normalizedName: normalizeDestinationName(
-          mockDestination.destinationName,
-        ),
-      });
-
-      const response = await api
-        .post('/api/destinations')
-        .set('Authorization', authHeader)
-        .set('Content-Type', 'application/json')
-        .send({ destination: 'Tokyo' })
-        .expect(201);
-
-      expect(response.body.message).toBe('Destination saved successfully');
-    });
-  });
-
-  it('can delete a destination', async () => {
+  it('can delete a saved destination', async () => {
     await retry(async () => {
       const destinationName = 'Tokyo';
 
@@ -141,24 +88,57 @@ describe('Destination API', () => {
 
       const id = createResponse.body.destination.destinationId;
 
+      // Then delete it
       await api
-        .delete(`/api/destinations/${id}`)
+        .delete(`/api/saved-destinations/${id}`)
         .set('Authorization', authHeader)
         .expect(200);
 
-      // Verify it's gone
+      // Verify it's gone from saved list
       const getResponse = await api
-        .get('/api/destinations')
+        .get('/api/saved-destinations')
         .set('Authorization', authHeader);
 
-      expect(getResponse.body).toEqual([]);
+      expect(getResponse.body).toEqual({
+        message: 'Fetched saved destinations successfully',
+        savedDestinations: [],
+      });
+    });
+  });
+
+  it('gives a conflict error if destination is already saved', async () => {
+    await retry(async () => {
+      const destinationName = 'Tokyo';
+
+      setLLMResponse('success', 'destination');
+      const res = await api
+        .post('/api/destinations')
+        .set('Authorization', authHeader)
+        .set('Content-Type', 'application/json')
+        .send({ destination: destinationName })
+        .expect(201);
+
+      const id = res.body.destination.destinationId;
+
+      setLLMResponse('success', 'destination');
+      const response = await api
+        .post(`/api/saved-destinations/${id}`)
+        .set('Authorization', authHeader)
+        .set('Content-Type', 'application/json')
+        .send({ destination: destinationName });
+
+      expect(response.status).toBe(409);
+      expect(response.body).toEqual({
+        error: 'Destination already saved!',
+        savedDestination: expect.any(Object),
+      });
     });
   });
 
   it('fails with 401 if no auth token', async () => {
     await retry(async () => {
       await api
-        .post('/api/destinations')
+        .post('/api/saved-destinations/1')
         .set('Content-Type', 'application/json')
         .send({ destination: 'Tokyo' })
         .expect(401);
@@ -170,15 +150,13 @@ describe('Destination API', () => {
       setLLMResponse('malformed', 'destination');
 
       const response = await api
-        .post('/api/destinations')
+        .post('/api/saved-destinations/2')
         .set('Authorization', authHeader)
         .set('Content-Type', 'application/json')
         .send({ destination: 'Tokyo' });
 
       expect(response.status).toBe(500);
-      expect(response.body.error).toContain(
-        'Failed to generate destination data',
-      );
+      expect(response.body.error).toContain('Failed to save destination');
     });
   });
 });
