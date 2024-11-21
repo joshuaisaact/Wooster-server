@@ -71,10 +71,9 @@ describe('Destination API', () => {
       .expect(201);
   });
 
-  it('gives a conflict error if destination is already saved for user', async () => {
+  it('gives a conflict error if destination is already saved', async () => {
     const destinationName = 'Tokyo';
 
-    // First creation should succeed
     setLLMResponse('success', 'destination');
     await api
       .post('/api/destinations')
@@ -83,7 +82,6 @@ describe('Destination API', () => {
       .send({ destination: destinationName })
       .expect(201);
 
-    // Second attempt should fail with "already saved"
     setLLMResponse('success', 'destination');
     const response = await api
       .post('/api/destinations')
@@ -91,21 +89,19 @@ describe('Destination API', () => {
       .set('Content-Type', 'application/json')
       .send({ destination: destinationName });
 
-    expect(response.status).toBe(409); // Conflict
+    expect(response.status).toBe(409);
     expect(response.body.code).toBe('DESTINATION_ALREADY_SAVED');
     expect(response.body.error).toBe('Destination is already saved');
   });
 
-  it('can save an existing destination for a new user', async () => {
+  it('can save an existing destination to the saved destinations list', async () => {
     const mockDestination = mockLLMDestinations.tokyo;
 
-    // Insert the destination directly
     await testDb.insert(destinations).values({
       ...mockDestination,
       normalizedName: normalizeDestinationName(mockDestination.destinationName),
     });
 
-    // Then try to save it via the API
     const response = await api
       .post('/api/destinations')
       .set('Authorization', authHeader)
