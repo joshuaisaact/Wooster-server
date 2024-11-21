@@ -47,7 +47,7 @@ export const handleAddDestination = async (
       });
     }
 
-    logger.error('Unexpected error:', error);
+    logger.error({ error }, 'Unexpected error in handleAddDestination');
     return res.status(500).json({
       error: 'An unexpected error occurred',
       code: 'DB_QUERY_FAILED',

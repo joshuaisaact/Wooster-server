@@ -1,13 +1,16 @@
-import { drizzle } from 'drizzle-orm/node-postgres';
-import * as pgmem from 'pgmem';
-import { migrate } from 'drizzle-orm/node-postgres/migrator';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import 'dotenv/config';
 
-// Create an in-memory PostgreSQL instance
-const pg = pgmem();
-const db = drizzle(pg); // Drizzle ORM setup for pgmem
+import * as schema from '../../db/tables';
 
-// Apply migrations dynamically at runtime
-await migrate(db); // Apply the migrations defined in your schema
+const databaseUrl = process.env.TEST_DATABASE_URL;
 
-// Export the test database instance for your tests
-export const testDb = db;
+if (!databaseUrl) {
+  throw new Error(
+    'DATABASE_URL is not defined. Please set it in your .env file.',
+  );
+}
+
+const sql = postgres(databaseUrl);
+export const testDb = drizzle(sql, { schema });

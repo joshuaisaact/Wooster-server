@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
     "start": "node dist/server.js",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
     "drizzle:generate": "drizzle-kit generate --config=drizzle.config.ts",
     "drizzle:generate:test": "drizzle-kit generate --config=drizzle.test.config.ts",
     "drizzle:migrate": "drizzle-kit push --config=drizzle.config.ts",
@@ -61,6 +64,8 @@
     "drizzle-orm": "^0.36.3",
     "express": "^4.21.0",
     "express-rate-limit": "^7.4.1",
+    "pg": "^8.13.1",
+    "pg-mem": "^3.0.3",
     "pino": "^9.5.0",
     "postgres": "^3.4.4",
     "uuid": "^10.0.0"

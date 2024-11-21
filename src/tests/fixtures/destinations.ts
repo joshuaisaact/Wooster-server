@@ -1,28 +1,28 @@
 export const mockLLMDestinations = {
   tokyo: {
-    destinationName: 'TEST_DESTINATION_TOKYO',
+    destinationName: 'Tokyo',
 
     latitude: '35.6762',
     longitude: '139.6503',
     description: 'A city where tradition meets modernity',
     country: 'Japan',
-    bestTimeToVisit: ['Spring', 'Autumn'],
+    bestTimeToVisit: 'Spring, Autumn',
     averageTemperatureLow: '8',
     averageTemperatureHigh: '25',
-    popularActivities: ['Visit Senso-ji', 'Explore Shibuya'],
-    travelTips: ['Get a Pasmo card', 'Learn basic phrases'],
-    nearbyAttractions: ['Mount Fuji', 'Kamakura'],
-    transportationOptions: ['Metro', 'JR Trains', 'Bus'],
+    popularActivities: 'Visit Senso-ji, Explore Shibuya',
+    travelTips: 'Get a Pasmo card, Learn basic phrases',
+    nearbyAttractions: 'Mount Fuji, Kamakura',
+    transportationOptions: 'Metro, JR Trains, Bus',
     accessibilityInfo: 'High',
     officialLanguage: 'Japanese',
     currency: 'JPY',
-    localCuisine: ['Sushi', 'Ramen'],
+    localCuisine: 'Sushi, Ramen',
     costLevel: 'High',
     safetyRating: 'High',
     culturalSignificance: 'High',
   },
   paris: {
-    destinationName: 'TEST_DESTINATION_PARIS',
+    destinationName: 'Paris',
 
     latitude: '48.8566',
     longitude: '2.3522',
@@ -44,7 +44,7 @@ export const mockLLMDestinations = {
     culturalSignificance: 'High',
   },
   kerry: {
-    destinationName: 'TEST_DESTINATION_KERRY',
+    destinationName: 'Kerry',
     latitude: '52.0662',
     longitude: '-9.6737',
     description:

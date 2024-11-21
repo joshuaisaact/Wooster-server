@@ -4,7 +4,7 @@ const config: Config = {
   rootDir: __dirname,
   preset: 'ts-jest',
   testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/tests/setup/jest.setup.ts'],
   collectCoverage: false,
   silent: false,
   verbose: true,

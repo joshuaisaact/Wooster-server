@@ -1,11 +1,11 @@
 CREATE TABLE `activities` (
-	`activity_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`activity_id` integer  AUTOINCREMENT,
 	`activity_name` text,
 	`description` text,
 	`location` text,
 	`latitude` real,
 	`longitude` real,
-	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP,
 	`price` text,
 	`location_id` integer,
 	`duration` text,
@@ -15,14 +15,14 @@ CREATE TABLE `activities` (
 );
 --> statement-breakpoint
 CREATE TABLE `destinations` (
-	`destination_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`destination_name` text NOT NULL,
-	`normalized_name` text NOT NULL,
+	`destination_id` integer AUTOINCREMENT,
+	`destination_name` text,
+	`normalized_name` text,
 	`latitude` real,
 	`longitude` real,
 	`description` text,
 	`country` text,
-	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP,
 	`best_time_to_visit` text,
 	`average_temperature_low` text,
 	`average_temperature_high` text,
@@ -42,28 +42,28 @@ CREATE TABLE `destinations` (
 --> statement-breakpoint
 CREATE UNIQUE INDEX `destinations_normalized_name_unique` ON `destinations` (`normalized_name`);--> statement-breakpoint
 CREATE TABLE `itinerary_days` (
-	`day_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`day_id` integer AUTOINCREMENT,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP,
 	`trip_id` integer,
 	`day_number` integer,
 	`activity_id` integer
 );
 --> statement-breakpoint
 CREATE TABLE `saved_destinations` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`user_id` text NOT NULL,
-	`destination_id` integer NOT NULL,
-	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`id` integer AUTOINCREMENT,
+	`user_id` text,
+	`destination_id` integer,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP,
 	`notes` text,
 	`is_visited` integer DEFAULT false,
 	FOREIGN KEY (`destination_id`) REFERENCES `destinations`(`destination_id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `trips` (
-	`trip_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`user_id` text NOT NULL,
+	`trip_id` integer AUTOINCREMENT,
+	`user_id` text,
 	`destination_id` integer,
 	`start_date` text,
-	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP,
 	`num_days` integer
 );

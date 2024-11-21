@@ -6,6 +6,7 @@ import {
   createDBNotFoundError,
   isServiceError,
   createDestinationGenerationError,
+  createServiceError,
 } from '../../types/errors';
 import { logger } from '../../utils/logger';
 import { generateNewDestination } from './destination-generator';
@@ -204,6 +205,24 @@ export async function getOrCreateDestination(location: string) {
       const destinationData = await generateNewDestination(location);
       return await addDestination(destinationData);
     } catch (error) {
+      // Postgres duplicate key error
+      if (error instanceof Error && 'code' in error && error.code === '23505') {
+        throw createServiceError(
+          'Destination already exists',
+          409,
+          'DESTINATION_EXISTS',
+          { location },
+        );
+      }
+
+      // Other database errors
+      if (error instanceof Error && 'code' in error) {
+        throw createDBQueryError('Failed to insert destination', {
+          originalError: error.message,
+        });
+      }
+
+      // Generation errors
       throw createDestinationGenerationError(
         'Failed to generate destination data',
         { location, error },
@@ -213,9 +232,10 @@ export async function getOrCreateDestination(location: string) {
     logger.error({ error, location }, 'Failed to process destination');
 
     if (isServiceError(error)) {
-      throw error;
+      throw error; // Pass through our custom errors
     }
 
+    // Unexpected errors
     throw createDBQueryError('Failed to process destination', {
       location,
       error,
