@@ -4,11 +4,11 @@ import 'dotenv/config';
 
 import * as schema from '../../db/tables';
 
-const databaseUrl = process.env.TEST_DATABASE_URL;
+const databaseUrl = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
 
 if (!databaseUrl) {
   throw new Error(
-    'DATABASE_URL is not defined. Please set it in your .env file.',
+    'Neither DATABASE_URL nor TEST_DATABASE_URL is defined. Please set one in your .env file.',
   );
 }
 
