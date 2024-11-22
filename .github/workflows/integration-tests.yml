@@ -60,6 +60,17 @@ jobs:
           echo "TEST_DATABASE_URL=${TEST_DATABASE_URL}" >> $GITHUB_ENV
           echo "DATABASE_URL=${TEST_DATABASE_URL}" >> $GITHUB_ENV
 
+      - name: Generate test migrations
+        run: npm run drizzle:generate:test
+        env:
+          NODE_ENV: test
+
+      - name: Run test migrations
+        run: npm run drizzle:migrate:test
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
+
       - name: Run integration tests with coverage
         run: npm run test:integration -- --coverage
 
