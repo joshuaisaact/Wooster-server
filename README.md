@@ -14,7 +14,9 @@ Wooster Server is the backend service for the Wooster AI-powered trip planning a
 
 It is built using **Express** and **TypeScript**, it uses **Drizzle** as an ORM, and integrates with **Google's Gemini API** for AI services and **Supabase** for cloud database storage. 
 
-The backend manages trip and destination data, providing API routes for creating, managing, and retrieving trip itineraries and destination details.
+The backend manages trip and destination data, providing API routes for creating, managing, and retrieving trip itineraries and destination details. 
+
+It uses Docker for a containerized test database, Pino for structured logging, and integrates with Google's Gemini AI for enhanced travel recommendations.
 
 [![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -22,8 +24,11 @@ The backend manages trip and destination data, providing API routes for creating
 [![Supabase](https://img.shields.io/badge/supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Drizzle](https://img.shields.io/badge/drizzle-C5F74F?style=for-the-badge&logo=drizzle&logoColor=black)](https://orm.drizzle.team/)
 [![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Pino](https://img.shields.io/badge/pino-grey?style=for-the-badge&logo=pino&logoColor=white)](https://getpino.io/)
+[![Google Gemini](https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
 [![Supertest](https://img.shields.io/badge/supertest-ff69b4?style=for-the-badge)](https://github.com/visionmedia/supertest)
+[![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
 
 ## Related Repositories
 
