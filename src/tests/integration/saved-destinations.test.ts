@@ -34,6 +34,9 @@ import {
   trips,
 } from '@/db';
 import { retry } from '../helpers/retry';
+import { mockLLMDestinations } from '../fixtures/destinations';
+import { normalizeDestinationName } from '@/services/destination-service';
+import { resetSequences } from '../utils/reset-sequence';
 
 const api = request(app);
 
@@ -51,6 +54,8 @@ describe('Saved destination API', () => {
       await testDb.delete(itineraryDays);
       await testDb.delete(trips);
       await testDb.delete(destinations);
+
+      await resetSequences();
     });
   });
 
@@ -74,6 +79,42 @@ describe('Saved destination API', () => {
         .get('/api/saved-destinations')
         .set('Authorization', authHeader)
         .expect(200);
+    });
+  });
+
+  it('can save an existing destination to the saved destinations list', async () => {
+    await retry(async () => {
+      const mockDestination = mockLLMDestinations.kerry;
+
+      // Log existing destinations before insert
+      const beforeDests = await testDb.select().from(destinations);
+      console.log('Destinations before:', beforeDests);
+
+      // Insert the destination
+      await testDb.insert(destinations).values({
+        ...mockDestination,
+        normalizedName: normalizeDestinationName(
+          mockDestination.destinationName,
+        ),
+      });
+
+      // Log destinations after insert
+      const afterInsertDests = await testDb.select().from(destinations);
+      console.log('Destinations after insert:', afterInsertDests);
+
+      // Make the API call
+      const response = await api
+        .post('/api/saved-destinations/1')
+        .set('Authorization', authHeader)
+        .set('Content-Type', 'application/json')
+        .send({ destination: 'Kerry' })
+        .expect(201);
+
+      // Log destinations after API call
+      const afterApiDests = await testDb.select().from(destinations);
+      console.log('Destinations after API call:', afterApiDests);
+
+      expect(response.body.message).toBe('Destination saved successfully');
     });
   });
 

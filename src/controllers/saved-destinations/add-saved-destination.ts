@@ -43,7 +43,7 @@ export const handleAddSavedDestination = async (
       savedDestination,
     });
   } catch (error) {
-    logger.error('Error saving destination:', error); // Log the error
+    logger.error('Error saving destination:', error);
     return res.status(500).json({
       error: 'Failed to save destination',
     });

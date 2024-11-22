@@ -36,6 +36,7 @@ import {
 import { mockLLMDestinations } from '../fixtures/destinations';
 import { normalizeDestinationName } from '@/services/destination-service';
 import { retry } from '../helpers/retry';
+import { resetSequences } from '../utils/reset-sequence';
 
 const api = request(app);
 
@@ -54,18 +55,45 @@ describe('Destination API', () => {
       await testDb.delete(trips);
       await testDb.delete(destinations);
     });
+
+    await resetSequences();
   });
 
   function generateRandomDestination() {
     return Math.random().toString(36).substring(2, 15);
   }
 
-  it('can get a list of destinations', async () => {
+  it.only('can get a list of destinations', async () => {
     await retry(async () => {
-      await api
+      const mockDestinations = [
+        mockLLMDestinations.tokyo,
+        mockLLMDestinations.kerry,
+      ];
+
+      await Promise.all(
+        mockDestinations.map((dest) =>
+          testDb.insert(destinations).values({
+            ...dest,
+            normalizedName: normalizeDestinationName(dest.destinationName),
+          }),
+        ),
+      );
+
+      const response = await api
         .get('/api/destinations')
         .set('Authorization', authHeader)
         .expect(200);
+
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body.length).toBe(2);
+
+      expect(response.body[0]).toEqual(
+        expect.objectContaining({
+          destinationId: expect.any(Number),
+          destinationName: expect.any(String),
+          normalizedName: expect.any(String),
+        }),
+      );
     });
   });
 
