@@ -1,5 +1,5 @@
-import { mockLLMDestinations } from '../fixtures/destinations';
-import { mockLLMTrips } from '../fixtures/trips';
+import { mockLLMDestinations } from '../tests/fixtures/destinations';
+import { mockLLMTrips } from '../tests/fixtures/trips';
 
 const mockGenerateContent = jest.fn();
 

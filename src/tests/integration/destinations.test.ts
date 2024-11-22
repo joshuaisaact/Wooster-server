@@ -8,7 +8,7 @@ jest.mock('../../db', () => {
   };
 });
 
-import { mockGeminiClient } from '@/tests/mocks/llm';
+import { mockGeminiClient } from '@/__mocks__/llm';
 import { requireAuth } from '@/__mocks__/auth-middleware';
 
 jest.mock('@/middleware/auth-middleware', () => ({
@@ -25,7 +25,7 @@ jest.mock('@google/generative-ai', () => {
 
 import request from 'supertest';
 import app from '@/index';
-import { setLLMResponse } from '../mocks/llm';
+import { setLLMResponse } from '../../__mocks__/llm';
 import {
   activities,
   destinations,

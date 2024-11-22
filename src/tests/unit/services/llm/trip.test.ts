@@ -1,4 +1,4 @@
-import { mockGeminiClient } from '@/tests/mocks/llm';
+import { mockGeminiClient } from '@/__mocks__/llm';
 
 jest.mock('@google/generative-ai', () => ({
   GoogleGenerativeAI: jest.fn().mockImplementation(() => mockGeminiClient),
@@ -6,7 +6,7 @@ jest.mock('@google/generative-ai', () => ({
 
 import { generateTripItinerary } from '@/services/llm/generators/trip';
 import { mockLLMTrips } from '@/tests/fixtures/trips';
-import { setLLMResponse } from '@/tests/mocks/llm';
+import { setLLMResponse } from '@/__mocks__/llm';
 
 describe('Trip Generator', () => {
   beforeEach(() => {
