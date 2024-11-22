@@ -72,7 +72,7 @@ jobs:
           DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
 
       - name: Run integration tests with coverage
-        run: npm run test:integration -- --coverage
+        run: npm run test:integration -- --coverage --verbose
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
