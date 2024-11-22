@@ -10,7 +10,7 @@ export default defineConfig({
       'postgres://testuser:testpassword@localhost:5432/testdb', // Connection string (pgmem creates an in-memory PostgreSQL database)
   },
   verbose: true,
-  strict: true,
+  strict: false,
   migrations: {
     prefix: 'timestamp', // Migration file prefix
     table: '__drizzle_migrations__', // Table to track migrations
