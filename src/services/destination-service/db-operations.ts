@@ -43,28 +43,6 @@ export const fetchDestinationDetailsByName = (destinationName: string) =>
     },
   );
 
-export const fetchDestinationIdByName = (location: string) =>
-  executeDbOperation(
-    async () => {
-      const [destination] = await db
-        .select({ destinationId: destinations.destinationId })
-        .from(destinations)
-        .where(eq(destinations.destinationName, location));
-
-      if (!destination) {
-        throw createDBNotFoundError(
-          `Destination with name ${location} not found`,
-          { location },
-        );
-      }
-
-      logger.info({ location }, 'Fetched destination ID');
-      return destination.destinationId;
-    },
-    'Error fetching destination ID',
-    { context: { location } },
-  );
-
 export const addDestination = (destinationData: NewDestination) =>
   executeDbOperation(
     async () => {
