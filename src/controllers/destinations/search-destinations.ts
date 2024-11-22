@@ -36,52 +36,37 @@ export async function handleSearchDestinations(
     ? req.query.country[0] || 'all'
     : req.query.country || 'all';
 
-  console.log('Search params:', { page, search, country }); // Add logging
-
   const ITEMS_PER_PAGE = 12;
   const offset = (page - 1) * ITEMS_PER_PAGE;
 
-  try {
-    // Build where conditions array
-    const conditions: SQL[] = [];
+  // Build where conditions
+  const conditions: SQL[] = [];
+  if (search)
+    conditions.push(ilike(destinations.destinationName, `%${search}%`));
+  if (country && country !== 'all')
+    conditions.push(eq(destinations.country, country));
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    if (search) {
-      conditions.push(ilike(destinations.destinationName, `%${search}%`));
-    }
+  // Get total count
+  const [countResult] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(destinations)
+    .where(whereClause || undefined);
 
-    if (country && country !== 'all') {
-      conditions.push(eq(destinations.country, country));
-    }
+  const totalCount = Number(countResult.count);
 
-    // Combine conditions with AND if there are any
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+  // Get paginated results
+  const results = await db
+    .select()
+    .from(destinations)
+    .where(whereClause || undefined)
+    .orderBy(destinations.destinationName)
+    .limit(ITEMS_PER_PAGE)
+    .offset(offset);
 
-    // Get total count
-    const [countResult] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(destinations)
-      .where(whereClause || undefined);
-
-    const totalCount = Number(countResult.count);
-
-    // Get paginated results
-    const results = await db
-      .select()
-      .from(destinations)
-      .where(whereClause || undefined)
-      .orderBy(destinations.destinationName)
-      .limit(ITEMS_PER_PAGE)
-      .offset(offset);
-
-    return res.json({
-      destinations: results,
-      totalCount,
-      hasMore: totalCount > offset + ITEMS_PER_PAGE,
-    });
-  } catch (error) {
-    console.error('Error searching destinations:', error);
-    return res.status(500).json({
-      error: 'Failed to search destinations',
-    });
-  }
+  return res.json({
+    destinations: results,
+    totalCount,
+    hasMore: totalCount > offset + ITEMS_PER_PAGE,
+  });
 }

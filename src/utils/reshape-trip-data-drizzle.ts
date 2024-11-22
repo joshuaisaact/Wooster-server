@@ -84,7 +84,7 @@ function reshapeTripData(dbData: TripDBRow[]) {
   const result = Object.values(tripsMap);
 
   // Return the object values as an array of trips
-
+  console.log(result);
   return result;
 }
 

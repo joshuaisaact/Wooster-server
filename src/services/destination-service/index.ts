@@ -1,2 +1,2 @@
 export * from './db-operations';
-export * from './destination-generator';
+export * from './utils';

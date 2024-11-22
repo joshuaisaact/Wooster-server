@@ -1,7 +1,4 @@
 import express from 'express';
-import register from '../controllers/auth/register';
-import login from '../controllers/auth/login';
-import logout from '../controllers/auth/logout';
 import { requireAuth } from '../middleware/auth-middleware';
 
 import { llmLimiter } from '../middleware/rate-limits';
@@ -27,17 +24,12 @@ import { handleSearchDestinations } from '../controllers/destinations/search-des
 
 const router = express.Router();
 
-// Auth routes
-router.post('/auth/register', register);
-router.post('/auth/login', login);
-router.post('/auth/logout', logout);
-
 // Public destination routes
 router.get('/destinations/search', handleSearchDestinations);
 router.get('/destination/:destinationName', handleGetDestinationByName);
-router.get('/destinations', requireAuth, handleGetDestinations);
 
 // Protected destination routes
+router.get('/destinations', requireAuth, handleGetDestinations);
 router.get(
   '/destination/:destinationName/activities',
   requireAuth,

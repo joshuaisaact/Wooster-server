@@ -1,195 +1,245 @@
 import { and, eq } from 'drizzle-orm';
 import { activities, db, destinations, itineraryDays, trips } from '../../db';
 
-export const fetchTripsFromDB = async (userId: string) => {
-  try {
-    const tripData = await db
-      .select({
-        tripId: trips.tripId,
-        destinationId: trips.destinationId,
-        startDate: trips.startDate,
-        numDays: trips.numDays,
-        itineraryDays: itineraryDays.dayNumber,
-        activities: {
-          activityId: activities.activityId,
-          activityName: activities.activityName,
-          latitude: activities.latitude,
-          longitude: activities.longitude,
-          price: activities.price,
-          location: activities.location,
-          description: activities.description,
-          duration: activities.duration,
-          difficulty: activities.difficulty,
-          category: activities.category,
-          bestTime: activities.bestTime,
-        },
-        destination: {
-          destinationId: destinations.destinationId,
-          destinationName: destinations.destinationName,
-          latitude: destinations.latitude,
-          longitude: destinations.longitude,
-          description: destinations.description,
-          country: destinations.country,
-          createdAt: destinations.createdAt,
-          popularActivities: destinations.popularActivities,
-          travelTips: destinations.travelTips,
-          nearbyAttractions: destinations.nearbyAttractions,
-          transportationOptions: destinations.transportationOptions,
-          accessibilityInfo: destinations.accessibilityInfo,
-          officialLanguage: destinations.officialLanguage,
-          currency: destinations.currency,
-          localCuisine: destinations.localCuisine,
-          costLevel: destinations.costLevel,
-          safetyRating: destinations.safetyRating,
-          culturalSignificance: destinations.culturalSignificance,
-          userRatings: destinations.userRatings,
-          bestTimeToVisit: destinations.bestTimeToVisit,
-          averageTemperatureLow: destinations.averageTemperatureLow,
-          averageTemperatureHigh: destinations.averageTemperatureHigh,
-        },
-      })
-      .from(trips)
-      .where(eq(trips.userId, userId))
-      .leftJoin(
-        destinations,
-        eq(destinations.destinationId, trips.destinationId),
-      )
-      .leftJoin(itineraryDays, eq(itineraryDays.tripId, trips.tripId))
-      .leftJoin(
-        activities,
-        eq(activities.activityId, itineraryDays.activityId),
+import { logger } from '../../utils/logger';
+import {
+  createDBNotFoundError,
+  createDBQueryError,
+} from '../../utils/error-handlers';
+import { DayItinerary } from '@/types/trip-types';
+import { addActivities } from '../activity-service';
+import { addItineraryDays } from '../itinerary-service';
+import { executeDbOperation } from '../../utils/db-utils';
+import reshapeTripData from '../../utils/reshape-trip-data-drizzle';
+
+export const fetchTripsFromDB = (userId: string, tripId?: string) =>
+  executeDbOperation(
+    async () => {
+      const whereConditions = [eq(trips.userId, userId)];
+
+      if (tripId) {
+        const parsedTripId = parseInt(tripId, 10);
+        if (isNaN(parsedTripId)) {
+          throw createDBQueryError('Invalid trip ID', { tripId });
+        }
+        whereConditions.push(eq(trips.tripId, parsedTripId));
+      }
+
+      const tripData = await db
+        .select({
+          tripId: trips.tripId,
+          destinationId: trips.destinationId,
+          startDate: trips.startDate,
+          numDays: trips.numDays,
+          itineraryDays: itineraryDays.dayNumber,
+          activities: {
+            activityId: activities.activityId,
+            activityName: activities.activityName,
+            latitude: activities.latitude,
+            longitude: activities.longitude,
+            price: activities.price,
+            location: activities.location,
+            description: activities.description,
+            duration: activities.duration,
+            difficulty: activities.difficulty,
+            category: activities.category,
+            bestTime: activities.bestTime,
+          },
+          destination: {
+            destinationId: destinations.destinationId,
+            destinationName: destinations.destinationName,
+            latitude: destinations.latitude,
+            longitude: destinations.longitude,
+            description: destinations.description,
+            country: destinations.country,
+            createdAt: destinations.createdAt,
+            popularActivities: destinations.popularActivities,
+            travelTips: destinations.travelTips,
+            nearbyAttractions: destinations.nearbyAttractions,
+            transportationOptions: destinations.transportationOptions,
+            accessibilityInfo: destinations.accessibilityInfo,
+            officialLanguage: destinations.officialLanguage,
+            currency: destinations.currency,
+            localCuisine: destinations.localCuisine,
+            costLevel: destinations.costLevel,
+            safetyRating: destinations.safetyRating,
+            culturalSignificance: destinations.culturalSignificance,
+            userRatings: destinations.userRatings,
+            bestTimeToVisit: destinations.bestTimeToVisit,
+            averageTemperatureLow: destinations.averageTemperatureLow,
+            averageTemperatureHigh: destinations.averageTemperatureHigh,
+          },
+        })
+        .from(trips)
+        .where(and(...whereConditions))
+        .leftJoin(
+          destinations,
+          eq(destinations.destinationId, trips.destinationId),
+        )
+        .leftJoin(itineraryDays, eq(itineraryDays.tripId, trips.tripId))
+        .leftJoin(
+          activities,
+          eq(activities.activityId, itineraryDays.activityId),
+        );
+
+      if (tripId && !tripData.length) {
+        throw createDBNotFoundError('Trip not found', { tripId, userId });
+      }
+
+      const reshapedTrips = reshapeTripData(tripData);
+
+      logger.info(
+        { userId, tripId: tripId || 'all' },
+        'Fetched trip(s) successfully',
       );
+      return tripId ? reshapedTrips[0] : reshapedTrips;
+    },
+    'Error fetching trip(s)',
+    { context: { userId, tripId } },
+  );
 
-    return tripData;
-  } catch (error) {
-    throw new Error(
-      `Error fetching trips: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
-    );
-  }
-};
-
-export const addTrip = async (
+export const addTrip = (
   userId: string,
   destinationId: number,
   startDate: string,
   numDays: number,
-) => {
-  try {
-    const startDateAsDate = new Date(startDate);
+) =>
+  executeDbOperation(
+    async () => {
+      const startDateAsDate = new Date(startDate);
 
-    const [insertedTrip] = await db
-      .insert(trips)
-      .values({
-        userId,
-        destinationId,
-        startDate: startDateAsDate,
-        numDays,
-      })
-      .returning({ tripId: trips.tripId });
+      const [insertedTrip] = await db
+        .insert(trips)
+        .values({
+          userId,
+          destinationId,
+          startDate: startDateAsDate,
+          numDays,
+        })
+        .returning({ tripId: trips.tripId });
 
-    return insertedTrip.tripId;
-  } catch (error) {
-    throw new Error(
-      `Failed to insert trip: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
-  }
-};
-
-export const deleteTripById = async (tripId: number) => {
-  try {
-    const deletedTrips = await db
-      .delete(trips)
-      .where(eq(trips.tripId, tripId))
-      .returning();
-
-    // Check if any rows were deleted
-    if (deletedTrips.length === 0) {
-      throw new Error(`No trip found with ID ${tripId}`);
-    }
-
-    return deletedTrips.length;
-  } catch (error) {
-    throw new Error(
-      `Error deleting trip with ID ${tripId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
-  }
-};
-
-export const fetchTripFromDB = async (tripId: string, userId: string) => {
-  try {
-    const parsedTripId = parseInt(tripId, 10);
-
-    if (isNaN(parsedTripId)) {
-      throw new Error('Invalid trip ID');
-    }
-
-    const tripData = await db
-      .select({
-        tripId: trips.tripId,
-        destinationId: trips.destinationId,
-        startDate: trips.startDate,
-        numDays: trips.numDays,
-        itineraryDays: itineraryDays.dayNumber,
-        activities: {
-          activityId: activities.activityId,
-          activityName: activities.activityName,
-          latitude: activities.latitude,
-          longitude: activities.longitude,
-          price: activities.price,
-          location: activities.location,
-          description: activities.description,
-          duration: activities.duration,
-          difficulty: activities.difficulty,
-          category: activities.category,
-          bestTime: activities.bestTime,
-        },
-        destination: {
-          destinationId: destinations.destinationId,
-          destinationName: destinations.destinationName,
-          latitude: destinations.latitude,
-          longitude: destinations.longitude,
-          description: destinations.description,
-          country: destinations.country,
-          createdAt: destinations.createdAt,
-          popularActivities: destinations.popularActivities,
-          travelTips: destinations.travelTips,
-          nearbyAttractions: destinations.nearbyAttractions,
-          transportationOptions: destinations.transportationOptions,
-          accessibilityInfo: destinations.accessibilityInfo,
-          officialLanguage: destinations.officialLanguage,
-          currency: destinations.currency,
-          localCuisine: destinations.localCuisine,
-          costLevel: destinations.costLevel,
-          safetyRating: destinations.safetyRating,
-          culturalSignificance: destinations.culturalSignificance,
-          userRatings: destinations.userRatings,
-          bestTimeToVisit: destinations.bestTimeToVisit,
-          averageTemperatureLow: destinations.averageTemperatureLow,
-          averageTemperatureHigh: destinations.averageTemperatureHigh,
-        },
-      })
-      .from(trips)
-      .where(and(eq(trips.tripId, parsedTripId), eq(trips.userId, userId)))
-      .leftJoin(
-        destinations,
-        eq(destinations.destinationId, trips.destinationId),
-      )
-      .leftJoin(itineraryDays, eq(itineraryDays.tripId, trips.tripId))
-      .leftJoin(
-        activities,
-        eq(activities.activityId, itineraryDays.activityId),
+      logger.info(
+        { userId, destinationId, startDate, numDays },
+        'Inserted trip successfully',
       );
+      return insertedTrip.tripId;
+    },
+    'Failed to insert trip',
+    { context: { userId, destinationId, startDate, numDays } },
+  );
 
-    if (!tripData.length) {
-      throw new Error('Trip not found');
-    }
+export const deleteTripById = (tripId: number) =>
+  executeDbOperation(
+    async () => {
+      const deletedTrips = await db
+        .delete(trips)
+        .where(eq(trips.tripId, tripId))
+        .returning();
 
-    return tripData[0];
-  } catch (error) {
-    throw new Error(
-      `Error fetching trip: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
-  }
-};
+      if (deletedTrips.length === 0) {
+        throw createDBNotFoundError(`No trip found with ID ${tripId}`, {
+          tripId,
+        });
+      }
+
+      logger.info({ tripId }, 'Deleted trip successfully');
+      return deletedTrips.length;
+    },
+    'Error deleting trip',
+    { context: { tripId } },
+  );
+
+export const fetchTripFromDB = (tripId: string, userId: string) =>
+  executeDbOperation(
+    async () => {
+      const parsedTripId = parseInt(tripId, 10);
+
+      if (isNaN(parsedTripId)) {
+        const errorMessage = 'Invalid trip ID';
+        logger.warn({ tripId }, errorMessage);
+        throw createDBQueryError(errorMessage, { tripId });
+      }
+
+      const tripData = await db
+        .select({
+          tripId: trips.tripId,
+          destinationId: trips.destinationId,
+          startDate: trips.startDate,
+          numDays: trips.numDays,
+          itineraryDays: itineraryDays.dayNumber,
+          activities: {
+            activityId: activities.activityId,
+            activityName: activities.activityName,
+            latitude: activities.latitude,
+            longitude: activities.longitude,
+            price: activities.price,
+            location: activities.location,
+            description: activities.description,
+            duration: activities.duration,
+            difficulty: activities.difficulty,
+            category: activities.category,
+            bestTime: activities.bestTime,
+          },
+          destination: {
+            destinationId: destinations.destinationId,
+            destinationName: destinations.destinationName,
+            latitude: destinations.latitude,
+            longitude: destinations.longitude,
+            description: destinations.description,
+            country: destinations.country,
+            createdAt: destinations.createdAt,
+            popularActivities: destinations.popularActivities,
+            travelTips: destinations.travelTips,
+            nearbyAttractions: destinations.nearbyAttractions,
+            transportationOptions: destinations.transportationOptions,
+            accessibilityInfo: destinations.accessibilityInfo,
+            officialLanguage: destinations.officialLanguage,
+            currency: destinations.currency,
+            localCuisine: destinations.localCuisine,
+            costLevel: destinations.costLevel,
+            safetyRating: destinations.safetyRating,
+            culturalSignificance: destinations.culturalSignificance,
+            userRatings: destinations.userRatings,
+            bestTimeToVisit: destinations.bestTimeToVisit,
+            averageTemperatureLow: destinations.averageTemperatureLow,
+            averageTemperatureHigh: destinations.averageTemperatureHigh,
+          },
+        })
+        .from(trips)
+        .where(and(eq(trips.tripId, parsedTripId), eq(trips.userId, userId)))
+        .leftJoin(
+          destinations,
+          eq(destinations.destinationId, trips.destinationId),
+        )
+        .leftJoin(itineraryDays, eq(itineraryDays.tripId, trips.tripId))
+        .leftJoin(
+          activities,
+          eq(activities.activityId, itineraryDays.activityId),
+        );
+
+      if (!tripData.length) {
+        const errorMessage = 'Trip not found';
+        logger.warn({ tripId, userId }, errorMessage);
+        throw createDBNotFoundError(errorMessage, { tripId, userId });
+      }
+      console.log(tripData);
+      logger.info({ tripId, userId }, 'Fetched trip successfully');
+      return tripData[0];
+    },
+    'Error fetching trip',
+    { context: { tripId, userId } },
+  );
+
+// Helper function to create trip in database
+export async function createTripInDB(
+  userId: string,
+  destinationId: number,
+  startDate: string,
+  days: number,
+  itinerary: DayItinerary[],
+): Promise<number> {
+  const tripId = await addTrip(userId, destinationId, startDate, days);
+  const activityIds = await addActivities(itinerary, destinationId);
+  await addItineraryDays(tripId, itinerary, activityIds);
+  return tripId;
+}

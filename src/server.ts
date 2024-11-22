@@ -1,19 +1,24 @@
 import app from './index';
+import { logger } from './utils/logger';
 
-const PORT = process.env.PORT || 4000;
+const config = {
+  port: process.env.PORT || 4000,
+  environment: process.env.NODE_ENV || 'development',
+};
+
+logger.info('Starting server with configuration', config);
+
+const PORT = config.port;
 
 if (!PORT) {
+  logger.error('Missing environment variable: PORT');
   throw new Error('Missing environment variable: PORT');
 }
 
 app.listen(PORT, () => {
-  const timestamp = new Date().toLocaleString();
-  const host = `http://localhost:${PORT}`;
-  console.log(`
-    ----------------------------------------
-    🚀 Server is running successfully!
-    🌐 URL: ${host}
-    📅 Startup Time: ${timestamp}
-    ----------------------------------------
-    `);
+  logger.info({
+    message: 'Server started successfully',
+    url: `http://localhost:${PORT}`,
+    startupTime: new Date().toISOString(),
+  });
 });

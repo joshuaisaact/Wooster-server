@@ -1,0 +1,86 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: |
+            **/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Set environment variables
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+          TEST_USER_UUID: ${{ secrets.TEST_USER_UUID }}
+        run: |
+          echo "SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}" >> $GITHUB_ENV
+          echo "SUPABASE_URL=${SUPABASE_URL}" >> $GITHUB_ENV
+          echo "TEST_DATABASE_URL=${TEST_DATABASE_URL}" >> $GITHUB_ENV
+          echo "DATABASE_URL=${TEST_DATABASE_URL}" >> $GITHUB_ENV
+          echo "TEST_USER_UUID=${TEST_USER_UUID}" >> $GITHUB_ENV
+
+      - name: Generate test migrations
+        run: npm run drizzle:generate:test
+        env:
+          NODE_ENV: test
+
+      - name: Run test migrations
+        run: npm run drizzle:migrate:test
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
+
+      - name: Run integration tests with coverage
+        run: |
+          npm run test:integration -- --coverage --verbose --runInBand --detectOpenHandles
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

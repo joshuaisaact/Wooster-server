@@ -5,11 +5,9 @@ export const handleGetSavedDestinations = async (
   req: Request,
   res: Response,
 ) => {
-  try {
-    const savedDestinations = await fetchSavedDestinations(req.user!.id);
-    res.json(savedDestinations);
-  } catch (error) {
-    console.error('Error fetching saved destinations:', error);
-    res.status(500).json({ error: 'Something went wrong' });
-  }
+  const savedDestinations = await fetchSavedDestinations(req.user!.id);
+  return res.status(200).json({
+    message: 'Fetched saved destinations successfully',
+    savedDestinations,
+  });
 };

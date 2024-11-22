@@ -2,87 +2,69 @@ import { desc, eq } from 'drizzle-orm';
 import { activities, db, destinations } from '../../db';
 import { NewDestination } from '../../types/destination-type';
 
-export const fetchDestinations = async () => {
-  try {
+import { logger } from '../../utils/logger';
+import { generateDestinationData } from '../llm/generators/destination';
+import { normalizeDestinationName } from './utils';
+import { executeDbOperation } from '../../utils/db-utils';
+import {
+  createDBNotFoundError,
+  createDBQueryError,
+  createDestinationGenerationError,
+  createServiceError,
+} from '../../utils/error-handlers';
+import { isServiceError } from '../../utils/error-guards';
+
+export const fetchDestinations = () =>
+  executeDbOperation(async () => {
     const destinationsData = await db.select().from(destinations);
+    logger.info('Fetched all destinations successfully');
     return destinationsData;
-  } catch (error) {
-    throw new Error(
-      `Error fetching destinations: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
-    );
-  }
-};
+  }, 'Error fetching destinations');
 
-// Fetch a single destination by name
-export const fetchDestinationDetailsByName = async (
-  destinationName: string,
-) => {
-  try {
-    const [destination] = await db
-      .select()
-      .from(destinations)
-      .where(eq(destinations.destinationName, destinationName));
+export const fetchDestinationDetailsByName = (destinationName: string) =>
+  executeDbOperation(
+    async () => {
+      const [destination] = await db
+        .select()
+        .from(destinations)
+        .where(eq(destinations.destinationName, destinationName));
 
-    if (!destination) {
-      throw new Error(`Destination with name ${destinationName} not found`);
-    }
+      if (!destination) {
+        throw createDBNotFoundError(
+          `Destination ${destinationName} not found`,
+          { destinationName },
+        );
+      }
 
-    return destination;
-  } catch (error) {
-    throw new Error(
-      `Error fetching destination with name ${destinationName}: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
-    );
-  }
-};
+      return destination;
+    },
+    'Error fetching destination details',
+    {
+      context: { destinationName },
+    },
+  );
 
-export const fetchDestinationIdByName = async (location: string) => {
-  try {
-    const [destination] = await db
-      .select({ destinationId: destinations.destinationId })
-      .from(destinations)
-      .where(eq(destinations.destinationName, location));
+export const addDestination = (destinationData: NewDestination) =>
+  executeDbOperation(
+    async () => {
+      const normalizedName = normalizeDestinationName(
+        destinationData.destinationName,
+      );
 
-    if (!destination) {
-      throw new Error(`Destination with name ${location} not found`);
-    }
+      const [insertedDestination] = await db
+        .insert(destinations)
+        .values({
+          ...destinationData,
+          normalizedName,
+        })
+        .returning();
 
-    return destination.destinationId;
-  } catch (error) {
-    throw new Error(
-      `Error fetching destination with name ${location}: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
-    );
-  }
-};
-
-export const addDestination = async (destinationData: NewDestination) => {
-  try {
-    const normalizedName = normalizeDestinationName(
-      destinationData.destinationName,
-    );
-
-    const [insertedDestination] = await db
-      .insert(destinations)
-      .values({
-        ...destinationData,
-        normalizedName,
-      })
-      .returning();
-
-    return insertedDestination;
-  } catch (error) {
-    throw new Error(
-      `Failed to insert destination: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
-    );
-  }
-};
+      logger.info({ destinationData }, 'Inserted destination successfully');
+      return insertedDestination;
+    },
+    'Failed to insert destination',
+    { context: { destinationData } },
+  );
 
 // Delete a destination by ID
 export const deleteDestinationById = async (destinationId: number) => {
@@ -93,71 +75,75 @@ export const deleteDestinationById = async (destinationId: number) => {
       .returning();
 
     if (!deletedDestination || deletedDestination.length === 0) {
-      throw new Error(`No destination found with ID ${destinationId}`);
+      const errorMessage = `No destination found with ID ${destinationId}`;
+      logger.warn({ destinationId }, errorMessage);
+      throw createDBNotFoundError(errorMessage, { destinationId });
     }
 
+    logger.info({ destinationId }, 'Deleted destination successfully');
     return deletedDestination;
   } catch (error) {
-    throw new Error(
-      `Error deleting destination with ID ${destinationId}: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
+    logger.error({ error, destinationId }, 'Error deleting destination');
+    throw createDBQueryError(
+      `Error deleting destination with ID ${destinationId}`,
+      {
+        originalError: error instanceof Error ? error.message : 'Unknown error',
+      },
     );
   }
 };
 
-export const normalizeDestinationName = (name: string): string => {
-  return (
-    name
-      .trim()
-      .toLowerCase()
-      // Replace multiple spaces with single space
-      .replace(/\s+/g, ' ')
-      // Remove special characters except spaces and hyphens
-      .replace(/[^a-z0-9\s-]/g, '')
-      // Replace spaces with hyphens
-      .replace(/\s/g, '-')
+export const fetchActivitiesByDestinationName = (destinationName: string) =>
+  executeDbOperation(
+    async () => {
+      const destination = await fetchDestinationDetailsByName(destinationName);
+
+      const activitiesList = await db
+        .select()
+        .from(activities)
+        .where(eq(activities.locationId, destination.destinationId))
+        .orderBy(desc(activities.createdAt));
+
+      logger.info({ destinationName }, 'Fetched activities successfully');
+      return activitiesList;
+    },
+    'Error fetching activities',
+    { context: { destinationName } },
   );
-};
 
-export const findDestinationByName = async (destinationName: string) => {
+export async function getOrCreateDestination(location: string) {
   try {
-    const normalizedName = normalizeDestinationName(destinationName);
+    try {
+      const existingDestination = await fetchDestinationDetailsByName(location);
+      logger.info({ location }, 'Found existing destination');
+      return existingDestination;
+    } catch (error) {
+      if (!isServiceError(error) || error.code !== 'DB_NOT_FOUND') {
+        throw error;
+      }
+    }
 
-    const [destination] = await db
-      .select()
-      .from(destinations)
-      .where(eq(destinations.normalizedName, normalizedName));
-
-    return destination || null;
+    logger.info({ location }, 'Creating new destination');
+    const destinationData = await generateDestinationData(location);
+    return await addDestination(destinationData);
   } catch (error) {
-    throw new Error(
-      `Error finding destination with name ${destinationName}: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
-    );
+    // Handle specific creation errors
+    if (error instanceof Error && 'code' in error && error.code === '23505') {
+      throw createServiceError(
+        'Destination already exists',
+        409,
+        'DESTINATION_EXISTS',
+        { location },
+      );
+    }
+
+    if (!isServiceError(error)) {
+      throw createDestinationGenerationError(
+        'Failed to generate destination data',
+        { location, error },
+      );
+    }
+
+    throw error;
   }
-};
-
-export const fetchActivitiesByDestinationName = async (
-  destinationName: string,
-) => {
-  try {
-    const destination = await fetchDestinationDetailsByName(destinationName);
-
-    // Just get all activities for the destination, ordered by creation date
-    const activitiesList = await db
-      .select()
-      .from(activities)
-      .where(eq(activities.locationId, destination.destinationId))
-      .orderBy(desc(activities.createdAt));
-
-    return activitiesList;
-  } catch (error) {
-    throw new Error(
-      `Error fetching activities for destination ${destinationName}: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
-    );
-  }
-};
+}
