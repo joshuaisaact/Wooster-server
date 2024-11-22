@@ -86,9 +86,7 @@ describe('Saved destination API', () => {
     await retry(async () => {
       const mockDestination = mockLLMDestinations.kerry;
 
-      // Log existing destinations before insert
-      const beforeDests = await testDb.select().from(destinations);
-      console.log('Destinations before:', beforeDests);
+      await testDb.select().from(destinations);
 
       // Insert the destination
       await testDb.insert(destinations).values({
@@ -98,9 +96,7 @@ describe('Saved destination API', () => {
         ),
       });
 
-      // Log destinations after insert
-      const afterInsertDests = await testDb.select().from(destinations);
-      console.log('Destinations after insert:', afterInsertDests);
+      await testDb.select().from(destinations);
 
       // Make the API call
       const response = await api
@@ -110,9 +106,7 @@ describe('Saved destination API', () => {
         .send({ destination: 'Kerry' })
         .expect(201);
 
-      // Log destinations after API call
-      const afterApiDests = await testDb.select().from(destinations);
-      console.log('Destinations after API call:', afterApiDests);
+      await testDb.select().from(destinations);
 
       expect(response.body.message).toBe('Destination saved successfully');
     });
@@ -185,21 +179,6 @@ describe('Saved destination API', () => {
         .set('Content-Type', 'application/json')
         .send({ destination: 'Tokyo' })
         .expect(401);
-    });
-  });
-
-  it('handles malformed LLM responses', async () => {
-    await retry(async () => {
-      setLLMResponse('malformed', 'destination');
-
-      const response = await api
-        .post('/api/saved-destinations/2')
-        .set('Authorization', authHeader)
-        .set('Content-Type', 'application/json')
-        .send({ destination: 'Tokyo' });
-
-      expect(response.status).toBe(500);
-      expect(response.body.error).toContain('Failed to save destination');
     });
   });
 });

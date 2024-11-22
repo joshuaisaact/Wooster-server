@@ -63,7 +63,7 @@ describe('Destination API', () => {
     return Math.random().toString(36).substring(2, 15);
   }
 
-  it.only('can get a list of destinations', async () => {
+  it('can get a list of destinations', async () => {
     await retry(async () => {
       const mockDestinations = [
         mockLLMDestinations.tokyo,
@@ -257,9 +257,9 @@ describe('Destination API', () => {
         .set('Content-Type', 'application/json')
         .send({ destination: 'Tokyo' });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(422);
       expect(response.body.error).toContain(
-        'Failed to generate destination data',
+        'Invalid JSON response from LLM for destination data',
       );
     });
   });

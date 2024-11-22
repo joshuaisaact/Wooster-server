@@ -7,46 +7,45 @@ import {
   createServiceError,
 } from '../../types/errors';
 import { logger } from '../../utils/logger';
+import { executeDbOperation } from '@/utils/db-utils';
 
-export const fetchSavedDestinations = async (userId: string) => {
-  try {
-    const savedDestinationsList = await db
-      .select({
-        id: savedDestinations.id,
-        userId: savedDestinations.userId,
-        destinationId: savedDestinations.destinationId,
-        createdAt: savedDestinations.createdAt,
-        notes: savedDestinations.notes,
-        isVisited: savedDestinations.isVisited,
-        destination: destinations,
-      })
-      .from(savedDestinations)
-      .leftJoin(
-        destinations,
-        eq(savedDestinations.destinationId, destinations.destinationId),
-      )
-      .where(eq(savedDestinations.userId, userId))
-      .orderBy(desc(savedDestinations.createdAt));
+export const fetchSavedDestinations = (userId: string) =>
+  executeDbOperation(
+    async () => {
+      const savedDestinationsList = await db
+        .select({
+          id: savedDestinations.id,
+          userId: savedDestinations.userId,
+          destinationId: savedDestinations.destinationId,
+          createdAt: savedDestinations.createdAt,
+          notes: savedDestinations.notes,
+          isVisited: savedDestinations.isVisited,
+          destination: destinations,
+        })
+        .from(savedDestinations)
+        .leftJoin(
+          destinations,
+          eq(savedDestinations.destinationId, destinations.destinationId),
+        )
+        .where(eq(savedDestinations.userId, userId))
+        .orderBy(desc(savedDestinations.createdAt));
 
-    const flattenedList = savedDestinationsList.map((entry) => ({
-      ...entry,
-      ...entry.destination,
-    }));
+      const flattenedList = savedDestinationsList.map((entry) => ({
+        ...entry,
+        ...entry.destination,
+      }));
 
-    logger.info({ userId }, 'Fetched saved destinations successfully');
-    return flattenedList;
-  } catch (error) {
-    logger.error({ error, userId }, 'Error fetching saved destinations');
-    throw createDBQueryError('Error fetching saved destinations', {
-      originalError: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
+      logger.info({ userId }, 'Fetched saved destinations successfully');
+      return flattenedList;
+    },
+    'Error fetching saved destinations',
+    { context: { userId } },
+  );
 
-export async function saveDestinationForUser(
+export const saveDestinationForUser = async (
   destinationId: number,
   userId: string,
-) {
+) => {
   try {
     const existingSaved = await findSavedDestinationByUserAndDest(
       userId,
@@ -64,162 +63,139 @@ export async function saveDestinationForUser(
 
     return await addSavedDestination(userId, destinationId);
   } catch (error) {
-    logger.error(
-      { error, destinationId, userId },
-      'Failed to save destination',
-    );
-
     if (isServiceError(error)) {
       throw error;
     }
 
+    logger.error(
+      { error, destinationId, userId },
+      'Failed to save destination',
+    );
     throw createDBQueryError('Failed to save destination', {
       userId,
       destinationId,
       error,
     });
   }
-}
+};
 
-export const addSavedDestination = async (
+export const addSavedDestination = (
   userId: string,
   destinationId: number,
   notes?: string,
   isVisited: boolean = false,
-) => {
-  try {
-    const [savedDestination] = await db
-      .insert(savedDestinations)
-      .values({
-        userId,
-        destinationId,
-        notes,
-        isVisited,
-      })
-      .returning();
+) =>
+  executeDbOperation(
+    async () => {
+      const [savedDestination] = await db
+        .insert(savedDestinations)
+        .values({
+          userId,
+          destinationId,
+          notes,
+          isVisited,
+        })
+        .returning();
 
-    logger.info(
-      { userId, destinationId },
-      'Inserted saved destination successfully',
-    );
-    return savedDestination;
-  } catch (error) {
-    logger.error(
-      { error, userId, destinationId },
-      'Error inserting saved destination',
-    );
-    throw createDBQueryError('Failed to save destination', {
-      originalError: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
+      logger.info(
+        { userId, destinationId },
+        'Inserted saved destination successfully',
+      );
+      return savedDestination;
+    },
+    'Failed to save destination',
+    { context: { userId, destinationId } },
+  );
 
-export const updateSavedDestination = async (
+export const updateSavedDestination = (
   userId: string,
   destinationId: number,
   updates: {
     notes?: string;
     isVisited?: boolean;
   },
-) => {
-  try {
-    const [updatedDestination] = await db
-      .update(savedDestinations)
-      .set(updates)
-      .where(
-        and(
-          eq(savedDestinations.userId, userId),
-          eq(savedDestinations.destinationId, destinationId),
-        ),
-      )
-      .returning();
+) =>
+  executeDbOperation(
+    async () => {
+      const [updatedDestination] = await db
+        .update(savedDestinations)
+        .set(updates)
+        .where(
+          and(
+            eq(savedDestinations.userId, userId),
+            eq(savedDestinations.destinationId, destinationId),
+          ),
+        )
+        .returning();
 
-    if (!updatedDestination) {
-      const errorMessage = `No saved destination found for user ${userId} and destination ${destinationId}`;
-      logger.warn({ userId, destinationId }, errorMessage);
-      throw createDBNotFoundError(errorMessage, { userId, destinationId });
-    }
+      if (!updatedDestination) {
+        throw createDBNotFoundError(
+          `No saved destination found for user ${userId} and destination ${destinationId}`,
+          { userId, destinationId },
+        );
+      }
 
-    logger.info(
-      { userId, destinationId },
-      'Updated saved destination successfully',
-    );
-    return updatedDestination;
-  } catch (error) {
-    logger.error(
-      { error, userId, destinationId },
-      'Error updating saved destination',
-    );
-    throw createDBQueryError('Error updating saved destination', {
-      originalError: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
+      logger.info(
+        { userId, destinationId },
+        'Updated saved destination successfully',
+      );
+      return updatedDestination;
+    },
+    'Error updating saved destination',
+    { context: { userId, destinationId } },
+  );
 
-export const deleteSavedDestination = async (
+export const deleteSavedDestination = (userId: string, destinationId: number) =>
+  executeDbOperation(
+    async () => {
+      const [deletedDestination] = await db
+        .delete(savedDestinations)
+        .where(
+          and(
+            eq(savedDestinations.userId, userId),
+            eq(savedDestinations.destinationId, destinationId),
+          ),
+        )
+        .returning();
+
+      if (!deletedDestination) {
+        throw createDBNotFoundError(
+          `No saved destination found for user ${userId} and destination ${destinationId}`,
+          { userId, destinationId },
+        );
+      }
+
+      logger.info(
+        { userId, destinationId },
+        'Deleted saved destination successfully',
+      );
+      return deletedDestination;
+    },
+    'Error deleting saved destination',
+    { context: { userId, destinationId } },
+  );
+
+export const findSavedDestinationByUserAndDest = (
   userId: string,
   destinationId: number,
-) => {
-  try {
-    const [deletedDestination] = await db
-      .delete(savedDestinations)
-      .where(
-        and(
-          eq(savedDestinations.userId, userId),
-          eq(savedDestinations.destinationId, destinationId),
-        ),
-      )
-      .returning();
+) =>
+  executeDbOperation(
+    async () => {
+      const [foundDestination] = await db
+        .select()
+        .from(savedDestinations)
+        .where(
+          and(
+            eq(savedDestinations.userId, userId),
+            eq(savedDestinations.destinationId, destinationId),
+          ),
+        )
+        .limit(1);
 
-    if (!deletedDestination) {
-      const errorMessage = `No saved destination found for user ${userId} and destination ${destinationId}`;
-      logger.warn({ userId, destinationId }, errorMessage);
-      throw createDBNotFoundError(errorMessage, { userId, destinationId });
-    }
-
-    logger.info(
-      { userId, destinationId },
-      'Deleted saved destination successfully',
-    );
-    return deletedDestination;
-  } catch (error) {
-    logger.error(
-      { error, userId, destinationId },
-      'Error deleting saved destination',
-    );
-    throw createDBQueryError('Error deleting saved destination', {
-      originalError: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
-
-export const findSavedDestinationByUserAndDest = async (
-  userId: string,
-  destinationId: number,
-) => {
-  try {
-    const foundDestination = await db
-      .select()
-      .from(savedDestinations)
-      .where(
-        and(
-          eq(savedDestinations.userId, userId),
-          eq(savedDestinations.destinationId, destinationId),
-        ),
-      )
-      .limit(1);
-
-    return foundDestination[0] || null;
-  } catch (error) {
-    logger.error(
-      { error, userId, destinationId },
-      'Error finding saved destination',
-    );
-    throw createDBQueryError(
-      `Error finding saved destination for user ${userId} and destination ${destinationId}`,
-      {
-        originalError: error instanceof Error ? error.message : 'Unknown error',
-      },
-    );
-  }
-};
+      return foundDestination || null;
+    },
+    'Error finding saved destination',
+    {
+      context: { userId, destinationId },
+    },
+  );
