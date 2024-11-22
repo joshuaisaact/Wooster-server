@@ -4,8 +4,12 @@ import {
   cleanLLMJsonResponse,
   validateJSON,
 } from '../utils/llm-utils';
-import { createAIServiceError, createValidationError } from '../types/errors';
+
 import { logger } from '../utils/logger';
+import {
+  createAIServiceError,
+  createValidationError,
+} from '@/utils/error-handlers';
 
 export const generateTripItinerary = async (
   prompt: string,

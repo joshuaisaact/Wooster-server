@@ -1,81 +1,77 @@
-export class ServiceError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-    public data?: unknown,
-  ) {
-    super(message);
-    this.name = 'ServiceError';
-  }
-}
+import { ErrorCode, ServiceError } from '@/types/errors';
 
-export const isServiceError = (error: unknown): error is ServiceError => {
-  return error instanceof ServiceError;
-};
+export const createServiceError = (
+  message: string,
+  status: number,
+  code: ErrorCode,
+  details?: unknown,
+): ServiceError => ({
+  message,
+  status,
+  code,
+  details,
+});
 
-export const isDatabaseError = (error: unknown): boolean => {
-  return typeof error === 'object' && error !== null && 'code' in error;
-};
+export const createAuthenticationError = (
+  message: string = 'Authentication failed',
+  details?: unknown,
+): ServiceError =>
+  createServiceError(message, 401, 'AUTHENTICATION_ERROR', details);
 
-export interface AIError {
-  operation: 'TRIP_GENERATION' | 'DESTINATION_GENERATION' | 'PARSING';
-  message: string;
-  details?: unknown;
-}
+export const createDatabaseConnectionError = (
+  message: string = 'Database connection failed',
+  details?: unknown,
+): ServiceError =>
+  createServiceError(message, 403, 'DATABASE_CONNECTION_ERROR', details);
 
-export const isAIError = (error: unknown): error is AIError => {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'operation' in error &&
-    'message' in error
-  );
-};
+export const createDestinationGenerationError = (
+  message: string = 'Failed to generate destination data',
+  details?: unknown,
+): ServiceError =>
+  createServiceError(message, 500, 'DESTINATION_GENERATION_FAILED', details);
 
-export const handleControllerError = (error: unknown) => {
-  console.error('Error caught:', error);
+export const createTripGenerationError = (
+  message: string = 'Failed to generate trip itinerary',
+  details?: unknown,
+): ServiceError =>
+  createServiceError(message, 500, 'TRIP_GENERATION_FAILED', details);
 
-  if (isServiceError(error)) {
-    return {
-      status: error.status,
-      message: error.message,
-      data: error.data,
-    };
-  }
+export const createParsingError = (
+  message: string = 'Failed to parse data',
+  details?: unknown,
+): ServiceError => createServiceError(message, 422, 'PARSING_ERROR', details);
 
-  if (isDatabaseError(error)) {
-    return {
-      status: 409,
-      message: 'Resource already exists',
-    };
-  }
+export const createAIServiceError = (
+  message: string = 'AI service error',
+  details?: unknown,
+): ServiceError =>
+  createServiceError(message, 500, 'AI_SERVICE_ERROR', details);
 
-  if (isAIError(error)) {
-    switch (error.operation) {
-      case 'TRIP_GENERATION':
-        return {
-          status: 500,
-          message: 'Failed to generate trip itinerary. Please try again.',
-          data: error.details,
-        };
-      case 'DESTINATION_GENERATION':
-        return {
-          status: 500,
-          message:
-            'Failed to generate destination information. Please try again.',
-          data: error.details,
-        };
-      case 'PARSING':
-        return {
-          status: 500,
-          message: 'Failed to process AI response. Please try again.',
-          data: error.details,
-        };
-    }
-  }
+export const createValidationError = (
+  message: string = 'Validation failed',
+  details?: unknown,
+): ServiceError =>
+  createServiceError(message, 422, 'VALIDATION_ERROR', details);
 
-  return {
-    status: 500,
-    message: 'Something went wrong',
-  };
-};
+export const createDatabaseError = (
+  message: string,
+  status: number,
+  code: ErrorCode,
+  details?: unknown,
+): ServiceError => ({
+  message,
+  status,
+  code,
+  details,
+});
+
+export const createDBQueryError = (
+  message: string = 'Database query failed',
+  details?: unknown,
+): ServiceError =>
+  createDatabaseError(message, 500, 'DB_QUERY_FAILED', details);
+
+export const createDBNotFoundError = (
+  message: string = 'Database record not found',
+  details?: unknown,
+): ServiceError => createDatabaseError(message, 404, 'DB_NOT_FOUND', details);

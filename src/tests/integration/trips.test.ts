@@ -34,7 +34,8 @@ import {
   trips,
 } from '@/db';
 import { resetSequences } from '../utils/reset-sequence';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
+import { fetchTripFromDB } from '@/services/trip-service';
 
 const api = request(app);
 
@@ -57,12 +58,72 @@ describe('Destination API', () => {
     await resetSequences();
   });
 
-  // function generateRandomTrip() {
-  //   return Math.random().toString(36).substring(2, 15);
-  // }
+  describe('Trips API', () => {
+    it('can get a single trip by ID', async () => {
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+        { type: 'success', dataType: 'trip', location: 'tokyo' },
+      ]);
 
-  describe('POST /api/trips', () => {
-    it('creates a new trip with generated itinerary', async () => {
+      await api.post('/api/trips').set('Authorization', authHeader).send({
+        days: 2,
+        location: 'Tokyo',
+        startDate: '2024-12-25',
+      });
+
+      const trip = fetchTripFromDB('1', 'e92ad976-973d-406d-92d4-34b6ef182e1a');
+
+      const response = await api
+        .get('/api/trips/1')
+        .set('Authorization', authHeader)
+        .expect(200);
+
+      expect(response.body).toMatchObject({
+        message: 'Trip fetched successfully',
+        trip,
+      });
+    });
+
+    it('can get a list of trips', async () => {
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+        { type: 'success', dataType: 'trip', location: 'tokyo' },
+      ]);
+
+      await api.post('/api/trips').set('Authorization', authHeader).send({
+        days: 2,
+        location: 'Tokyo',
+        startDate: '2024-12-25',
+      });
+
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'paris' },
+        { type: 'success', dataType: 'trip', location: 'paris' },
+      ]);
+
+      await api.post('/api/trips').set('Authorization', authHeader).send({
+        days: 1,
+        location: 'Paris',
+        startDate: '2024-12-26',
+      });
+
+      const response = await api
+        .get('/api/trips')
+        .set('Authorization', authHeader)
+        .expect(200);
+
+      expect(response.body).toHaveLength(2);
+      expect(response.body[0]).toMatchObject({
+        tripId: expect.any(String),
+        numDays: expect.any(Number),
+        startDate: expect.any(String),
+        destination: expect.objectContaining({
+          destinationName: expect.any(String),
+        }),
+      });
+    });
+
+    it('creates a new trip with a new destination', async () => {
       setLLMResponse([
         { type: 'success', dataType: 'destination', location: 'tokyo' },
         { type: 'success', dataType: 'trip', location: 'tokyo' },
@@ -94,7 +155,6 @@ describe('Destination API', () => {
         },
       });
 
-      // Verify the database entries
       const tripInDb = await testDb
         .select()
         .from(trips)
@@ -103,6 +163,49 @@ describe('Destination API', () => {
 
       expect(tripInDb[0]).toBeDefined();
       expect(tripInDb[0].numDays).toBe(2);
+    });
+
+    it('creates a trip using an existing destination', async () => {
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'paris' },
+      ]);
+
+      await api
+        .post('/api/destinations')
+        .set('Authorization', authHeader)
+        .send({ destination: 'Paris' });
+
+      setLLMResponse([
+        { type: 'success', dataType: 'trip', location: 'paris' },
+      ]);
+
+      const response = await api
+        .post('/api/trips')
+        .set('Authorization', authHeader)
+        .send({
+          days: 1,
+          location: 'Paris',
+          startDate: '2024-12-25',
+        })
+        .expect(201);
+
+      const tripInDb = await testDb
+        .select()
+        .from(trips)
+        .where(eq(trips.tripId, Number(response.body.trip.tripId)))
+        .execute();
+
+      expect(tripInDb[0]).toBeDefined();
+      expect(tripInDb[0].numDays).toBe(1);
+
+      const destinationResult = await testDb
+        .select({
+          count: sql<number>`count(*)`.mapWith(Number),
+        })
+        .from(destinations)
+        .execute();
+
+      expect(destinationResult[0].count).toBe(1);
     });
   });
 });

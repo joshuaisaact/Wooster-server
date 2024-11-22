@@ -1,7 +1,14 @@
 import { and, eq } from 'drizzle-orm';
 import { activities, db, destinations, itineraryDays, trips } from '../../db';
-import { createDBQueryError, createDBNotFoundError } from '../../types/errors';
+
 import { logger } from '../../utils/logger';
+import {
+  createDBNotFoundError,
+  createDBQueryError,
+} from '@/utils/error-handlers';
+import { DayItinerary } from '@/types/trip-types';
+import { addActivities } from '../activity-service';
+import { addItineraryDays } from '../itinerary-service';
 
 export const fetchTripsFromDB = async (userId: string) => {
   try {
@@ -212,3 +219,17 @@ export const fetchTripFromDB = async (tripId: string, userId: string) => {
     });
   }
 };
+
+// Helper function to create trip in database
+export async function createTripInDB(
+  userId: string,
+  destinationId: number,
+  startDate: string,
+  days: number,
+  itinerary: DayItinerary[],
+): Promise<number> {
+  const tripId = await addTrip(userId, destinationId, startDate, days);
+  const activityIds = await addActivities(itinerary, destinationId);
+  await addItineraryDays(tripId, itinerary, activityIds);
+  return tripId;
+}

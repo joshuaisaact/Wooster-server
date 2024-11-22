@@ -44,10 +44,10 @@ export interface Trip {
   startDate: string;
   numDays: number;
   destinationName: string;
-  itinerary: ItineraryDay[];
+  itinerary: DayItinerary[];
 }
 
 export interface ItineraryDay {
-  dayNumber: number;
+  day: number;
   activities: Activity[];
 }

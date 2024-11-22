@@ -1,11 +1,12 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../../utils/logger';
+
+import { cleanLLMJsonResponse, validateJSON } from '../../utils/llm-utils';
 import {
   createAIServiceError,
   createValidationError,
-  isAIServiceError,
-} from '../../types/errors';
-import { cleanLLMJsonResponse, validateJSON } from '../../utils/llm-utils';
+} from '@/utils/error-handlers';
+import { isAIServiceError } from '@/utils/error-guards';
 
 export const createGeminiClient = () => {
   const apiKey = process.env.GEMINI_API_KEY;

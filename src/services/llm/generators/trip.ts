@@ -1,4 +1,4 @@
-import { Trip } from '@/types/trip-types';
+import { DayItinerary, Trip } from '@/types/trip-types';
 import { generateValidJsonResponse } from '../gemini-client';
 import { tripPromptTemplate } from '../prompts/trip';
 
@@ -14,5 +14,14 @@ export const generateTripItinerary = async (
     startDate,
     selectedCategories,
   );
-  return generateValidJsonResponse<Trip>(prompt, 'trip itinerary');
+  return {
+    tripId: '',
+    startDate,
+    numDays: days,
+    destinationName: location,
+    itinerary: await generateValidJsonResponse<DayItinerary[]>(
+      prompt,
+      'trip itinerary',
+    ),
+  };
 };

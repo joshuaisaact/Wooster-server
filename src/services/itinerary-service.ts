@@ -1,8 +1,12 @@
 import { eq } from 'drizzle-orm';
 import { db, itineraryDays } from '../db';
 import { DayItinerary } from '../types/trip-types';
-import { createDBQueryError, createValidationError } from '../types/errors';
+
 import { logger } from '../utils/logger';
+import {
+  createDBQueryError,
+  createValidationError,
+} from '@/utils/error-handlers';
 
 export const addItineraryDays = async (
   tripId: number,

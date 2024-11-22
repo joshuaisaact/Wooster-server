@@ -1,8 +1,5 @@
-import {
-  createDBNotFoundError,
-  createDBQueryError,
-  isServiceError,
-} from '@/types/errors';
+import { isServiceError } from './error-guards';
+import { createDBNotFoundError, createDBQueryError } from './error-handlers';
 import { logger } from './logger';
 
 interface DbOperationOptions {

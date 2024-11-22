@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { createAuthenticationError } from '../types/errors';
+
 import { logger } from '../utils/logger';
+import { createAuthenticationError } from '@/utils/error-handlers';
 
 export const requireAuth = async (
   req: Request,

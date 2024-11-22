@@ -22,7 +22,15 @@ describe('Trip Generator', () => {
       'Food & Drink',
     ]);
 
-    expect(result).toEqual(mockLLMTrips.tokyo);
+    const expectedTrip = {
+      tripId: '',
+      startDate: '20th January',
+      numDays: 2,
+      destinationName: 'Tokyo',
+      itinerary: mockLLMTrips.tokyo,
+    };
+
+    expect(result).toEqual(expectedTrip);
   });
 
   it('handles malformed JSON response', async () => {

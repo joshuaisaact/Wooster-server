@@ -1,13 +1,14 @@
 import { generateTripItinerary } from '../google-ai-service';
 import { createPrompt } from '../../config/trip-prompt-template';
 import { addActivities } from '../activity-service';
+
+import { logger } from '../../utils/logger';
 import {
   createAIServiceError,
   createParsingError,
   createTripGenerationError,
-  isAIServiceError,
-} from '../../types/errors';
-import { logger } from '../../utils/logger';
+} from '@/utils/error-handlers';
+import { isAIServiceError } from '@/utils/error-guards';
 
 export const generateTrip = async (
   days: number,
