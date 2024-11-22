@@ -75,16 +75,10 @@ jobs:
 
       - name: Run integration tests with coverage
         run: |
-          npm run test:integration -- --coverage --verbose --detectOpenHandles --runInBand
+          npm run test:integration -- --coverage --verbose --runInBand
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
-
-      - name: Display logs if tests failed
-        if: failure()
-        run: |
-          echo "=== Last 1000 lines of npm logs ==="
-          tail -n 1000 ~/.npm/_logs/*-debug.log || true
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
