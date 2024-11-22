@@ -48,6 +48,6 @@ export interface Trip {
 }
 
 export interface ItineraryDay {
-  day_number: number;
+  dayNumber: number;
   activities: Activity[];
 }

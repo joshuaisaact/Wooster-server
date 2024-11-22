@@ -17,7 +17,7 @@ describe('Destination Generator', () => {
   it('successfully generates destination data', async () => {
     setLLMResponse('success', 'destination');
     const result = await generateDestinationData('Tokyo');
-    expect(JSON.parse(result)).toEqual(mockLLMDestinations.tokyo);
+    expect(result).toEqual(mockLLMDestinations.tokyo);
   });
 
   it('handles empty responses', async () => {

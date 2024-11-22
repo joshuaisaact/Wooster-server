@@ -22,7 +22,7 @@ describe('Trip Generator', () => {
       'Food & Drink',
     ]);
 
-    expect(JSON.parse(result)).toEqual(mockLLMTrips.tokyo);
+    expect(result).toEqual(mockLLMTrips.tokyo);
   });
 
   it('handles malformed JSON response', async () => {

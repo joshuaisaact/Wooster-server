@@ -20,10 +20,10 @@ export const createGeminiClient = () => {
   return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 };
 
-export const generateValidJsonResponse = async (
+export const generateValidJsonResponse = async <T>(
   prompt: string,
   context: string,
-): Promise<string> => {
+): Promise<T> => {
   const model = createGeminiClient();
   let responseText: string = '';
 
@@ -37,7 +37,7 @@ export const generateValidJsonResponse = async (
     });
     clearTimeout(timeoutId);
 
-    responseText = await result.response.text();
+    responseText = result.response.text();
 
     if (!responseText?.trim()) {
       throw createAIServiceError('Empty response from LLM', { prompt });
@@ -47,7 +47,10 @@ export const generateValidJsonResponse = async (
     const cleanedResponse = cleanLLMJsonResponse(responseText);
     validateJSON(cleanedResponse);
 
-    return cleanedResponse;
+    // Parse the cleaned JSON string into the specified type
+    const parsedResponse = JSON.parse(cleanedResponse) as T;
+
+    return parsedResponse;
   } catch (error) {
     // Handle abort/timeout
     if (error instanceof Error && error.name === 'AbortError') {

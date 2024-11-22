@@ -126,7 +126,7 @@ describe('Destination API', () => {
     });
   });
 
-  it.only('can search for destinations', async () => {
+  it('can search for destinations', async () => {
     await retry(async () => {
       // Create a couple of destinations
       setLLMResponse('success', 'destination');

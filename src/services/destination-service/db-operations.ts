@@ -9,7 +9,7 @@ import {
   createServiceError,
 } from '../../types/errors';
 import { logger } from '../../utils/logger';
-import { generateNewDestination } from './destination-generator';
+import { generateDestinationData } from '../llm/generators/destination';
 
 export const fetchDestinations = async () => {
   try {
@@ -202,7 +202,7 @@ export async function getOrCreateDestination(location: string) {
 
     logger.info({ location }, 'Creating new destination');
     try {
-      const destinationData = await generateNewDestination(location);
+      const destinationData = await generateDestinationData(location);
       return await addDestination(destinationData);
     } catch (error) {
       // Postgres duplicate key error

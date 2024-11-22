@@ -4,7 +4,6 @@ import { addTrip, validateTripInput } from '../../services/trip-service';
 import { generateTripItinerary } from '../../services/google-ai-service';
 import {
   findDestinationByName,
-  generateNewDestination,
   addDestination,
 } from '../../services/destination-service';
 import { addItineraryDays } from '../../services/itinerary-service';
@@ -13,6 +12,7 @@ import { createPrompt } from '../../config/trip-prompt-template';
 import { eq } from 'drizzle-orm';
 import { db, destinations } from '../../db';
 import { logger } from '../../utils/logger';
+import { generateDestinationData } from '@/services/llm/generators/destination';
 
 interface CreateTripRequestBody {
   days: number;
@@ -34,7 +34,7 @@ async function getOrCreateDestination(location: string): Promise<number> {
 
     // If not found, generate and create new destination
     logger.info(`Generating new destination: ${location}`);
-    const destinationData = await generateNewDestination(location);
+    const destinationData = await generateDestinationData(location);
     const newDestination = await addDestination(destinationData);
     return newDestination.destinationId;
   } catch (error) {

@@ -29,8 +29,8 @@ export const fetchSavedDestinations = async (userId: string) => {
       .orderBy(desc(savedDestinations.createdAt));
 
     const flattenedList = savedDestinationsList.map((entry) => ({
-      ...entry, // Brings in all savedDestinations fields
-      ...entry.destination, // Flattens all fields in destination into the root object
+      ...entry,
+      ...entry.destination,
     }));
 
     logger.info({ userId }, 'Fetched saved destinations successfully');
