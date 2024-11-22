@@ -75,7 +75,7 @@ jobs:
 
       - name: Run integration tests with coverage
         run: |
-          npm run test:integration -- --coverage --verbose --runInBand
+          npm run test:integration -- --coverage --verbose --runInBand --detectOpenHandles
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb

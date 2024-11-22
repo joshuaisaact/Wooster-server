@@ -26,4 +26,9 @@ beforeEach(async () => {
   await clearTables();
 });
 
-afterAll(async () => {});
+afterAll(async () => {
+  await testDb.$client.end();
+
+  // Give a small delay to allow connections to close
+  await new Promise((resolve) => setTimeout(resolve, 100));
+});
