@@ -5,14 +5,14 @@ import { NewDestination } from '../../types/destination-type';
 import { logger } from '../../utils/logger';
 import { generateDestinationData } from '../llm/generators/destination';
 import { normalizeDestinationName } from './utils';
-import { executeDbOperation } from '@/utils/db-utils';
+import { executeDbOperation } from '../../utils/db-utils';
 import {
   createDBNotFoundError,
   createDBQueryError,
   createDestinationGenerationError,
   createServiceError,
-} from '@/utils/error-handlers';
-import { isServiceError } from '@/utils/error-guards';
+} from '../../utils/error-handlers';
+import { isServiceError } from '../../utils/error-guards';
 
 export const fetchDestinations = () =>
   executeDbOperation(async () => {

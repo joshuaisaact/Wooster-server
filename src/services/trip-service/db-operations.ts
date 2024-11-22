@@ -5,11 +5,11 @@ import { logger } from '../../utils/logger';
 import {
   createDBNotFoundError,
   createDBQueryError,
-} from '@/utils/error-handlers';
+} from '../../utils/error-handlers';
 import { DayItinerary } from '@/types/trip-types';
 import { addActivities } from '../activity-service';
 import { addItineraryDays } from '../itinerary-service';
-import { executeDbOperation } from '@/utils/db-utils';
+import { executeDbOperation } from '../../utils/db-utils';
 
 export const fetchTripsFromDB = (userId: string) =>
   executeDbOperation(

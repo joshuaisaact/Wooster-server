@@ -2,13 +2,13 @@ import { and, desc, eq } from 'drizzle-orm';
 import { db, destinations, savedDestinations } from '../../db';
 
 import { logger } from '../../utils/logger';
-import { executeDbOperation } from '@/utils/db-utils';
+import { executeDbOperation } from '../../utils/db-utils';
 import {
   createDBNotFoundError,
   createDBQueryError,
   createServiceError,
-} from '@/utils/error-handlers';
-import { isServiceError } from '@/utils/error-guards';
+} from '../../utils/error-handlers';
+import { isServiceError } from '../../utils/error-guards';
 
 export const fetchSavedDestinations = (userId: string) =>
   executeDbOperation(

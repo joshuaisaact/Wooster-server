@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { getOrCreateDestination } from '../../services/destination-service';
 import { saveDestinationForUser } from '../../services/saved-destination-service';
 
-import { createValidationError } from '@/utils/error-handlers';
+import { createValidationError } from '../../utils/error-handlers';
 
 interface CreateDestinationRequestBody {
   destination: string;

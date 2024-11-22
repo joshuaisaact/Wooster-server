@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { deleteSavedDestination } from '../../services/saved-destination-service/';
-import { createValidationError } from '@/utils/error-handlers';
+import { createValidationError } from '../../utils/error-handlers';
 
 export const handleDeleteSavedDestination = async (
   req: Request,

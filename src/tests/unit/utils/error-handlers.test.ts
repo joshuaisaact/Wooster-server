@@ -1,7 +1,7 @@
 import {
   createDatabaseError,
   createServiceError,
-} from '@/utils/error-handlers';
+} from '../../../utils/error-handlers';
 
 describe('Error Handler', () => {
   it('creates a service error', () => {

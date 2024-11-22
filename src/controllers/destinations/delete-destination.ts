@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { deleteDestinationById } from '../../services/destination-service';
 import { logger } from '../../utils/logger';
-import { createValidationError } from '@/utils/error-handlers';
+import { createValidationError } from '../../utils/error-handlers';
 
 export const handleDeleteDestination = async (
   req: Request,

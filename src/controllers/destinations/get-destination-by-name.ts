@@ -3,7 +3,7 @@ import { fetchDestinationDetailsByName } from '../../services/destination-servic
 import {
   createDBNotFoundError,
   createValidationError,
-} from '@/utils/error-handlers';
+} from '../../utils/error-handlers';
 
 export const handleGetDestinationByName = async (
   req: Request,

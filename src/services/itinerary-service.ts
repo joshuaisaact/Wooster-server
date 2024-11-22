@@ -6,7 +6,7 @@ import { logger } from '../utils/logger';
 import {
   createDBQueryError,
   createValidationError,
-} from '@/utils/error-handlers';
+} from '../utils/error-handlers';
 
 export const addItineraryDays = async (
   tripId: number,

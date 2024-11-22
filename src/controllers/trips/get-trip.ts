@@ -3,7 +3,7 @@ import { fetchTripFromDB } from '../../services/trip-service';
 import {
   createDBNotFoundError,
   createValidationError,
-} from '@/utils/error-handlers';
+} from '../../utils/error-handlers';
 
 export const handleGetTrip = async (req: Request, res: Response) => {
   const tripId = req.params.id;

@@ -5,8 +5,8 @@ import { cleanLLMJsonResponse, validateJSON } from '../../utils/llm-utils';
 import {
   createAIServiceError,
   createValidationError,
-} from '@/utils/error-handlers';
-import { isAIServiceError } from '@/utils/error-guards';
+} from '../../utils/error-handlers';
+import { isAIServiceError } from '../../utils/error-guards';
 
 export const createGeminiClient = () => {
   const apiKey = process.env.GEMINI_API_KEY;

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { createTripInDB, validateTripInput } from '../../services/trip-service';
-import { generateTripItinerary } from '@/services/llm/generators/trip';
+import { generateTripItinerary } from '../../services/llm/generators/trip';
 import { logger } from '../../utils/logger';
 import { getOrCreateDestination } from '../../services/destination-service';
 
