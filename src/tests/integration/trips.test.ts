@@ -72,7 +72,7 @@ describe('Destination API', () => {
           startDate: '2024-12-25',
         });
 
-        const trip = fetchTripFromDB(
+        const trip = await fetchTripFromDB(
           '1',
           'e92ad976-973d-406d-92d4-34b6ef182e1a',
         );
