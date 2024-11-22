@@ -15,9 +15,15 @@ jest.mock('@/middleware/auth-middleware', () => ({
   requireAuth: requireAuth,
 }));
 
-jest.mock('@google/generative-ai', () => ({
-  GoogleGenerativeAI: jest.fn().mockImplementation(() => mockGeminiClient),
-}));
+jest.mock('@google/generative-ai', () => {
+  console.log('Setting up Google Generative AI mock');
+  return {
+    GoogleGenerativeAI: jest.fn().mockImplementation(() => {
+      console.log('Creating mock Gemini client');
+      return mockGeminiClient;
+    }),
+  };
+});
 
 import request from 'supertest';
 import app from '@/index';
