@@ -22,13 +22,6 @@ export const setLLMResponse = (
       trip: mockLLMTrips[location],
     };
 
-    console.log('Setting mock response for:', {
-      type,
-      dataType,
-      location,
-      mockDataToBeReturned: mockData[dataType],
-    });
-
     const responseTypes = {
       success: {
         response: {
