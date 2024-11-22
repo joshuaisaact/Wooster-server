@@ -15,13 +15,17 @@ describe('Destination Generator', () => {
   });
 
   it('successfully generates destination data', async () => {
-    setLLMResponse('success', 'destination');
+    setLLMResponse([
+      { type: 'success', dataType: 'destination', location: 'tokyo' },
+    ]);
     const result = await generateDestinationData('Tokyo');
     expect(result).toEqual(mockLLMDestinations.tokyo);
   });
 
   it('handles empty responses', async () => {
-    setLLMResponse('empty', 'destination');
+    setLLMResponse([
+      { type: 'empty', dataType: 'destination', location: 'tokyo' },
+    ]);
     await expect(generateDestinationData('Tokyo')).rejects.toMatchObject({
       message: 'Empty response from LLM',
       code: 'AI_SERVICE_ERROR',
@@ -29,7 +33,9 @@ describe('Destination Generator', () => {
   });
 
   it('handles malformed JSON response', async () => {
-    setLLMResponse('malformed', 'destination');
+    setLLMResponse([
+      { type: 'malformed', dataType: 'destination', location: 'tokyo' },
+    ]);
     await expect(generateDestinationData('Tokyo')).rejects.toEqual(
       expect.objectContaining({
         message: 'Invalid JSON response from LLM for destination data',

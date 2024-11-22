@@ -57,6 +57,9 @@ describe('Destination API', () => {
     });
 
     await resetSequences();
+
+    const mockModel = mockGeminiClient.getGenerativeModel();
+    mockModel.generateContent.mockReset();
   });
 
   function generateRandomDestination() {
@@ -100,7 +103,9 @@ describe('Destination API', () => {
   it('can create a new destination', async () => {
     await retry(async () => {
       const randomDestination = generateRandomDestination();
-      setLLMResponse('success', 'destination');
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+      ]);
 
       await api
         .post('/api/destinations')
@@ -115,7 +120,9 @@ describe('Destination API', () => {
     await retry(async () => {
       const destinationName = 'Tokyo';
 
-      setLLMResponse('success', 'destination');
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+      ]);
       await api
         .post('/api/destinations')
         .set('Authorization', authHeader)
@@ -123,7 +130,9 @@ describe('Destination API', () => {
         .send({ destination: destinationName })
         .expect(201);
 
-      setLLMResponse('success', 'destination');
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+      ]);
       const response = await api
         .post('/api/destinations')
         .set('Authorization', authHeader)
@@ -161,7 +170,9 @@ describe('Destination API', () => {
   it('can search for destinations', async () => {
     await retry(async () => {
       // Create a couple of destinations
-      setLLMResponse('success', 'destination');
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+      ]);
       await api
         .post('/api/destinations')
         .set('Authorization', authHeader)
@@ -169,7 +180,9 @@ describe('Destination API', () => {
         .send({ destination: 'Tokyo' })
         .expect(201);
 
-      setLLMResponse('success', 'destination', mockLLMDestinations.paris);
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'paris' },
+      ]);
       await api
         .post('/api/destinations')
         .set('Authorization', authHeader)
@@ -212,7 +225,9 @@ describe('Destination API', () => {
     await retry(async () => {
       const destinationName = 'Tokyo';
 
-      setLLMResponse('success', 'destination');
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+      ]);
 
       const createResponse = await api
         .post('/api/destinations')
@@ -249,7 +264,9 @@ describe('Destination API', () => {
 
   it('handles malformed LLM responses', async () => {
     await retry(async () => {
-      setLLMResponse('malformed', 'destination');
+      setLLMResponse([
+        { type: 'malformed', dataType: 'destination', location: 'tokyo' },
+      ]);
 
       const response = await api
         .post('/api/destinations')

@@ -10,36 +10,51 @@ export const mockGeminiClient = {
 };
 
 export const setLLMResponse = (
-  type: 'success' | 'malformed' | 'timeout' | 'empty',
-  dataType: 'destination' | 'trip',
-  destinationData:
-    | (typeof mockLLMDestinations)[keyof typeof mockLLMDestinations]
-    | null = null,
+  responses: Array<{
+    type: 'success' | 'malformed' | 'timeout' | 'empty';
+    dataType: 'destination' | 'trip';
+    location: keyof typeof mockLLMTrips;
+  }>,
 ) => {
-  if (type === 'success') {
-    mockGenerateContent.mockResolvedValue({
-      response: {
-        text: () =>
-          JSON.stringify(
-            dataType === 'destination'
-              ? destinationData || mockLLMDestinations.tokyo
-              : mockLLMTrips.tokyo,
-          ),
-      },
+  responses.forEach(({ type, dataType, location }) => {
+    const mockData = {
+      destination: mockLLMDestinations[location],
+      trip: mockLLMTrips[location],
+    };
+
+    console.log('Setting mock response for:', {
+      type,
+      dataType,
+      location,
+      mockDataToBeReturned: mockData[dataType],
     });
-  } else if (type === 'malformed') {
-    mockGenerateContent.mockResolvedValue({
-      response: {
-        text: () => '{broken json',
+
+    const responseTypes = {
+      success: {
+        response: {
+          text: () => JSON.stringify(mockData[dataType]),
+        },
       },
-    });
-  } else if (type === 'timeout') {
-    mockGenerateContent.mockRejectedValue(new Error('AbortError'));
-  } else if (type === 'empty') {
-    mockGenerateContent.mockResolvedValue({
-      response: {
-        text: () => '',
+      malformed: {
+        response: {
+          text: () => '{broken json',
+        },
       },
-    });
-  }
+      empty: {
+        response: {
+          text: () => '',
+        },
+      },
+    };
+
+    if (type === 'timeout') {
+      mockGenerateContent.mockImplementationOnce(() =>
+        Promise.reject(new Error('AbortError')),
+      );
+    } else {
+      mockGenerateContent.mockImplementationOnce(() =>
+        Promise.resolve(responseTypes[type]),
+      );
+    }
+  });
 };

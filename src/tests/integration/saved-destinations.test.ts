@@ -66,7 +66,9 @@ describe('Saved destination API', () => {
   it('can get a list of saved destinations', async () => {
     await retry(async () => {
       const randomDestination = generateRandomDestination();
-      setLLMResponse('success', 'destination');
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+      ]);
 
       await api
         .post('/api/destinations')
@@ -116,7 +118,9 @@ describe('Saved destination API', () => {
     await retry(async () => {
       const destinationName = 'Tokyo';
 
-      setLLMResponse('success', 'destination');
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+      ]);
 
       const createResponse = await api
         .post('/api/destinations')
@@ -147,7 +151,9 @@ describe('Saved destination API', () => {
     await retry(async () => {
       const destinationName = 'Tokyo';
 
-      setLLMResponse('success', 'destination');
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+      ]);
       const res = await api
         .post('/api/destinations')
         .set('Authorization', authHeader)
@@ -157,7 +163,9 @@ describe('Saved destination API', () => {
 
       const id = res.body.destination.destinationId;
 
-      setLLMResponse('success', 'destination');
+      setLLMResponse([
+        { type: 'success', dataType: 'destination', location: 'tokyo' },
+      ]);
       const response = await api
         .post(`/api/saved-destinations/${id}`)
         .set('Authorization', authHeader)

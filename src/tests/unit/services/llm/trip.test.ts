@@ -15,7 +15,7 @@ describe('Trip Generator', () => {
   });
 
   it('successfully generates trip itinerary', async () => {
-    setLLMResponse('success', 'trip');
+    setLLMResponse([{ type: 'success', dataType: 'trip', location: 'tokyo' }]);
 
     const result = await generateTripItinerary(2, 'Tokyo', '20th January', [
       'Cultural',
@@ -26,7 +26,9 @@ describe('Trip Generator', () => {
   });
 
   it('handles malformed JSON response', async () => {
-    setLLMResponse('malformed', 'trip');
+    setLLMResponse([
+      { type: 'malformed', dataType: 'trip', location: 'tokyo' },
+    ]);
 
     await expect(
       generateTripItinerary(2, 'Tokyo', '20th January', [
@@ -47,7 +49,7 @@ describe('Trip Generator', () => {
   });
 
   it('handles empty responses', async () => {
-    setLLMResponse('empty', 'trip');
+    setLLMResponse([{ type: 'empty', dataType: 'trip', location: 'tokyo' }]);
 
     await expect(
       generateTripItinerary(2, 'Tokyo', '20th January', [
