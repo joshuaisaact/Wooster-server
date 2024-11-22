@@ -4,9 +4,10 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![Unit Tests CI](https://github.com/joshuaisaact/Wooster-server/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/joshuaisaact/Wooster-server/actions/workflows/unit-tests.yml)
 [![Integration Tests CI](https://github.com/joshuaisaact/Wooster-server/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/joshuaisaact/Wooster-server/actions/workflows/integration-tests.yml)
+[![codecov](https://codecov.io/github/joshuaisaact/Wooster-server/graph/badge.svg?token=QQRR182CNS)](https://codecov.io/github/joshuaisaact/Wooster-server)
 ![Deployed on Digital Ocean](https://img.shields.io/badge/Deployed%20on-Digital%20Ocean-0070B8?style=flat&logo=digitalocean)
 
-[![codecov](https://codecov.io/github/joshuaisaact/Wooster-server/graph/badge.svg?token=QQRR182CNS)](https://codecov.io/github/joshuaisaact/Wooster-server)
+
 
 <img src="./docs/wooster.png" alt="Wooster Server Logo" title="Wooster Server" style="width:350px;"/>
 
