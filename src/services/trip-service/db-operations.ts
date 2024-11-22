@@ -10,10 +10,21 @@ import { DayItinerary } from '@/types/trip-types';
 import { addActivities } from '../activity-service';
 import { addItineraryDays } from '../itinerary-service';
 import { executeDbOperation } from '../../utils/db-utils';
+import reshapeTripData from '../../utils/reshape-trip-data-drizzle';
 
-export const fetchTripsFromDB = (userId: string) =>
+export const fetchTripsFromDB = (userId: string, tripId?: string) =>
   executeDbOperation(
     async () => {
+      const whereConditions = [eq(trips.userId, userId)];
+
+      if (tripId) {
+        const parsedTripId = parseInt(tripId, 10);
+        if (isNaN(parsedTripId)) {
+          throw createDBQueryError('Invalid trip ID', { tripId });
+        }
+        whereConditions.push(eq(trips.tripId, parsedTripId));
+      }
+
       const tripData = await db
         .select({
           tripId: trips.tripId,
@@ -60,7 +71,7 @@ export const fetchTripsFromDB = (userId: string) =>
           },
         })
         .from(trips)
-        .where(eq(trips.userId, userId))
+        .where(and(...whereConditions))
         .leftJoin(
           destinations,
           eq(destinations.destinationId, trips.destinationId),
@@ -71,11 +82,20 @@ export const fetchTripsFromDB = (userId: string) =>
           eq(activities.activityId, itineraryDays.activityId),
         );
 
-      logger.info({ userId }, 'Fetched trips successfully');
-      return tripData;
+      if (tripId && !tripData.length) {
+        throw createDBNotFoundError('Trip not found', { tripId, userId });
+      }
+
+      const reshapedTrips = reshapeTripData(tripData);
+
+      logger.info(
+        { userId, tripId: tripId || 'all' },
+        'Fetched trip(s) successfully',
+      );
+      return tripId ? reshapedTrips[0] : reshapedTrips;
     },
-    'Error fetching trips',
-    { context: { userId } },
+    'Error fetching trip(s)',
+    { context: { userId, tripId } },
   );
 
 export const addTrip = (
@@ -202,7 +222,7 @@ export const fetchTripFromDB = (tripId: string, userId: string) =>
         logger.warn({ tripId, userId }, errorMessage);
         throw createDBNotFoundError(errorMessage, { tripId, userId });
       }
-
+      console.log(tripData);
       logger.info({ tripId, userId }, 'Fetched trip successfully');
       return tripData[0];
     },
