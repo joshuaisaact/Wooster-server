@@ -73,12 +73,10 @@ jobs:
 
       - name: Run integration tests with coverage
         run: |
-          export NODE_DEBUG=*
           npm run test:integration -- --coverage --verbose --detectOpenHandles --runInBand
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
-          DEBUG: '*'
 
       - name: Display logs if tests failed
         if: failure()
