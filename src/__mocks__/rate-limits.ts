@@ -1,2 +1,2 @@
-export const llmLimiter = jest.fn((req, res, next) => next());
-export const generalLimiter = jest.fn((req, res, next) => next());
+export const llmLimiter = jest.fn((next) => next());
+export const generalLimiter = jest.fn((next) => next());
