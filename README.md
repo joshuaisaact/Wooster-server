@@ -2,7 +2,8 @@
 <h2> Wooster Server </h2>
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-[![Node.js CI](https://github.com/joshuaisaact/Wooster-server/actions/workflows/tests.yml/badge.svg)](https://github.com/joshuaisaact/Wooster-server/actions/workflows/tests.yml)
+[![Unit Tests CI](https://github.com/joshuaisaact/Wooster-server/actions/workflows/tests.yml/badge.svg)](https://github.com/joshuaisaact/Wooster-server/actions/workflows/unit-tests.yml)
+[![Integration Tests CI](https://github.com/joshuaisaact/Wooster-server/actions/workflows/tests.yml/badge.svg)](https://github.com/joshuaisaact/Wooster-server/actions/workflows/integration-tests.yml)
 ![Deployed on Digital Ocean](https://img.shields.io/badge/Deployed%20on-Digital%20Ocean-0070B8?style=flat&logo=digitalocean)
 
 <img src="./docs/wooster.png" alt="Wooster Server Logo" title="Wooster Server" style="width:350px;"/>
