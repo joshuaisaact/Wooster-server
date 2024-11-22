@@ -39,34 +39,6 @@ export const handleAddDestination = async (
       },
     });
   } catch (error) {
-    type ErrorDetail = {
-      isServiceError: boolean;
-      message: string;
-      stack?: string;
-      code?: string;
-      name?: string;
-      details?: unknown;
-      fullError: string;
-    };
-
-    const errorDetails: ErrorDetail = {
-      isServiceError: isServiceError(error),
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      code:
-        error instanceof Error && 'code' in error
-          ? (error as { code?: string }).code
-          : undefined,
-      name: error instanceof Error ? error.name : undefined,
-      details:
-        error instanceof Error && 'details' in error
-          ? (error as { details?: unknown }).details
-          : undefined,
-      fullError: JSON.stringify(error, null, 2),
-    };
-
-    console.error('Full error details:', errorDetails);
-
     if (isServiceError(error)) {
       return res.status(error.status).json({
         error: error.message,
@@ -76,7 +48,6 @@ export const handleAddDestination = async (
     }
 
     logger.error({ error }, 'Unexpected error in handleAddDestination');
-    console.error('Error in POST /api/destinations:', error);
     return res.status(500).json({
       error: 'An unexpected error occurred',
       code: 'DB_QUERY_FAILED',

@@ -16,10 +16,8 @@ jest.mock('@/middleware/auth-middleware', () => ({
 }));
 
 jest.mock('@google/generative-ai', () => {
-  console.log('Setting up Google Generative AI mock');
   return {
     GoogleGenerativeAI: jest.fn().mockImplementation(() => {
-      console.log('Creating mock Gemini client');
       return mockGeminiClient;
     }),
   };
