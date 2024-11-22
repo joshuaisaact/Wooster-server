@@ -15,7 +15,8 @@ import reshapeTripData from '../../utils/reshape-trip-data-drizzle';
 export const fetchTripsFromDB = (userId: string, tripId?: string) =>
   executeDbOperation(
     async () => {
-      const whereConditions = [eq(trips.userId, userId)];
+      const whereConditions = [];
+      whereConditions.push(eq(trips.userId, userId));
 
       if (tripId) {
         const parsedTripId = parseInt(tripId, 10);
