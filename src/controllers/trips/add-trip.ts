@@ -33,6 +33,8 @@ export const handleAddTrip = async (
     selectedCategories,
   );
 
+  console.log(trip);
+
   const tripId = await createTripInDB(
     userId,
     destination.destinationId,
