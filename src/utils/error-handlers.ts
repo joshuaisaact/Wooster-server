@@ -1,4 +1,4 @@
-import { ErrorCode, ServiceError } from '@/types/errors';
+import { ErrorCode, ServiceError } from '../types/errors';
 
 export const createServiceError = (
   message: string,
