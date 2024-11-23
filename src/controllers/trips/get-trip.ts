@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { fetchTripsFromDB } from '../../services/trip-service';
+import { fetchTripFromDB } from '../../services/trip-service';
 import { createValidationError } from '../../utils/error-handlers';
 
 export const handleGetTrip = async (req: Request, res: Response) => {
@@ -9,9 +9,11 @@ export const handleGetTrip = async (req: Request, res: Response) => {
     throw createValidationError('Trip ID is required');
   }
 
-  const trip = await fetchTripsFromDB(req.user!.id, tripId);
+  const trips = await fetchTripFromDB(tripId, req.user!.id);
+
+  // Return just the first trip since we're fetching by ID
   return res.status(200).json({
     message: 'Trip fetched successfully',
-    trip,
+    trip: trips[0], // <-- Return single object instead of array
   });
 };

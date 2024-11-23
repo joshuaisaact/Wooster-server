@@ -12,20 +12,9 @@ import { addItineraryDays } from '../itinerary-service';
 import { executeDbOperation } from '../../utils/db-utils';
 import reshapeTripData from '../../utils/reshape-trip-data-drizzle';
 
-export const fetchTripsFromDB = (userId: string, tripId?: string) =>
+export const fetchTripsFromDB = (userId: string) =>
   executeDbOperation(
     async () => {
-      const whereConditions = [];
-      whereConditions.push(eq(trips.userId, userId));
-
-      if (tripId) {
-        const parsedTripId = parseInt(tripId, 10);
-        if (isNaN(parsedTripId)) {
-          throw createDBQueryError('Invalid trip ID', { tripId });
-        }
-        whereConditions.push(eq(trips.tripId, parsedTripId));
-      }
-
       const tripData = await db
         .select({
           tripId: trips.tripId,
@@ -72,7 +61,7 @@ export const fetchTripsFromDB = (userId: string, tripId?: string) =>
           },
         })
         .from(trips)
-        .where(and(...whereConditions))
+        .where(eq(trips.userId, userId))
         .leftJoin(
           destinations,
           eq(destinations.destinationId, trips.destinationId),
@@ -83,20 +72,13 @@ export const fetchTripsFromDB = (userId: string, tripId?: string) =>
           eq(activities.activityId, itineraryDays.activityId),
         );
 
-      if (tripId && !tripData.length) {
-        throw createDBNotFoundError('Trip not found', { tripId, userId });
-      }
-
       const reshapedTrips = reshapeTripData(tripData);
 
-      logger.info(
-        { userId, tripId: tripId || 'all' },
-        'Fetched trip(s) successfully',
-      );
-      return tripId ? reshapedTrips[0] : reshapedTrips;
+      logger.info('Fetched trips successfully');
+      return reshapedTrips;
     },
-    'Error fetching trip(s)',
-    { context: { userId, tripId } },
+    'Error fetching trips',
+    { context: { userId } },
   );
 
 export const addTrip = (
@@ -223,9 +205,12 @@ export const fetchTripFromDB = (tripId: string, userId: string) =>
         logger.warn({ tripId, userId }, errorMessage);
         throw createDBNotFoundError(errorMessage, { tripId, userId });
       }
+
+      const reshapedTrips = reshapeTripData(tripData);
+
       console.log(tripData);
       logger.info({ tripId, userId }, 'Fetched trip successfully');
-      return tripData[0];
+      return reshapedTrips;
     },
     'Error fetching trip',
     { context: { tripId, userId } },
@@ -239,7 +224,16 @@ export async function createTripInDB(
   days: number,
   itinerary: DayItinerary[],
 ): Promise<number> {
+  console.log('createTripInDB itinerary:', JSON.stringify(itinerary, null, 2));
   const tripId = await addTrip(userId, destinationId, startDate, days);
+  console.log('Created trip with ID:', tripId);
+
+  console.log('About to call addActivities with:', {
+    itineraryType: typeof itinerary,
+    isArray: Array.isArray(itinerary),
+    length: itinerary?.length,
+  });
+
   const activityIds = await addActivities(itinerary, destinationId);
   await addItineraryDays(tripId, itinerary, activityIds);
   return tripId;
