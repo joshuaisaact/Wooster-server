@@ -25,6 +25,34 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Prepare and clean server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            # Create a backup directory if it doesn't exist
+            mkdir -p /home/wooster/backend/backup
+
+            # Stop the server
+            pm2 stop wooster-server || true
+
+            # Backup current version (just in case)
+            timestamp=$(date +%Y%m%d_%H%M%S)
+            tar -czf /home/wooster/backend/backup/backup_${timestamp}.tar.gz /home/wooster/backend/dist /home/wooster/backend/src || true
+
+            # Clean the deployment directory while preserving important files
+            cd /home/wooster/backend
+            find . -mindepth 1 -maxdepth 1 \
+              ! -name 'node_modules' \
+              ! -name '.env' \
+              ! -name 'backup' \
+              ! -name 'logs' \
+              ! -name 'pm2' \
+              -exec rm -rf {} +
+
       - name: Deploy to server
         uses: appleboy/scp-action@master
         with:
@@ -32,5 +60,32 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: './'
+          source: '.,!node_modules,!.git,!.github,!backup,!test,!.env,!.env.*'
           target: '/home/wooster/backend'
+          strip_components: 0
+
+      - name: Restart application
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            cd /home/wooster/backend
+
+            # Install production dependencies if needed
+            npm ci --production
+
+            # Ensure correct permissions
+            chmod +x dist/index.js
+
+            # Restart the application
+            pm2 restart wooster-server || pm2 start dist/index.js --name wooster-server
+
+            # Save PM2 config
+            pm2 save
+
+            # Clean old backups (keep last 5)
+            cd backup
+            ls -t | tail -n +6 | xargs -r rm --

@@ -86,11 +86,12 @@ describe('Destination API', () => {
         .get('/api/destinations')
         .set('Authorization', authHeader)
         .expect(200);
+      const destinationsRes = response.body.destinations;
+      console.log(destinationsRes);
+      expect(destinationsRes).toBeInstanceOf(Array);
+      expect(destinationsRes.length).toBe(2);
 
-      expect(response.body).toBeInstanceOf(Array);
-      expect(response.body.length).toBe(2);
-
-      expect(response.body[0]).toEqual(
+      expect(destinationsRes[0]).toEqual(
         expect.objectContaining({
           destinationId: expect.any(Number),
           destinationName: expect.any(String),
@@ -248,7 +249,7 @@ describe('Destination API', () => {
         .get('/api/destinations')
         .set('Authorization', authHeader);
 
-      expect(getResponse.body).toEqual([]);
+      expect(getResponse.body.destinations).toEqual([]);
     });
   });
 
