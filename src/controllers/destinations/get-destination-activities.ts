@@ -24,5 +24,8 @@ export const handleGetDestinationActivities = async (
   );
   logger.info({ count: activities.length }, 'Activities fetched');
 
-  return res.json(activities);
+  return res.json({
+    activities: activities,
+    message: 'Activities fetched successfully',
+  });
 };
