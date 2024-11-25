@@ -12,6 +12,8 @@ function reshapeTripData(dbData: TripDBRow[]) {
         tripId: row.tripId.toString(),
         startDate: row.startDate,
         numDays: row.numDays,
+        description: row.description === 'NULL' ? null : row.description,
+        title: row.title === 'NULL' ? null : row.title,
         destination: {
           destinationId: row.destination?.destinationId,
           destinationName:

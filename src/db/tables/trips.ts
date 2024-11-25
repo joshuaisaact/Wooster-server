@@ -1,4 +1,11 @@
-import { pgTable, bigint, timestamp, uuid, serial } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  bigint,
+  timestamp,
+  uuid,
+  serial,
+  text,
+} from 'drizzle-orm/pg-core';
 
 export const trips = pgTable('trips', {
   tripId: serial('trip_id').primaryKey(),
@@ -9,4 +16,6 @@ export const trips = pgTable('trips', {
     .defaultNow()
     .notNull(),
   numDays: bigint('num_days', { mode: 'number' }),
+  title: text('title'),
+  description: text('description'),
 });

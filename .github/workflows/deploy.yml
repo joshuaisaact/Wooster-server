@@ -12,9 +12,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
@@ -33,25 +31,22 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
-            # Create a backup directory if it doesn't exist
-            mkdir -p /home/wooster/backend/backup
+            cd /home/wooster/backend
+
+            # Create backup directory
+            mkdir -p backup
 
             # Stop the server
-            pm2 stop wooster-server || true
+            pm2 stop backend || true
 
-            # Backup current version (just in case)
-            timestamp=$(date +%Y%m%d_%H%M%S)
-            tar -czf /home/wooster/backend/backup/backup_${timestamp}.tar.gz /home/wooster/backend/dist /home/wooster/backend/src || true
+            # Backup current version
+            if [ -d "dist" ]; then
+              timestamp=$(date +%Y%m%d_%H%M%S)
+              tar -czf backup/backup_${timestamp}.tar.gz dist src || true
+            fi
 
-            # Clean the deployment directory while preserving important files
-            cd /home/wooster/backend
-            find . -mindepth 1 -maxdepth 1 \
-              ! -name 'node_modules' \
-              ! -name '.env' \
-              ! -name 'backup' \
-              ! -name 'logs' \
-              ! -name 'pm2' \
-              -exec rm -rf {} +
+            # Clean the deployment directory
+            sudo rm -rf dist build src package.json package-lock.json tsconfig.json .eslintrc.* README.md
 
       - name: Deploy to server
         uses: appleboy/scp-action@master
@@ -64,7 +59,7 @@ jobs:
           target: '/home/wooster/backend'
           strip_components: 0
 
-      - name: Restart application
+      - name: Post-deploy setup
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -74,18 +69,22 @@ jobs:
           script: |
             cd /home/wooster/backend
 
-            # Install production dependencies if needed
+            # Install production dependencies
             npm ci --production
 
             # Ensure correct permissions
             chmod +x dist/index.js
 
-            # Restart the application
-            pm2 restart wooster-server || pm2 start dist/index.js --name wooster-server
+            # Start/restart the application
+            pm2 describe backend > /dev/null
+            if [ $? -eq 0 ]; then
+              pm2 restart backend --update-env
+            else
+              pm2 start dist/index.js --name backend
+            fi
 
             # Save PM2 config
             pm2 save
 
             # Clean old backups (keep last 5)
-            cd backup
-            ls -t | tail -n +6 | xargs -r rm --
+            cd backup && ls -t | tail -n +6 | xargs -r rm --

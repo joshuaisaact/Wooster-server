@@ -32,6 +32,8 @@ export interface TripDBRow {
   startDate: Date | null; // Allow null
   numDays: number | null; // Allow null
   itineraryDays: number | null; // Allow null
+  title: string | null;
+  description: string | null;
   activities: {
     activityId: number | null;
     activityName: string | null;
