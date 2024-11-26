@@ -32,6 +32,7 @@ export interface TripDBRow {
   startDate: Date | null; // Allow null
   numDays: number | null; // Allow null
   itineraryDays: number | null; // Allow null
+  status: string;
   title: string | null;
   description: string | null;
   activities: {
@@ -54,3 +55,14 @@ export interface DBItineraryDay {
   day: number;
   activities: DBActivity[];
 }
+
+export interface TripTableRow {
+  tripId: number;
+  startDate: Date | null;
+  numDays: number | null;
+  title: string | null;
+  description: string | null;
+  status: TripStatus;
+}
+
+export type TripStatus = 'PLANNING' | 'BOOKED' | 'COMPLETED';

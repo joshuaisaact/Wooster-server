@@ -23,6 +23,7 @@ export const fetchTripsFromDB = (userId: string) =>
           numDays: trips.numDays,
           title: trips.title,
           description: trips.description,
+          status: trips.status,
           itineraryDays: itineraryDays.dayNumber,
           activities: {
             activityId: activities.activityId,
@@ -153,6 +154,7 @@ export const fetchTripFromDB = (tripId: string, userId: string) =>
           numDays: trips.numDays,
           title: trips.title,
           description: trips.description,
+          status: trips.status,
           itineraryDays: itineraryDays.dayNumber,
           activities: {
             activityId: activities.activityId,
@@ -224,11 +226,17 @@ interface UpdateFields {
   startDate?: Date;
   title?: string;
   description?: string;
+  status?: string;
 }
 
 export const updateTripInDB = async (
   tripId: string,
-  updates: { startDate?: string; title?: string; description?: string },
+  updates: {
+    startDate?: string;
+    title?: string;
+    description?: string;
+    status?: string;
+  },
 ) => {
   return executeDbOperation(
     async () => {
@@ -248,6 +256,10 @@ export const updateTripInDB = async (
         updateFields.description = updates.description;
       }
 
+      if (updates.status) {
+        updateFields.status = updates.status;
+      }
+
       const [updatedTrip] = await db
         .update(trips)
         .set(updateFields)
@@ -257,6 +269,7 @@ export const updateTripInDB = async (
           startDate: trips.startDate,
           title: trips.title,
           description: trips.description,
+          status: trips.status,
         });
 
       if (!updatedTrip) {

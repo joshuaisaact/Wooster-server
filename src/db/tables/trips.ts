@@ -18,4 +18,5 @@ export const trips = pgTable('trips', {
   numDays: bigint('num_days', { mode: 'number' }),
   title: text('title'),
   description: text('description'),
+  status: text('status').default('PLANNING').notNull(),
 });

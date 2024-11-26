@@ -185,13 +185,13 @@ describe('Trips API', () => {
       .send(newTripData)
       .expect(201);
 
-    // Add a verification GET to make sure it really worked
     const tripId = response.body.trip.tripId;
 
     const updatedTrip = {
       startDate: '2024-12-26',
       title: 'My trip',
       description: 'What a trip',
+      status: 'BOOKED',
     };
 
     const newTrip = await api
@@ -203,6 +203,7 @@ describe('Trips API', () => {
     expect(newTrip.body.message).toBe('Trip updated successfully');
     expect(newTrip.body.trip).toHaveProperty('title', 'My trip');
     expect(newTrip.body.trip).toHaveProperty('description', 'What a trip');
+    expect(newTrip.body.trip).toHaveProperty('status', 'BOOKED');
     expect(newTrip.body.trip).toHaveProperty(
       'startDate',
       '2024-12-26T00:00:00.000Z',
