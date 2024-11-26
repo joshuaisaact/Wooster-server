@@ -166,6 +166,49 @@ describe('Trips API', () => {
     expect(verifyResponse.body.trip).toBeDefined();
   });
 
+  it('can update a trip', async () => {
+    setLLMResponse([
+      { type: 'success', dataType: 'destination', location: 'tokyo' },
+      { type: 'success', dataType: 'trip', location: 'tokyo' },
+    ]);
+
+    const newTripData = {
+      days: 2,
+      location: 'Tokyo',
+      startDate: '2024-12-25',
+      selectedCategories: ['Cultural', 'Food & Drink'],
+    };
+
+    const response = await api
+      .post('/api/trips')
+      .set('Authorization', authHeader)
+      .send(newTripData)
+      .expect(201);
+
+    // Add a verification GET to make sure it really worked
+    const tripId = response.body.trip.tripId;
+
+    const updatedTrip = {
+      startDate: '2024-12-26',
+      title: 'My trip',
+      description: 'What a trip',
+    };
+
+    const newTrip = await api
+      .put(`/api/trips/${tripId}`)
+      .set('Authorization', authHeader)
+      .send(updatedTrip)
+      .expect(201);
+
+    expect(newTrip.body.message).toBe('Trip updated successfully');
+    expect(newTrip.body.trip).toHaveProperty('title', 'My trip');
+    expect(newTrip.body.trip).toHaveProperty('description', 'What a trip');
+    expect(newTrip.body.trip).toHaveProperty(
+      'startDate',
+      '2024-12-26T00:00:00.000Z',
+    );
+  });
+
   it('creates a trip using an existing destination', async () => {
     setLLMResponse([
       { type: 'success', dataType: 'destination', location: 'paris' },

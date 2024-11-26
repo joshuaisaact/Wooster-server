@@ -34,7 +34,7 @@ export const handleUpdateTrip = async (
     description,
   });
 
-  return res.status(200).json({
+  return res.status(201).json({
     message: 'Trip updated successfully',
     trip: updatedTrip,
   });
