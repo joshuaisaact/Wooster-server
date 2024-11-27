@@ -1,0 +1,1 @@
+ALTER TABLE "trips" ADD COLUMN "status" text DEFAULT 'PLANNING' NOT NULL;

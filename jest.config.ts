@@ -21,9 +21,12 @@ const config: Config = {
       'ts-jest',
       {
         tsconfig: 'tsconfig.test.json',
+        useESM: true,
       },
     ],
   },
+  transformIgnorePatterns: ['node_modules/(?!(nanoid)/)'],
+  extensionsToTreatAsEsm: ['.ts'],
 };
 
 export default config;

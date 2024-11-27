@@ -22,6 +22,27 @@
       "when": 1732180743909,
       "tag": "20241121091903_nostalgic_sabra",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1732492163282,
+      "tag": "20241124234923_majestic_polaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1732604391616,
+      "tag": "20241126065951_odd_reavers",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1732625340355,
+      "tag": "20241126124900_strong_tyger_tiger",
+      "breakpoints": true
     }
   ]
 }

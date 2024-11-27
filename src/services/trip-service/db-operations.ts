@@ -21,6 +21,9 @@ export const fetchTripsFromDB = (userId: string) =>
           destinationId: trips.destinationId,
           startDate: trips.startDate,
           numDays: trips.numDays,
+          title: trips.title,
+          description: trips.description,
+          status: trips.status,
           itineraryDays: itineraryDays.dayNumber,
           activities: {
             activityId: activities.activityId,
@@ -132,7 +135,7 @@ export const deleteTripById = (tripId: number) =>
     { context: { tripId } },
   );
 
-export const fetchTripFromDB = (tripId: string, userId: string) =>
+export const fetchTripFromDB = (tripId: string, userId?: string) =>
   executeDbOperation(
     async () => {
       const parsedTripId = parseInt(tripId, 10);
@@ -143,12 +146,19 @@ export const fetchTripFromDB = (tripId: string, userId: string) =>
         throw createDBQueryError(errorMessage, { tripId });
       }
 
+      const whereConditions = userId
+        ? and(eq(trips.tripId, parsedTripId), eq(trips.userId, userId))
+        : eq(trips.tripId, parsedTripId);
+
       const tripData = await db
         .select({
           tripId: trips.tripId,
           destinationId: trips.destinationId,
           startDate: trips.startDate,
           numDays: trips.numDays,
+          title: trips.title,
+          description: trips.description,
+          status: trips.status,
           itineraryDays: itineraryDays.dayNumber,
           activities: {
             activityId: activities.activityId,
@@ -189,7 +199,7 @@ export const fetchTripFromDB = (tripId: string, userId: string) =>
           },
         })
         .from(trips)
-        .where(and(eq(trips.tripId, parsedTripId), eq(trips.userId, userId)))
+        .where(whereConditions)
         .leftJoin(
           destinations,
           eq(destinations.destinationId, trips.destinationId),
@@ -215,6 +225,70 @@ export const fetchTripFromDB = (tripId: string, userId: string) =>
     'Error fetching trip',
     { context: { tripId, userId } },
   );
+
+interface UpdateFields {
+  startDate?: Date;
+  title?: string;
+  description?: string;
+  status?: string;
+}
+
+export const updateTripInDB = async (
+  tripId: string,
+  updates: {
+    startDate?: string;
+    title?: string;
+    description?: string;
+    status?: string;
+  },
+) => {
+  return executeDbOperation(
+    async () => {
+      const parsedTripId = parseInt(tripId, 10);
+      if (isNaN(parsedTripId)) {
+        throw createDBQueryError('Invalid trip ID', { tripId });
+      }
+
+      const updateFields: UpdateFields = {};
+      if (updates.startDate) {
+        updateFields.startDate = new Date(updates.startDate);
+      }
+      if (updates.title) {
+        updateFields.title = updates.title;
+      }
+      if (updates.description) {
+        updateFields.description = updates.description;
+      }
+
+      if (updates.status) {
+        updateFields.status = updates.status;
+      }
+
+      const [updatedTrip] = await db
+        .update(trips)
+        .set(updateFields)
+        .where(eq(trips.tripId, parsedTripId))
+        .returning({
+          tripId: trips.tripId,
+          startDate: trips.startDate,
+          title: trips.title,
+          description: trips.description,
+          status: trips.status,
+        });
+
+      if (!updatedTrip) {
+        throw createDBNotFoundError(`No trip found with ID ${tripId}`, {
+          tripId,
+        });
+      }
+
+      logger.info({ tripId, updates }, 'Trip updated successfully');
+      return updatedTrip;
+    },
+    'Error updating trip',
+    { context: { tripId, updates } },
+  );
+};
 
 // Helper function to create trip in database
 export async function createTripInDB(
