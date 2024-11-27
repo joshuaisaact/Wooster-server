@@ -250,4 +250,55 @@ describe('Trips API', () => {
 
     expect(destinationResult[0].count).toBe(1);
   });
+
+  it('can share a trip', async () => {
+    setLLMResponse([
+      { type: 'success', dataType: 'destination', location: 'tokyo' },
+      { type: 'success', dataType: 'trip', location: 'tokyo' },
+    ]);
+
+    const newTripData = {
+      days: 2,
+      location: 'Tokyo',
+      startDate: '2024-12-25',
+      selectedCategories: ['Cultural', 'Food & Drink'],
+    };
+
+    const response = await api
+      .post('/api/trips')
+      .set('Authorization', authHeader)
+      .send(newTripData)
+      .expect(201);
+
+    const tripId = response.body.trip.tripId;
+
+    const sharedTrip = await api
+      .post(`/api/trips/${tripId}/share`)
+      .set('Authorization', authHeader)
+      .expect(201);
+
+    expect(sharedTrip.body.message).toBe('Share link created successfully');
+
+    const shareCode = sharedTrip.body.shareCode;
+
+    const unprotectedTrip = await api
+      .get(`/api/shared/${shareCode}`)
+      .expect(200);
+
+    expect(unprotectedTrip.body).toMatchObject({
+      message: 'Shared trip fetched successfully',
+      trip: {
+        tripId: expect.any(String),
+        startDate: expect.any(String),
+        numDays: expect.any(Number),
+        destination: expect.any(Object),
+        itinerary: expect.arrayContaining([
+          expect.objectContaining({
+            day: expect.any(Number),
+            activities: expect.any(Array),
+          }),
+        ]),
+      },
+    });
+  });
 });

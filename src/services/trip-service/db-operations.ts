@@ -135,7 +135,7 @@ export const deleteTripById = (tripId: number) =>
     { context: { tripId } },
   );
 
-export const fetchTripFromDB = (tripId: string, userId: string) =>
+export const fetchTripFromDB = (tripId: string, userId?: string) =>
   executeDbOperation(
     async () => {
       const parsedTripId = parseInt(tripId, 10);
@@ -145,6 +145,10 @@ export const fetchTripFromDB = (tripId: string, userId: string) =>
         logger.warn({ tripId }, errorMessage);
         throw createDBQueryError(errorMessage, { tripId });
       }
+
+      const whereConditions = userId
+        ? and(eq(trips.tripId, parsedTripId), eq(trips.userId, userId))
+        : eq(trips.tripId, parsedTripId);
 
       const tripData = await db
         .select({
@@ -195,7 +199,7 @@ export const fetchTripFromDB = (tripId: string, userId: string) =>
           },
         })
         .from(trips)
-        .where(and(eq(trips.tripId, parsedTripId), eq(trips.userId, userId)))
+        .where(whereConditions)
         .leftJoin(
           destinations,
           eq(destinations.destinationId, trips.destinationId),

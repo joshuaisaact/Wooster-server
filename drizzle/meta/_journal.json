@@ -36,6 +36,13 @@
       "when": 1732604391616,
       "tag": "20241126065951_odd_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1732625340355,
+      "tag": "20241126124900_strong_tyger_tiger",
+      "breakpoints": true
     }
   ]
 }
