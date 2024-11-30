@@ -1,9 +1,42 @@
-import { DBActivity, TripDBRow, DBItineraryDay } from '../types/db-types';
+import { TripDBRow, DBItineraryDay, DBActivity } from '../types/db-types';
+
+interface Trip {
+  tripId: string;
+  startDate: Date | null;
+  status: string;
+  numDays: number | null;
+  description: string | null;
+  title: string | null;
+  destination: {
+    destinationId?: number | undefined;
+    destinationName: string;
+    latitude: string;
+    longitude: string;
+    description: string;
+    country: string;
+    bestTimeToVisit: string;
+    averageTemperatureLow: string;
+    averageTemperatureHigh: string;
+    popularActivities: string;
+    travelTips: string;
+    nearbyAttractions: string;
+    transportationOptions: string;
+    accessibilityInfo: string;
+    officialLanguage: string;
+    currency: string;
+    localCuisine: string;
+    costLevel: string;
+    safetyRating: string;
+    culturalSignificance: string;
+    userRatings: string;
+  };
+  itinerary: DBItineraryDay[];
+}
 
 // Reshape the data returned by Drizzle ORM
 function reshapeTripData(dbData: TripDBRow[]) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tripsMap: any = {};
+  const tripsMap: Record<string, Trip> = {};
 
   dbData.forEach((row: TripDBRow) => {
     // If the trip is not yet in tripsMap, add it
@@ -45,12 +78,10 @@ function reshapeTripData(dbData: TripDBRow[]) {
 
     // Handle itinerary day grouping
     const itineraryDay = tripsMap[row.tripId].itinerary.find(
-      (day: DBItineraryDay) => {
-        return day.day === row.itineraryDays;
-      },
+      (day: DBItineraryDay) => day.day === row.itineraryDays,
     );
 
-    const activity: DBActivity | null =
+    const activity =
       row.activities && row.activities.activityId
         ? {
             activityId: row.activities.activityId,
@@ -68,27 +99,38 @@ function reshapeTripData(dbData: TripDBRow[]) {
             difficulty: row.activities.difficulty,
             category: row.activities.category,
             bestTime: row.activities.bestTime,
+            slotNumber: row.slotNumber,
           }
         : null;
 
-    // If the day already exists, just push the non-null activity
+    // If the day exists, add activity and sort by slot number
     if (itineraryDay) {
       if (activity) {
         itineraryDay.activities.push(activity);
       }
     } else {
+      // Create new day with activity
       tripsMap[row.tripId].itinerary.push({
-        day: row.itineraryDays,
+        day: row.itineraryDays ?? 1,
         activities: activity ? [activity] : [],
       });
     }
   });
 
-  const result = Object.values(tripsMap);
+  for (const trip of Object.values(tripsMap)) {
+    trip.itinerary.sort(
+      (a: DBItineraryDay, b: DBItineraryDay) => a.day - b.day,
+    );
 
-  // Return the object values as an array of trips
-  console.log(result);
-  return result;
+    trip.itinerary.forEach((day: DBItineraryDay) => {
+      day.activities.sort(
+        (a: DBActivity, b: DBActivity) =>
+          (a.slotNumber ?? 1) - (b.slotNumber ?? 1),
+      );
+    });
+  }
+
+  return Object.values(tripsMap);
 }
 
 export default reshapeTripData;

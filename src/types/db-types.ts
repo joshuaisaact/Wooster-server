@@ -13,6 +13,7 @@ export interface DBActivity {
   difficulty: Difficulty;
   category: Category;
   bestTime: BestTime;
+  slotNumber: number | null;
 }
 
 export interface DBDestination {
@@ -31,6 +32,7 @@ export interface TripDBRow {
   startDate: Date | null;
   numDays: number | null;
   itineraryDays: number | null;
+  slotNumber: number | null;
   status: string;
   title: string | null;
   description: string | null;

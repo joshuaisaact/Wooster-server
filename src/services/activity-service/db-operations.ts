@@ -41,16 +41,18 @@ export const reorderActivities = async (
             sql`${itineraryDays.tripId} = ${tripId}`,
             sql`${itineraryDays.dayNumber} = ${dayNumber}`,
           ),
+        )
+        .leftJoin(
+          activities,
+          eq(activities.activityId, itineraryDays.activityId),
         );
 
-      // Validate that all activities exist in this day
       const currentActivityIds = new Set<number>(
         currentActivities
           .map((a) => a.activityId ?? -1)
           .filter((id) => id !== -1),
       );
 
-      // Validate that all activities exist in this day
       const allActivitiesExist = updates.every((u) =>
         currentActivityIds.has(u.activityId),
       );
@@ -58,7 +60,7 @@ export const reorderActivities = async (
       if (!allActivitiesExist) {
         throw createDBQueryError('Some activities do not exist in this day', {
           updates,
-          existingActivities: currentActivityIds,
+          existingActivities: Array.from(currentActivityIds),
         });
       }
 
@@ -68,7 +70,7 @@ export const reorderActivities = async (
           const activity = currentActivities.find(
             (a) => a.activityId === activityId,
           );
-          if (!activity) return Promise.resolve(); // Should never happen due to earlier validation
+          if (!activity) return Promise.resolve();
 
           return tx
             .update(itineraryDays)
@@ -79,17 +81,17 @@ export const reorderActivities = async (
         await Promise.all(updatePromises);
       });
 
-      // Return updated activities
-      return db
+      // Return only the updated activities for this specific day
+      const updatedActivities = await db
         .select({
           activityId: activities.activityId,
           activityName: activities.activityName,
+          description: activities.description,
+          location: activities.location,
+          price: activities.price,
+          duration: activities.duration,
           latitude: activities.latitude,
           longitude: activities.longitude,
-          price: activities.price,
-          location: activities.location,
-          description: activities.description,
-          duration: activities.duration,
           difficulty: activities.difficulty,
           category: activities.category,
           bestTime: activities.bestTime,
@@ -107,17 +109,10 @@ export const reorderActivities = async (
           eq(activities.activityId, itineraryDays.activityId),
         )
         .orderBy(itineraryDays.slotNumber);
+
+      return updatedActivities;
     },
     'Error reordering activities',
     { context: { tripId, dayNumber, updates } },
   );
-};
-
-// We'll also need to properly move these functions from trip-service
-export const addActivities = async (/* params */) => {
-  // Move from trip service
-};
-
-export const getActivitiesForDay = async (/* params */) => {
-  // Move from trip service
 };

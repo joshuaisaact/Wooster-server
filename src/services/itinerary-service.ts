@@ -8,6 +8,13 @@ import {
   createValidationError,
 } from '../utils/error-handlers';
 
+interface ItineraryDayData {
+  tripId: number;
+  dayNumber: number;
+  activityId: number;
+  slotNumber: number;
+}
+
 export const addItineraryDays = async (
   tripId: number,
   itinerary: DayItinerary[],
@@ -29,7 +36,7 @@ export const addItineraryDays = async (
     });
   }
 
-  const itineraryDaysData = [];
+  const itineraryDaysData: ItineraryDayData[] = [];
 
   for (let i = 0; i < itinerary.length; i++) {
     const dayNumber = i + 1;
@@ -40,13 +47,14 @@ export const addItineraryDays = async (
       throw createValidationError(errorMessage, { tripId, dayNumber });
     }
 
-    for (const activityId of activityIds[i]) {
+    activityIds[i].forEach((activityId, slotIndex) => {
       itineraryDaysData.push({
         tripId,
         dayNumber,
         activityId,
+        slotNumber: slotIndex + 1,
       });
-    }
+    });
   }
 
   try {

@@ -301,4 +301,74 @@ describe('Trips API', () => {
       },
     });
   });
+
+  it('can reorder activities within a day', async () => {
+    // First create a trip with activities using your existing flow
+    setLLMResponse([
+      { type: 'success', dataType: 'destination', location: 'tokyo' },
+      { type: 'success', dataType: 'trip', location: 'tokyo' },
+    ]);
+
+    const createResponse = await api
+      .post('/api/trips')
+      .set('Authorization', authHeader)
+      .send({
+        days: 2,
+        location: 'Tokyo',
+        startDate: '2024-12-25',
+      })
+      .expect(201);
+
+    const tripId = createResponse.body.trip.tripId;
+    const dayNumber = 1;
+
+    // Get the current activities to know their IDs
+    const tripResponse = await api
+      .get(`/api/trips/${tripId}`)
+      .set('Authorization', authHeader)
+      .expect(200);
+
+    const currentActivities = tripResponse.body.trip.itinerary[0].activities;
+
+    // Initially: Museum = slot 1, Senso-ji = slot 2
+    // Let's swap their positions
+    const reorderResponse = await api
+      .put(`/api/trips/${tripId}/days/${dayNumber}/reorder`)
+      .set('Authorization', authHeader)
+      .send({
+        updates: [
+          { activityId: currentActivities[0].activityId, slotNumber: 2 }, // Move Museum to slot 2
+          { activityId: currentActivities[1].activityId, slotNumber: 1 }, // Move Senso-ji to slot 1
+        ],
+      })
+      .expect(200);
+
+    expect(reorderResponse.body).toMatchObject({
+      message: 'Activities reordered successfully',
+      activities: expect.arrayContaining([
+        expect.objectContaining({
+          activityId: expect.any(Number),
+          activityName: expect.any(String),
+          slotNumber: expect.any(Number),
+        }),
+      ]),
+    });
+
+    // Verify the new order persisted
+    const verifyResponse = await api
+      .get(`/api/trips/${tripId}`)
+      .set('Authorization', authHeader)
+      .expect(200);
+
+    const updatedActivities = verifyResponse.body.trip.itinerary[0].activities;
+
+    // First activity should now be Senso-ji (originally second)
+    expect(updatedActivities[0].activityName).toContain('Senso-ji');
+    // Second activity should now be Museum (originally first)
+    expect(updatedActivities[1].activityName).toContain('Museum');
+
+    // Verify slot numbers
+    expect(updatedActivities[0].slotNumber).toBe(1);
+    expect(updatedActivities[1].slotNumber).toBe(2);
+  });
 });

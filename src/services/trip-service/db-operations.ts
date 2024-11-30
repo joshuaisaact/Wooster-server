@@ -25,6 +25,7 @@ export const fetchTripsFromDB = (userId: string) =>
           description: trips.description,
           status: trips.status,
           itineraryDays: itineraryDays.dayNumber,
+          slotNumber: itineraryDays.slotNumber,
           activities: {
             activityId: activities.activityId,
             activityName: activities.activityName,
@@ -160,6 +161,7 @@ export const fetchTripFromDB = (tripId: string, userId?: string) =>
           description: trips.description,
           status: trips.status,
           itineraryDays: itineraryDays.dayNumber,
+          slotNumber: itineraryDays.slotNumber,
           activities: {
             activityId: activities.activityId,
             activityName: activities.activityName,
@@ -298,16 +300,7 @@ export async function createTripInDB(
   days: number,
   itinerary: DayItinerary[],
 ): Promise<number> {
-  console.log('createTripInDB itinerary:', JSON.stringify(itinerary, null, 2));
   const tripId = await addTrip(userId, destinationId, startDate, days);
-  console.log('Created trip with ID:', tripId);
-
-  console.log('About to call addActivities with:', {
-    itineraryType: typeof itinerary,
-    isArray: Array.isArray(itinerary),
-    length: itinerary?.length,
-  });
-
   const activityIds = await addActivities(itinerary, destinationId);
   await addItineraryDays(tripId, itinerary, activityIds);
   return tripId;
