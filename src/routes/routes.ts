@@ -24,6 +24,7 @@ import { handleSearchDestinations } from '../controllers/destinations/search-des
 import { handleUpdateTrip } from '../controllers/trips/update-trip';
 import { handleCreateShareLink } from '../controllers/trips/share';
 import { handleGetSharedTrip } from '../controllers/trips/get-shared-trip';
+import { handleReorderActivities } from '@/controllers/activities/reorder-activities';
 
 const router = express.Router();
 
@@ -64,6 +65,11 @@ router.get('/trips', requireAuth, handleGetTrips);
 router.get('/trips/:id', requireAuth, handleGetTrip);
 router.post('/trips', llmLimiter, requireAuth, handleAddTrip);
 router.put('/trips/:tripId', requireAuth, handleUpdateTrip);
+router.put(
+  '/trips/:tripId/days/:dayNumber/reorder',
+  requireAuth,
+  handleReorderActivities,
+);
 router.delete('/trips/:tripId', requireAuth, handleDeleteTrip);
 
 // Share routes
