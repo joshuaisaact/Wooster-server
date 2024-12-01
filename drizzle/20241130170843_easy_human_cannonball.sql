@@ -1,0 +1,1 @@
+ALTER TABLE "itinerary_days" ADD COLUMN "slot_number" integer;

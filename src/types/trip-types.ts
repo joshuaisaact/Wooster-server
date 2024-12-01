@@ -34,6 +34,13 @@ export interface Activity {
   bestTime: BestTime;
 }
 
+export interface ActivityUpdate {
+  tripId: number;
+  dayNumber: number;
+  activityId: number;
+  slotNumber: number;
+}
+
 export interface DayItinerary {
   day: number;
   activities: Activity[];
