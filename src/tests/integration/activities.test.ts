@@ -135,14 +135,23 @@ describe('Activities API', () => {
     const tripId = createResponse.body.trip.tripId;
     const dayNumber = 1;
 
+    // Get the actual activity IDs from our created trip
+    const tripResponse = await api
+      .get(`/api/trips/${tripId}`)
+      .set('Authorization', authHeader)
+      .expect(200);
+
+    const day1Activities = tripResponse.body.trip.itinerary[0].activities;
+    const day2Activities = tripResponse.body.trip.itinerary[1].activities;
+
     // Test duplicate slot numbers
     await api
       .put(`/api/trips/${tripId}/days/${dayNumber}/reorder`)
       .set('Authorization', authHeader)
       .send({
         updates: [
-          { activityId: 1, slotNumber: 1 },
-          { activityId: 2, slotNumber: 1 }, // Duplicate slot
+          { activityId: day1Activities[0].activityId, slotNumber: 1 },
+          { activityId: day1Activities[1].activityId, slotNumber: 1 }, // Duplicate slot
         ],
       })
       .expect(400);
@@ -153,10 +162,22 @@ describe('Activities API', () => {
       .set('Authorization', authHeader)
       .send({
         updates: [
-          { activityId: 1, slotNumber: 0 }, // Invalid slot
-          { activityId: 2, slotNumber: 4 }, // Invalid slot
+          { activityId: day1Activities[0].activityId, slotNumber: 0 },
+          { activityId: day1Activities[1].activityId, slotNumber: 4 },
         ],
       })
       .expect(400);
+
+    // Test activity from different day
+    await api
+      .put(`/api/trips/${tripId}/days/${dayNumber}/reorder`)
+      .set('Authorization', authHeader)
+      .send({
+        updates: [
+          { activityId: day2Activities[0].activityId, slotNumber: 1 }, // Activity from day 2
+          { activityId: day1Activities[0].activityId, slotNumber: 2 },
+        ],
+      })
+      .expect(500);
   });
 });
