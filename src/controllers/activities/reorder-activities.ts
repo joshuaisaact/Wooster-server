@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { logger } from '../../utils/logger';
-import { reorderActivities } from '@/services/activity-service/';
+import { reorderActivities } from '../../services/activity-service/';
 
 export const handleReorderActivities = async (req: Request, res: Response) => {
   try {

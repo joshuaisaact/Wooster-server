@@ -24,7 +24,7 @@ import { handleSearchDestinations } from '../controllers/destinations/search-des
 import { handleUpdateTrip } from '../controllers/trips/update-trip';
 import { handleCreateShareLink } from '../controllers/trips/share';
 import { handleGetSharedTrip } from '../controllers/trips/get-shared-trip';
-import { handleReorderActivities } from '@/controllers/activities/reorder-activities';
+import { handleReorderActivities } from '../controllers/activities/reorder-activities';
 
 const router = express.Router();
 
